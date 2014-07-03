@@ -1,9 +1,12 @@
 ######################################################################
 # Parser
+
+# Qianji Zheng
+# July 2014
 ######################################################################
 
-from src.Tokenizer import *
-from src.LEDInterp import *
+from Tokenizer import *
+from LEDInterp import *
 '''
 This simple parser program parses the following grammar:
 

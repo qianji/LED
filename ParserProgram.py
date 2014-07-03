@@ -1,4 +1,7 @@
 '''
+Qianji Zheng
+July 2014
+
 This program reads in a text file, stores its contents as a string 
 (presumably consisting of function definitions separated by white space), 
 tokenizes it, splits it up into its component definitions using the 'let' keywords, and stores them as a dict.
@@ -12,8 +15,8 @@ For example, the following program let f(x) = x^2 let g(x,y) = y+2*x would be re
 {('f',1):(['x'],('^',['x',2])) , 
 ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
 '''
-from src.Tokenizer import *
-from src.ParserV9 import *
+from Tokenizer import *
+from Parser import *
 '''
 string -> dict * bool
 If F is the name of the file containing the function definitions of LED, then parseProgram(F) = (dict,True), where dict is a dictionary 
@@ -77,5 +80,5 @@ otherwise, params(S) = []
 def params(S):
     return [p for p in S if not p==',']
 
-print(parseProgram('program.txt'))
+print(parseProgram('program_test.txt'))
 #print(parseProgram('program.txt'))
