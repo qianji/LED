@@ -3,12 +3,6 @@ LED evaluator
 Dr. Nelson Rushton, Texas Tech University
 July, 2014
 
-
-An *operator* is one of the following strings:
-   '+'   '-'  '*'  '/'  '^'    '+1'   '-1'
-   '='  '<'  '>'  '<='  '>='
-   'and' 'or' '~' '=>' '<=>'
-
 An *AST* is one of the following
 
   1. a number
@@ -20,17 +14,39 @@ In this program, the variable E will vary over AST's.
 
 import numbers, math
 
-def isNumber(E): return isinstance(E,numbers.Number)
+def isScalar(E): return isinstance(E,numbers.Number) 
+
+builtIns = {'+',   '-',  '*',  '/',  '^',    '+1',   '-1',
+            '=',  '<',  '>',  '<=',  '>=', 'and', 'or', '~', '=>', '<=>'}
 
 # If E is an expression, val(E) is the value of E.
-def val(E):
-    if isNumber(E): return E
+def val(E,Program, DefinedFuns):
+    if isScalar(E): return E
     (Op,X) = E
     # Our nonstrict ops are 'and' and '=>'
     if Op in {'and','=>'}: Args=X  
-    else: Args = [val(E) for E in X]
-    F = builtIns[Op]
-    return F(Args)
+    else: Args = [val(E,Program, DefinedFuns) for E in X]
+    if Op in builtIns :
+        F = builtIns[Op]
+        return F(Args)
+    if Op in DefinedFuns:
+        F=(Op,len(Args))
+        params,funBody = Program[F]
+        return val( subAll(Args,params,funBody) , Program, DefinedFuns)
+
+def subAll(Vals,Vars,E):
+    a = E
+    for i in range(len(Vals)):
+        a = sub(Vals[i],Vars[i],a)
+    return a
+
+def sub(c,x,T):
+    if isScalar(T): return T
+    elif T==x     :  return c
+    elif isinstance(T, str): return T
+    (Op,Args) = T
+    return ((sub(c,x,Op),[sub(c,x,A) for A in Args]))
+    
 
 # Each built-in operator is evaluated by a separate function.
 # These functions assume argument X has been evaluated, except
@@ -67,7 +83,8 @@ def valImplies(X):
     p = val(X[0])
     if p==False: return True
     return val(X[1])
-def valIff(X): return X[0]==X[1] 
+def valIff(X): return X[0]==X[1]
+
 
 # builtIns is a dictionary of the functions that evaluate each built-in
 
@@ -76,3 +93,17 @@ builtIns = {'+':valAdd, '-':valSubtract, '*':valTimes, '/':valDiv, '^':valExp,
             'floor':valFloor, 'ceil':valCeil, 'abs':valAbs, 'mod':valMod,
             '=':valEq, '<':valLess, '>':valGreater,'<=':valLesEq,'>=':valGreatEq,
             'and':valAnd,'or' :valOr,'~':valNot,'=>':valImplies,'<=>':valIff}
+
+
+def testEval():
+    global Program, DefinedFuns
+    # f(x) = x^2
+    # g(x,y) = y + 2*x
+    Program = {('f',1):(['x'],('^',['x',2])) ,
+           ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) }
+    DefinedFuns = {'f','g'}
+    E = ('f',[5])    # f(5)=25
+    F = ('g',[3,5])  # g(3,5) = 11
+    G = ('g',[E,F]) # g(E,F) = 61
+    if val(G)==61: return 'passed test :)'
+    return 'fail!'

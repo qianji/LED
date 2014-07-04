@@ -131,6 +131,6 @@ def tokens(S):
             tok,success = munch(S)
             if success: toks += [tok]
             else:       return (toks,False)
-print(tokens('let h(x,y) = y+2*x'))
+#print(tokens('let h(x,y) = y+2*x'))
 #print(tokens("2^3"))
 #print(alpha("^"))
