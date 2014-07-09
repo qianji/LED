@@ -22,18 +22,20 @@ def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
 def val(E):
     if isScalar(E): return E
     (Op,X) = E
-    # Our nonstrict ops are 'and' and '=>'
     if Op in {'and','=>'}: Args=X  
     else: Args = [val(E) for E in X]
     if Op=='vector': return ('vector',Args)
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
-    if Op in builtIns : 
+    if Op in builtIns : return valBuiltIn(Op,Args)
+    if (Op,len(Args)) in (Compiler.Program) : return valDefined(Op,Args)
+
+
+def valBuiltIn(Op,Args):
         F = builtIns[Op]
         return F(Args)
-    # get the defined functions in the Program
-    DefinedFuns = {Def[0] for Def in Compiler.Program}
-    if Op in DefinedFuns:
+
+def valDefined(Op,Args): 
         F=(Op,len(Args))
         params,funBody = Compiler.Program[F]
         groundBody = subAll(Args,params,funBody)
@@ -96,7 +98,7 @@ def valGreatEq(X): return X[0]>=X[1]
 # respective equality
 def respEqual(X):
     (t1,a),(t2,b) = X
-    return len(a)==len(b) and all([valEq(a[i],b[i]) for i in range(len(a))])
+    return len(a)==len(b) and all([valEq([a[i],b[i]]) for i in range(len(a))])
 # vector functions
 def valCat(X): return ('vector', X[0][1]+X[1][1])
 def valLen(X): return len(X[0][1])
@@ -159,39 +161,17 @@ def valEq(X):
     if isTuple(a) and isTuple(b): return respEqual(X)
     if isNumber(a) and isNumber(b): return a==b
     return False
-def valTimes(X):
+def valStar(X):
     if isNumber(X[0]) and isNumber(X[1]): return valMult(X)
     if isSet(X[0]) and isSet(X[1]): return valCrossProd(X)
 
 # builtIns is a dictionary of the functions that evaluate each built-in
-builtIns = {'+':valPlus, '-':valSubtract, '*':valTimes, '/':valDiv, '^':valExp,
+builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             '+1':valUnaryPlus, '-1':valUnaryMinus,
-            'floor':valFloor, 'ceil':valCeil, 'abs':valPipes, 'mod':valMod,
+            'floor':valFloor, 'ceil':valCeil, 'pipes':valPipes, 'mod':valMod,
             '=':valEq, '<':valLess, '>':valGreater,'<=':valLesEq,'>=':valGreatEq,
             'and':valAnd,'or' :valOr,'~':valNot,'=>':valImplies,'<=>':valIff,
             'sub':valSub,
             'in':valIn,'subeq':valSubeq,'union':valUnion,'nrsec':valNrsec,'\\':valSetSubtr,
             'Pow':valPow,'choose':valChoose}
 
-
-
-
-def testEval():
-    global Program, DefinedFuns
-    # f(x) = x^2
-    # g(x,y) = y + 2*x
-    # h(x) = 3 if x>0; 55 if x<-2; 1 otherwise
-    G1 = ('>',['x',0])
-    G2 = ('<',['x',-2])
-    Program = {('f',1):(['x'],('^',['x',2])) ,
-               ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])),
-               ('h',1):(['x'],('cond',[('if',[G1,3]),('if',[G2,55]),('ow',[1])]))  }
-    DefinedFuns = {'f','g','h'}
-    E = ('f',[5])    # f(5)=25
-    F = ('g',[3,5])  # g(3,5) = 11
-    G = ('g',[E,F]) # g(E,F) = 61
-    for j in range(-4,4): print(val(('h',[j]),Program,DefinedFuns))
-    if val(G,Program,DefinedFuns)==61: return 'passed test :)'
-    return 'fail!'
-
-#print(val(Parser.parseExpression('x >=1 & y > 0')[0]))
