@@ -1,7 +1,6 @@
 '''
 Qianji Zheng
 July 2014
-
 This program have test functions to combine the parser and evaluator together.
 '''
 from Compiler import compile
@@ -10,6 +9,8 @@ from Evaluater import val
 from Parser import *
 # import the global variable Program
 import Compiler
+
+# [This comment To be removed]
 '''
 If F is a string which is the name of a .led file (without the extension) run(F)
 compiles program F and lets the user enter expressions to evaluate using the
