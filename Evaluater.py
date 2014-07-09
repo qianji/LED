@@ -144,7 +144,7 @@ def valImplies(X):
     return val(X[1])
 def valIff(X): return X[0]==X[1]
 
-# dynamic overloadeding resolutiom
+# dynamic overloading resolution
 def valPlus(X):
     if isNumber(X[0]) and isNumber(X[1]): return valAdd(X)
     if isVector(X[0]) and isVector(X[1]): return valCat(X)
