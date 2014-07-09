@@ -1,16 +1,30 @@
 '''
 Qianji Zheng
 July 2014
+
 This program have test functions to combine the parser and evaluator together.
 '''
 from Compiler import compile
 from Tokenizer import tokens
 from Evaluater import val
 from Parser import *
-# import the global variable Program
 import Compiler
+# import the global variable Program
 
-# [This comment To be removed]
+def prettyString(E):
+    if isNumber(E): return(str(E))
+    if isSet(E): return('{' + prettyStack(E[1]) + '}')
+    if isVector(E): return( '<' + prettyStack(E[1]) + '>')
+    if isTuple(E): return( '(' + prettyStack(E[1]) + ')')
+
+def prettyStack(elts):
+    Str = ''
+    if not elts==[]:
+        Str += prettyString(elts[0])
+        for e in elts[1:]:
+            Str += ',' + prettyString(e)
+    return Str  
+
 '''
 If F is a string which is the name of a .led file (without the extension) run(F)
 compiles program F and lets the user enter expressions to evaluate using the
@@ -35,8 +49,7 @@ def run(F):
                 if eFlag:
                     tree, tFlag = parseExpression(expression)
                     if tFlag:
-                        value = val(tree)
-                        print(value)
+                        print(prettyString(val(tree)))
                         print()
                     else:
                         print('Cannot parse the tree.')
@@ -105,9 +118,9 @@ def definedFuns(P):
 #print(tokens('|<10,20,30>|'))
 #print(val(parseExpression(tokens('<10,20,30>[2]')[0])[0]))
 #print(tokens('|<10,20,30>|')[0])
-L = tokens('(1,2)[0]')[0]
-T = parseExpression(L)[0]
-print(val(T))
+#L = tokens('(1,2)[0]')[0]
+#T = parseExpression(L)[0]
+#print(val(T))
 
 #print (val(parseExpression( tokens( '(10, 20)' )[0] ) [0]))
 #print(closeParentesis('f{}}'))
