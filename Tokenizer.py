@@ -6,7 +6,7 @@
 
 
 # A character is *white* if it is a space, return, tab, or vertical tab.
-def white(c): return c in [' ', '\r','\t','\v']
+def white(c): return c in [' ', '\r','\t','\v','\n']
 
 
 #  If S is a list of characters, remInitialWhite(S) removes initial white space chars
@@ -18,7 +18,7 @@ def remInitialWhite(S):
 
 # A *special token* is a string that is a member of the following list.
 
-specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':-','|','&','~','=>','<=>','.',',']
+specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','.',',',';','[',']','{','}','\\']
 
 
 # An *identifier* is a nonempty string of letters and digits
@@ -71,7 +71,7 @@ def canPush(S,state):
     if state=='id':return alphaNum(c)
     if state == 'num': return digit(c) or c=='.'
     if state == 'lessgreat': return c == '='
-    if state =='colon' : return c=='-'
+    if state =='colon' : return c=='='
     if state == 'spec1' : return False
     if state == "equal": return c=='>'
     if state == 'digitsAndPoint': return digit(c)
@@ -131,6 +131,6 @@ def tokens(S):
             tok,success = munch(S)
             if success: toks += [tok]
             else:       return (toks,False)
-#print(tokens('let h(x,y) = y+2*x'))
+#print(tokens('h(x,y) := y+2*x'))
 #print(tokens("2^3"))
 #print(alpha("^"))

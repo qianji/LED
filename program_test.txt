@@ -1,3 +1,0 @@
-let f(x) = x^2 
-let g(x,y) = y+2*x
-
