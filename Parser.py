@@ -258,7 +258,7 @@ def parseT1(S):
         for infix in InfixT1:
             if S[i]==infix:
                 (t1,f1)=parseT0(S[0:i])
-                (t2,f2)= parseT1(S[i+1:])
+                (t2,f2)= parseT2(S[i+1:])
                 if f1 and f2: 
                     return ((infix,[t1,t2]),True) 
     # T0

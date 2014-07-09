@@ -8,18 +8,11 @@ July 2014
 A few simple test functions to start off:
 {defs
   f(x,y) :=
-       
     33      if g2(x) < 1; 
-       
     x*y     if x >=1 & y > 0;
-       
     x+2*y   otherwise             
 
-  
-
   g2(x) := x^2+4
-
-  
 
   g3(x) := g2(x+2)
 }
@@ -35,7 +28,7 @@ that k*m=n. An effective definition is as follows:
 
 /---------------------------------------------------------------
 An integer is *even* 2 is a divisor of it.
-{def  even(n) iff divisor(2,n)   }
+{def  even(n) iff divisor(2,n) }
 
 /---------------------------------------------------------------
 A number is *negative* if it is less than 0, and otherwise
@@ -55,7 +48,6 @@ Integer n is *prime* if n>1 and n has no divisors in {2..n-1}
     ~divisor(lowr,k) & noDivisors(k,lowr+1,uppr)   
 }
 
-/---------------------------------------------------------------
 An integer k is *perfect* if it is the sum of its divisors in the 
 interval {1..k-1}. 
 
@@ -71,9 +63,31 @@ k in the interval [L,U].
     sumDivisors(k,L+1,U)    otherwise
 }
 
-/------------
+/---------------------------------------------------------------
 A dummy test function for testing nested brackets
-{def t(x) := {x,x+1}
+{def t(x) := {x,x+1} }
+
+/---------------------------------------------------------------
+If S is a set of numbers, write Sum(S) for the sum of the members
+of S.
+
+{def  Sum(S):=
+    0                              if S={};
+    choose(S) + Sum(S\{choose(S)}) otherwise   
 }
+
+A nullary function. Currently it must be defined with parens but 
+called without them. So, given the following definition, e.g.,
+the expression g-4 would evaluate to 8.
+
+{def g() := 12 }
+
+{def
+  range(m,n) :=
+    {}                     if m>n;
+    {m} union range(m+1,n) otherwise
+}
+
+
 
 

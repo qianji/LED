@@ -21,6 +21,7 @@ def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
 # If E is an expression, val(E) is the value of E.
 def val(E):
     if isScalar(E): return E
+    if isinstance(E,str) and (E,0) in (Compiler.Program): return valDefined(E,[])
     (Op,X) = E
     if Op in {'and','=>'}: Args=X  
     else: Args = [val(E) for E in X]
@@ -57,9 +58,6 @@ def DefVal(fbody):
         if op == 'ow':
             term = Args[0]
             return val(term)
-
-    
-    
 
 def subAll(Vals,Vars,E):
     a = E
