@@ -11,7 +11,7 @@ An *AST* is one of the following
 In this program, the variable E will vary over AST's.
 """
 import numbers, math
-import Compiler
+from GlobalVars import Program 
 def isNumber(E): return isinstance(E,numbers.Number)
 def isScalar(E): return isNumber(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
@@ -21,7 +21,7 @@ def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
 # If E is an expression, val(E) is the value of E.
 def val(E):
     if isScalar(E): return E
-    if isinstance(E,str) and (E,0) in (Compiler.Program): return valDefined(E,[])
+    if isinstance(E,str) and (E,0) in Program: return valDefined(E,[])
     (Op,X) = E
     if Op in {'and','=>'}: Args=X  
     else: Args = [val(E) for E in X]
@@ -29,7 +29,7 @@ def val(E):
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
     if Op in builtIns : return valBuiltIn(Op,Args)
-    if (Op,len(Args)) in (Compiler.Program) : return valDefined(Op,Args)
+    if (Op,len(Args)) in Program : return valDefined(Op,Args)
 
 
 def valBuiltIn(Op,Args):
@@ -38,7 +38,7 @@ def valBuiltIn(Op,Args):
 
 def valDefined(Op,Args): 
         F=(Op,len(Args))
-        params,funBody = Compiler.Program[F]
+        params,funBody = Program[F]
         groundBody = subAll(Args,params,funBody)
         return DefVal( groundBody)
 
