@@ -8,7 +8,7 @@ from Compiler import compile
 from Tokenizer import tokens
 from Evaluater import val
 from Parser import *
-import Compiler
+from GlobalVars import *
 # import the global variable Program
 
 def prettyString(E):
@@ -30,34 +30,32 @@ If F is a string which is the name of a .led file (without the extension) run(F)
 compiles program F and lets the user enter expressions to evaluate using the
 definitions in F.
 '''
-def run(F):
-    compile(F+'.led')
+def run(F=''):
+    if not F=='':
+        compile(F+'.led')
     #print(Compiler.Program)
-    DefinedFuns = definedFuns(Compiler.Program)
-    print('Defined functions: ',DefinedFuns)
-    print()
+    DefinedFuns = definedFuns(Program)
+    if len(DefinedFuns)>0:
+        print('Defined functions: ',DefinedFuns)
+        print()
     print('Enter an expression and hit [return] to get its value.')
     print('Hit [return] at the prompt to exit.')
     print()
     while True:
-        if len(Compiler.Program)>0:
-            e = input('> ')
-            if e=='':
-                return
-            else:
-                expression,eFlag = tokens(e)
-                if eFlag:
-                    tree, tFlag = parseExpression(expression)
-                    if tFlag:
-                        print(prettyString(val(tree)))
-                        print()
-                    else:
-                        print('Cannot parse the tree.')
-                else:
-                    print('Cannot tokenize the expression.')
+        e = input('> ')
+        if e=='':
+            return
         else:
-            print("No program in the memory. Please use compile(t) to load the program first, where t is the name of your program file")
-            return 
+            expression,eFlag = tokens(e)
+            if eFlag:
+                tree, tFlag = parseExpression(expression)
+                if tFlag:
+                    print(prettyString(val(tree)))
+                    print()
+                else:
+                    print('Cannot parse the tree.')
+            else:
+                print('Cannot tokenize the expression.')
 
 '''
 # This function is used for UnitTest
@@ -128,4 +126,5 @@ def definedFuns(P):
 #print(removeComments('{def t(x) := {{}}{x,x+1} }'))
 #print(parseSet("{2,3,4}"))
 #print(expressionValues(['(1,2)[0]']))
+run()
 
