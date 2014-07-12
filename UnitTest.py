@@ -31,14 +31,7 @@ class ParserTest(unittest.TestCase):
         actural = functionValues(F,Fname,ParamsL)
         # expected value of function calls
         expected = [5,4,5,8]    
-        self.assertEqual(expected,actural)
-        
-        # test for g3
-        Fname = 'g3'
-        ParamsL = [[]]
-        actural = functionValues(F,Fname,ParamsL)
-        expected = []
-        self.assertEqual(expected,actural)        
+        self.assertEqual(expected,actural)      
         
         # test for 
         Fname = 'divisor'
@@ -76,8 +69,20 @@ class ParserTest(unittest.TestCase):
         ParamsL = [[8,0,5]]
         actural = functionValues(F,Fname,ParamsL)
         expected = [7]
-        self.assertEqual(expected,actural)   
-    
+        self.assertEqual(expected,actural)  
+        
+        Fname = 'g'
+        ParamsL = [[],[],[]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [12,12,12]
+        self.assertEqual(expected,actural) 
+        
+        Fname = 'Z'
+        ParamsL = [[],[],[]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [0,0,0]
+        self.assertEqual(expected,actural)      
+        
     '''
     This function test the function tokens in Tokenizer.py
     '''
@@ -96,7 +101,7 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(expected,actural) 
         
         S = tokens('{-1..2}')[0]
-        actural = (('intRange', [-1, 2]), True)
+        actural = (('intRange', [('-1', [1]), 2]), True)
         expected =parseRange(S)
         self.assertEqual(expected,actural)
 
