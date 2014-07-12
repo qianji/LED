@@ -76,7 +76,11 @@ def functionValues(F,FunN,ParamsL):
                 paramsStr += str(Params[i])+','
             else:
                 paramsStr += str(Params[i])
-        e = FunN + '(' + paramsStr + ')'
+        # check for constant definition g = 12
+        if paramsStr=='':
+            e = FunN
+        else:
+            e = FunN + '(' + paramsStr + ')'
         expression,eFlag = tokens(e)
         if eFlag:
             tree, tFlag = parseExpression(expression)
