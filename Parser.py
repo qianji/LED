@@ -324,6 +324,9 @@ def parseT0(S):
         # parse tuple
         (tree,flag) = parseTuple(S)
         if flag: return (tree,True)
+        # parse range { term .. term }
+        (tree,flag) = parseRange(S)
+        if flag: return (tree,True)
     except IndexError:
         return(None,False) 
     return (None,False)
@@ -504,9 +507,9 @@ def firstIndexBack(C,secondI,S):
 
 '''
 # helper function
-# lsit<str> * list<str> -> int
-# If Cs is a list of string and S is a list of string, firstIndex(C, S) is the first index of one of the member of C in S,
-# otherwise firstIndex(Cs, S) = len(S) 
+# str * list<str> -> int
+# If Cs is a string and S is a list of string, firstIndex(Cs, S) is the first index of one of the member of Cs in S,
+# otherwise firstIndex(Cs, S) = None
 
 '''
 def firstIndex(Cs, S):
@@ -709,6 +712,23 @@ def parseTuple(S):
                 return(('tuple',[tree]),True)
  
     return (None,False)
-     
+
+# rule: T0 ->  { term .. term }
+def parseRange(S):
+    if len(S)<5:
+        return (None,False)
+    # {term}
+    if S[0]=='{' and S[len(S)-1]=='}':
+        # find the first index of '..' in S
+        try:
+            i = S.index('..')
+        except ValueError:
+            return (None,False)
+        (t1,f1)= parseTerm(S[1:i])
+        (t2,f2)=parseTerm(S[i+1:-1])
+        if f1 and f2: 
+            return(('intRange',[t1,t2]),True)
+    return (None,False)
+
 #print(parseTerms(tokens('2+2,3,x2')[0]))
 #print(isIdentifier('2'))
