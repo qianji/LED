@@ -439,13 +439,19 @@ def parseFuncDef(S):
     program = {}
     for i in range(len(S)):
         if S[i]==':=':
-            ((fName,fParams),f1)=parseLHS(S[0:i])
-            (t2,f2)= parseFuncBody(S[i+1:])
-            if f1 and f2: 
+            t1,f1 = parseLHS(S[0:i])
+            if f1:
+                (fName,fParams)=parseLHS(S[0:i])[0]
                 paramNumber = len(fParams)
-                #put the content in the dictionary
-                program[(fName,paramNumber)] = (fParams,t2)
-                return(program,True)     
+                (t2,f2)= parseFuncBody(S[i+1:])
+                if f2: 
+                    #put the content in the dictionary
+                    program[(fName,paramNumber)] = (fParams,t2)
+                    return(program,True)    
+                else:
+                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                    print('cannot parse function definition left side: ',' '.join(S[0:i])) 
     return (None,False)     
 
 # relDef -> identifier ( vars ) iff   sentence
@@ -453,18 +459,24 @@ def parseRelDef(S):
     program = {}
     for i in range(len(S)):
         if S[i]=='iff':
-            ((fName,fParams),f1)=parseLHS(S[0:i])
-            (t2,f2)= parseSentence(S[i+1:])
-            if f1 and f2: 
+            t1,f1 = parseLHS(S[0:i])
+            if f1:
+                (fName,fParams)=parseLHS(S[0:i])[0]
                 paramNumber = len(fParams)
-                #put the content in the dictionary
-                program[(fName,paramNumber)] = (fParams,t2)
-                return(program,True)     
+                (t2,f2)= parseSentence(S[i+1:])
+                if f2: 
+                    #put the content in the dictionary
+                    program[(fName,paramNumber)] = (fParams,t2)
+                    return(program,True)    
+                else:
+                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                    print('cannot parse function definition left side: ',' '.join(S[0:i]))    
     return (None,False) 
 
 '''
 # string -> list< list<string> >
-# if S is a string of the program that has f1, f2, ... fn functions, then parseProgram(S)=[L1, L2, ... Ln], where L1... Ln 
+# if S is a string of the program that has f1, f2, ... fn functions, then parseProgram(S)=([L1, L2, ... Ln],True), where L1... Ln 
 # are lists of corresponding function to f1, f2,... fn.
 '''
 def parseProgram(S):
@@ -474,24 +486,33 @@ def parseProgram(S):
     while len(S)>0:
         # find the first iff or := in S
         firstI = firstIndex(separators,S)
-        # find the second iff or := in S
-        secondI = firstIndex(separators,S[firstI+1:])
-        # if there is only one iff or :=
-        if secondI==None:
+        if firstI ==None:
             allFunctions.append(S)
             S=[]
         else:
-            secondI += firstI
-            # search backward from secondI to find the first '('
-            lpI = firstIndexBack('(',secondI,S)
-            # find the end of the first function defintion
-            end = lpI -2 
-            eachFunc = S[:end+1]
-            allFunctions.append(eachFunc)
-            if end+1==0:
-                S = []
+            # find the second iff or := in S
+            secondI = firstIndex(separators,S[firstI+1:])
+            # if there is only one iff or :=
+            if secondI==None:
+                allFunctions.append(S)
+                S=[]
             else:
-                S = S[end+1:]
+                # secondeI is the index-1 of the second iff or := in S
+                secondI += firstI
+                # if there are no '(' or ')'  in the function head
+                if not S[secondI] ==')':
+                    lpI =secondI+1
+                else:
+                    # search backward from secondI to find the first '('
+                    lpI = firstIndexBack('(',secondI,S)
+                # find the end of the first function definition
+                end = lpI -2 
+                eachFunc = S[:end+1]
+                allFunctions.append(eachFunc)
+                if end+1==0:
+                    S = []
+                else:
+                    S = S[end+1:]
     return allFunctions
 
 '''
@@ -527,11 +548,18 @@ then parseLHS(S) = ((fName,fParams),True), where fname is a string and fParams i
 otherwise, parseLHS(S) = (None,False)
 '''
 def parseLHS(S):
+    if len(S)==1 and isIdentifier(S[0]):
+        return ((S[0],[]),True)
     if isIdentifier(S[0]) and S[1]=='(' and S[len(S)-1]==')':
-        fName = S[0]
-        S = S[2:len(S)-1]
-        fParams = params(S)
-        return ((fName,fParams),True)
+        fName = S[0] # the name of the function
+        # f()
+        if len(S)==3:
+            return ((fName,[]),True)
+        t,f = parseTerms(S[2:-1])
+        if f:
+            S = S[2:len(S)-1]
+            fParams = params(S)
+            return ((fName,fParams),True)
     return (None,False)
 
 '''
