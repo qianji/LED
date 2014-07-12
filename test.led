@@ -88,6 +88,6 @@ the expression g-4 would evaluate to 8.
     {m} union range(m+1,n) otherwise
 }
 
-
+{def Z:= 0}
 
 
