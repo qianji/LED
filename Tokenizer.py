@@ -18,7 +18,7 @@ def remInitialWhite(S):
 
 # A *special token* is a string that is a member of the following list.
 
-specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','.',',',';','[',']','{','}','\\']
+specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','..',',',';','[',']','{','}','\\']
 
 
 # An *identifier* is a nonempty string of letters and digits
@@ -44,7 +44,7 @@ def munch(S):
     if validToken(state): return (''.join(chars),True)
     else: return (chars,False)
         
-def validToken(state): return state in ['id','num','spec1','lessgreat','equal','colon','digitsAndPoint']
+def validToken(state): return state in ['id','num','spec1','lessgreat','equal','period','digitsAndPoint','colon','colonEqual','doublePeriod']
 
 # States are 'empty', 'id', 'num', 'lessgreat', or 'spec1'. Each state
 # corresponds to an assertion about the stack. 
@@ -63,23 +63,25 @@ def validToken(state): return state in ['id','num','spec1','lessgreat','equal','
 def canPush(S,state):
     if S==[]: return False
     c=S[0]
-    if state == 'empty': 
-        if(len(S)>1 and S[0]==':'):
-            return canPush(S[1:],'colon')
-        else:
-            return alphaNum(c) or beginsSpecial(c)
-    if state=='id':return alphaNum(c)
-    if state == 'num': return digit(c) or c=='.'
+    if state == 'empty': return alphaNum(c) or beginsSpecial(c)
+    if state =='id':return alphaNum(c)
+    if state == 'num': 
+        # don't allow push if the following two chars are both '.'
+        if len(S)>1:
+            if S[0]=='.' and S[1]=='.':
+                return False
+        return digit(c) or c=='.'
     if state == 'lessgreat': return c == '='
-    if state =='colon' : return c=='='
-    if state == 'spec1' : return False
+    if state == 'colon': return c=='='
+    if state == 'period' : return c=='.' or digit(c)
     if state == "equal": return c=='>'
-    if state == 'digitsAndPoint': return digit(c)
-
+    if state == 'digitsAndPoint': return digit(c)  
+    if state == 'doublePeriod': return False
+    if state == 'colonEqual': return False
+    if state == 'spec1' : return False
     
-
 # beginSpecial(c) iff c is the beginning of a special token that is not ":-"
-def beginsSpecial(c): return any([c==x[0] and not x[0]==':' for x in specialTokens])
+def beginsSpecial(c): return any([c==x[0] for x in specialTokens])
 
 # If canpush(S,state) and c=S[0], the newState(state,c) is the
 # state resulting from pushing c onto the stack.
@@ -90,16 +92,18 @@ def newState(state,c):
                'num' if digit(c) else \
                'lessgreat' if c in ['<','>'] else\
                'colon' if c==':' else\
+               'period' if c=='.' else\
                'equal' if c=='=' else\
-               'digitsAndPoint' if c=='.' else\
                'spec1'  
     if state =='id':return 'id'
     if state == 'num': return 'digitsAndPoint' if c=='.' else 'num'
     if state == 'lessgreat': return 'equal' if c=='=' else\
                 'spec1'
-    if state == 'colon': return 'spec1'
+    if state == 'colon': return 'colonEqual' if c=='=' else 'spec1'
+    if state == 'colonEqual': return 'spec1'
     if state =='equal': return 'spec1'
-    if state =='digitsAndPoint': return 'digitsAndPoint'
+    if state =='period': return 'digitsAndPoint' if digit(c) else 'doublePeriod' if c=='.' else 'spec1'
+    if state =='digitsAndPoint': return 'digitsAndPoint' if digit(c) else 'spec1'
 
 
 # alpha(c) means c is a letter. digit(c) means c is a digit. alphaNum(c) means
