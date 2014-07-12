@@ -1,6 +1,8 @@
 
 import unittest
 from IDE import functionValues, expressionValues
+from Tokenizer import tokens
+from Parser import *
 class ParserTest(unittest.TestCase):
     
     def test_file(self):
@@ -75,7 +77,30 @@ class ParserTest(unittest.TestCase):
         actural = functionValues(F,Fname,ParamsL)
         expected = [7]
         self.assertEqual(expected,actural)   
+    
+    '''
+    This function test the function tokens in Tokenizer.py
+    '''
+    
+    def test_tokens(self):
+        L = ['1.2', '1.', '1..3', '1.2..2']
+        expected = [ ['1.2'] , ['1.'], ['1','..', '3'], ['1.2', '..', '2'] ]
+        for i in range(len(L)):
+            actural = tokens(L[i])[0]
+            self.assertEqual(expected[i],actural)   
+    
+    def test_parseRange(self):
+        S = tokens('{1..23}')[0]
+        actural = (('intRange', [1, 23]), True)
+        expected =parseRange(S)
+        self.assertEqual(expected,actural) 
         
+        S = tokens('{-1..2}')[0]
+        actural = (('intRange', [-1, 2]), True)
+        expected =parseRange(S)
+        self.assertEqual(expected,actural)
+
+    '''   
     def test_evaluater(self):  
         # test for operators of tuple  
         expressions = ['(1,2)[1]']
@@ -94,6 +119,6 @@ class ParserTest(unittest.TestCase):
         actural = expressionValues(expressions)
         expected = [1,{2,3,4}]
         self.assertEqual(expected,actural)
-        
+      '''  
 if __name__ == '__main__':
     unittest.main()   
