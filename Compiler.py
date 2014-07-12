@@ -32,13 +32,13 @@ def compile(F):
     #text,tokenF = tokens(programText)
     if tokenF:
         # get a list of function definitions from text
-        funcs = parseProgram(text)
+        funcs= parseProgram(text)
         for i in range(len(funcs)):    
             p,programF = parseDfn(funcs[i])
             if programF:
                 Program.update(p)
             else:
-                print("Failed parsing #",i," program.")
+                print("Failed parsing #",i," program: ", ' '.join(funcs[i]))
                 return
         # TODO:  Write program to log.txt instead of printing.
         # Separate the functions by line breaks.
