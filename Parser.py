@@ -714,15 +714,18 @@ def definedFuns(P):
     return {Def[0] for Def in P}
 
 # helper function for removeComments
-# canPushParser(S,state) iff, in the current state S with the current stack stk,
+# canPushHead(S,state) iff, in the current state S with the current stack stk,
 # stk+[S[0]] is the beginning of a token.
-def canPushParser(S,state):
+def canPushHead(S,state):
     if S==[]: return False
     if state =='success': return False
     if state == 'spec1' : return False
     c=S[0]
     if state == 'empty': 
-        return c == '{'
+        return c == '/'
+    if state == 'slash': return c=='-'
+    if state == 'dash': return True
+    if state == 'white': return True
     if state == 'lb': return c=='d' or white(c)
     if state=='d': return 'e'
     if state == 'e': return c=='f'
@@ -733,13 +736,16 @@ def canPushParser(S,state):
     return False
 '''
 # helper function for removeComments
-# If canpushParser(S,state) and c=S[0], the newState(state,c) is the
+# If newStateHead(S,state) and c=S[0], the newState(state,c) is the
 # state resulting from pushing c onto the stack.
 '''
-def newStateParser(state,c):
+def newStateHead(state,c):
     if state == 'empty':
-        return 'lb' if c=='{' else \
-               'spec1'  
+        return 'slash' if c=='/' else \
+               'spec1'
+    if state == 'slash': return 'dash' if c=='-' else 'spec1'
+    if state == 'dash': return 'dash' if c=='-' else 'white' if white(c) else 'success'
+    if state =='white': return 'white' if white(c) else 'success'  
     if state =='lb':return 'd' if c =='d' else 'lb' if white(c) else 'spec1'
     if state == 'd': return 'e' if c=='e' else 'spec1'
     if state == 'e': return 'f' if c=='f' else 'spec1'
@@ -748,24 +754,65 @@ def newStateParser(state,c):
     if state =='w2': return 'w2' if white(c) else 'success'
 
 '''
-# If S is a string, then firstFuncHead(S)=(s,e), where s is the first index of { followed by 0 or more white space 
-# and followed by 'def' or 'defs' and 0 or more white spaces and e is the first non white space character after 'def' or 'defs'
-# For example, if S = '{defs daf}' then firstFuncHead(S) = (0,7)
+# If S is a string, then firstFuncHead(S)=(s,e), where s is the first index of / 
+# followed by 1 or more - and e is the first non white space character after that
+# For example, if S = '/-- daf--/' then firstFuncHead(S) = (0,4)
 '''
 def firstFuncHead(S):
     for i in range(len(S)):
-        if S[i]=='{':
+        if S[i]=='/':
             state = 'empty'
             temp = list(S[i:])
             end = i
-            while canPushParser(temp,state):
-                state = newStateParser(state,temp[0])
+            while canPushHead(temp,state):
+                state = newStateHead(state,temp[0])
                 temp.pop(0)
                 end= end +1
             if state == 'success':
-                return (i,end)
+                return (i,end-1)
     return None
 
+'''
+# If S is a string, then firstFuncEnd(S)=(s,e), where s is the first index of - 
+# followed by 0 or more - and followed by /, e is the index of / above
+# For example, if S = '/-- daf--/' then firstFuncEnd(S) = (7,9)
+'''
+def firstFuncEnd(S):
+    for i in range(len(S)):
+        if S[i]=='-':
+            state = 'empty'
+            temp = list(S[i:])
+            end = i
+            while canPushEnd(temp,state):
+                state = newStateEnd(state,temp[0])
+                temp.pop(0)
+                end= end +1
+            if state == 'success':
+                return (i,end-1)
+    return None
+
+# helper function for removeComments
+# canPushEnd(S,state) iff, in the current state S with the current stack stk,
+# stk+[S[0]] is the beginning of a token.
+def canPushEnd(S,state):
+    if S==[]: return False
+    if state == 'spec1' : return False
+    c=S[0]
+    if state == 'empty': 
+        return c == '-'
+    if state == 'success': return False
+    if state == 'dash': return c=='-' or c=='/'
+    return False
+'''
+# helper function for removeComments
+# If canPushEnd(S,state) and c=S[0], the newState(state,c) is the
+# state resulting from pushing c onto the stack.
+'''
+def newStateEnd(state,c):
+    if state == 'empty':
+        return 'dash' if c=='-' else \
+               'spec1'
+    if state == 'dash': return 'dash' if c=='-' else 'success' if c=='/' else 'spec1'
 '''
 str -> str
 If S is a string, then removeComments(S) is a string that does not have any comments in S
@@ -774,16 +821,20 @@ def removeComments(FS):
     S = FS
     allFunctionsText = ''
     while len(S)>0:
-        # find the first {def or {defs S
-        firstLb = firstFuncHead(S)
-        if firstLb == None:
+        # find the head of the function definition  /--
+        funcHead = firstFuncHead(S)
+        if funcHead == None:
             S= []
         else:
-            # find the first } after firstLb that is not in the function definition
-            #firstRb = firstIndex(separators,S[firstLb[1]:])+firstLb[1]
-            firstRb = closeParentesis('{',S[firstLb[1]:])+firstLb[1]
-            allFunctionsText += S[firstLb[1]-1: firstRb] + '  '
-            S = S[firstRb+1:]
+            head = funcHead[1]
+            # find the end of the function definition  --/
+            funcEnd = firstFuncEnd(S[head:])
+            if funcEnd ==None:
+                S=[]
+            else:
+                end = funcEnd[0] + head
+                allFunctionsText += S[head: end] + '  '
+                S = S[end+1:]
     return allFunctionsText
 '''
 # helper function for removeComments
@@ -798,6 +849,8 @@ def closeParentesis(L,S):
         R = ']'
     if L =='(':
         R = ')'
+    if L =='/':
+        R == '/'
     S = list(S)
     #create an empty stack S
     index = 0
