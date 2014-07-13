@@ -77,6 +77,7 @@ def parseIfClause(S):
     for i in range(len(S)):
         if S[i]=='if':
             (t1,f1)=parseTerm(S[0:i])
+            # statement and sentence are used interchangely 
             (t2,f2)= parseSentence(S[i+1:])
             if f1 and f2: 
                 return (('if',[t2,t1]),True) 
@@ -197,10 +198,53 @@ def parseS0(S):
         if flag: return (tree,True)
     return (None,False)      
 
-#rule: term  ->   T4  
+#rule: term  ->   T4  | lambda  vars . term
 def parseTerm(S):
-    return parseT4(S)
+    f,t = parseT4(S)
+    if t:
+        return parseT4(S)
+    f,t = parseLambda(S)
+    if t:
+        return parseLambda(S)
+    return (None,False)
 
+# rule: term -> lambda  vars . term
+def parseLambda(S):
+    if len(S)<4:
+        return (None,False)
+    if S[0]=='lambda':
+        try:
+            # find '.' in S
+            i = S.index('.')
+        except ValueError:
+            return (None,False)
+        (t1,f1)=parseVars(S[1:i])
+        (t2,f2)= parseTerm(S[i+1:])
+        if f1 and f2: 
+            if isinstance(t1,tuple) and t1[0]=='cstack':
+                return (('lambda',[t1[1],t2]))
+            else:
+                return (('lambda',[[t1],t2]),True) 
+# rule: vars -> var | var vars        
+def parseVars(S):
+    if len(S)==1:
+        (tree,flag) = parseVar(S)
+        if flag: 
+            return (tree,True)  
+    (t1,f1)=parseVar(S[0])
+    (t2,f2)= parseVars(S[1:])
+    if f1 and f2: 
+        if(isinstance(t2,tuple) and t2[0]=='cstack'):
+            return (('cstack',[t1]+t2[1]),True) 
+        else:
+            return (('cstack',[t1,t2]),True)
+    return (None,False)
+# rule: var
+def parseVar(S):
+    if len(S)==1:
+        if isIdentifier(S):
+            return (S[0],True)
+    return (None,False)     
 # rule: T4   ->  T3   |   T4 Infix4 T3
 InfixT4 = ['+','-','union','\\']
 def parseT4(S):
@@ -277,7 +321,7 @@ def parseT1(S):
     return (None,False) 
     
 #rule 0: T0 -> numeral | identifier | (term) | pipe term pipe | floor(term) | ceil(term) | prefun(terms) | 
-#              vector | set | tuple | Pow (vector) | choose(vector)| { term .. term }
+#              vector | set | tuple | Pow (vector) | choose(vector)| { term .. term } | { term pipe Stmt }
 def parseT0(S):
     if len(S)==0:
         return (None,False)
@@ -326,6 +370,9 @@ def parseT0(S):
         if flag: return (tree,True)
         # parse range { term .. term }
         (tree,flag) = parseRange(S)
+        if flag: return (tree,True)
+        # parse { term pipe Stmt }
+        (tree,flag) = parseTermPipeStmt(S)
         if flag: return (tree,True)
     except IndexError:
         return(None,False) 
@@ -758,5 +805,21 @@ def parseRange(S):
             return(('intRange',[t1,t2]),True)
     return (None,False)
 
+# rule: T0 -> { term pipe Stmt }
+def parseTermPipeStmt(S):
+    if len(S)<5:
+        return (None,False)
+    # {term}
+    if S[0]=='{' and S[len(S)-1]=='}':
+        # find the first index of '..' in S
+        try:
+            i = S.index('|')
+        except ValueError:
+            return (None,False)
+        (t1,f1)= parseTerm(S[1:i])
+        (t2,f2)=parseSentence(S[i+1:-1])
+        if f1 and f2: 
+            return(('setComp',[t1,t2]),True)
+    return (None,False)
 #print(parseTerms(tokens('2+2,3,x2')[0]))
 #print(isIdentifier('2'))
