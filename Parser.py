@@ -172,11 +172,40 @@ def parseS2(S):
         (t1,f1)= parseS2(S[1:])
         if f1: 
             return (('~',[t1]),True) 
+    (tree,flag) = parseS1(S)
+    if flag: 
+        return (tree,True)    
+    return (None,False)
+
+#rule S1 -> S0    |   some  var  in  term : S1    |   all   var  in  term : S1
+def parseS1(S):
+    # some  var  in  term : S1 | all   var  in  term : S1
+    (tree,flag) = parseSomeAll(S)
+    if flag: 
+        return (tree,True)    
+    # S0
     (tree,flag) = parseS0(S)
     if flag: 
         return (tree,True)    
     return (None,False)
 
+# rule: some  var  in  term : S1 | all   var  in  term : S1
+def parseSomeAll(S):
+    separators = ['some','all']
+    if len(S)<6:
+        return(None,False)
+    if S[0] in separators:
+        try:
+            i = S.index('in')
+            j = S.index(':')
+            t1,f1 = parseVar(S[1])
+            t2,f2 = parseTerm(S[i+1:j])
+            t3,f3 = parseS1(S[j+1:])
+            if f1 and f2 and f3:
+                return (S[0],[t1,t2,t3])
+        except ValueError:
+            return (None,False)
+    return (None,False)
 #rule S0  ->   term   infpred   term 
 InfpredS0 = ['=','<','>','<=','>=','in','subeq']
 def parseS0(S):
@@ -198,13 +227,13 @@ def parseS0(S):
         if flag: return (tree,True)
     return (None,False)      
 
-#rule: term  ->   T4  | lambda  vars . term
+# rule: term  ->   T4  | lambda  vars . term
 def parseTerm(S):
-    f,t = parseT4(S)
-    if t:
+    t,f = parseT4(S)
+    if f:
         return parseT4(S)
-    f,t = parseLambda(S)
-    if t:
+    t1,f1 = parseLambda(S)
+    if f1:
         return parseLambda(S)
     return (None,False)
 
@@ -225,6 +254,7 @@ def parseLambda(S):
                 return (('lambda',[t1[1],t2]))
             else:
                 return (('lambda',[[t1],t2]),True) 
+    return (None,False)
 # rule: vars -> var | var vars        
 def parseVars(S):
     if len(S)==1:
