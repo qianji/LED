@@ -18,7 +18,7 @@ def remInitialWhite(S):
 
 # A *special token* is a string that is a member of the following list.
 
-specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','..',',',';','[',']','{','}','\\']
+specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','..',',',';','[',']','{','}','\\',':']
 
 
 # An *identifier* is a nonempty string of letters and digits
