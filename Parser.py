@@ -202,7 +202,7 @@ def parseSomeAll(S):
             t2,f2 = parseTerm(S[i+1:j])
             t3,f3 = parseS1(S[j+1:])
             if f1 and f2 and f3:
-                return (S[0],[t1,t2,t3])
+                return ((S[0],[t1,t2,t3]),True)
         except ValueError:
             return (None,False)
     return (None,False)
@@ -305,7 +305,7 @@ def parseT3(S):
         return (tree,True)    
     return (None,False)
 
-# rule: T2   ->  T1   |  Prefix2  T2
+# rule: T2   ->  T1   |  Prefix2  T2 | Bigop [  Stmt  ] T2  |  Bigop [ Stmt ] ^ [ Stmt ] T2
 PrefixT2 = ['+','-']
 def parseT2(S):
     if len(S)==0:
@@ -317,9 +317,66 @@ def parseT2(S):
                 return ((prefix+'1',[t]),True) 
     (tree,flag) = parseT1(S)
     if flag: 
-        return (tree,True)    
+        return (tree,True)   
+    (tree,flag) = parseBigop(S)
+    if flag: 
+        return (tree,True)      
     return (None,False)    
 
+Bigop = ['Sum','Prod','Union','Nrsec']
+# rule: Bigop [  Stmt  ] T2  |  Bigop [ Stmt ] ^ [ Stmt ] T2
+def parseBigop(S):
+    (tree,flag) = parseBigop1(S)
+    if flag: 
+        return (tree,True) 
+    (tree,flag) = parseBigop2(S)
+    if flag: 
+        return (tree,True)      
+    return (None,False)  
+# rule: Bigop [  Stmt  ] T2
+def parseBigop1(S):
+    if len(S)<5:
+        return(None,False)
+    if S[0] in Bigop:
+        try:
+            # starting from the next char of the first '[', find the first ']' that does not match '['
+            i = closeParentesis('[',S[2:])
+            if i==None:
+                return (None,False)
+            i = i+2
+            t1,f1 = parseSentence(S[2:i])
+            t2,f2 = parseT2(S[i+1:])
+            if f1 and f2:
+                return ((S[0],[t1,t2]),True)
+        except ValueError:
+            return (None,False)
+    return (None,False)
+
+# rule: Bigop [ Stmt ] ^ [ Stmt ] T2
+def parseBigop2(S):
+    if len(S)<9:
+        return(None,False)
+    if S[0] in Bigop:
+        try:
+            # starting from the next char of the first '[', find the first ']' that does not match '['
+            i = closeParentesis('[',S[2:])
+            if i==None:
+                return (None,False)
+            # add 2 to get the correct index
+            i=i+2
+            j = i+1
+            k = closeParentesis('[',S[j+2:])
+            if k == None:
+                return (None,False)
+            k=k+2+j
+            t1,f1 = parseSentence(S[2:i])
+            t2,f2 = parseSentence(S[j+2:k])
+            t3,f3 = parseT2(S[k+1:])
+            if f1 and f2 and f3:
+                return ((S[0],[t1,t2,t3]),True)
+        except ValueError:
+            return (None,False)
+    return (None,False)
 # rule: T1 -> T0 | T1 [term]  | T0  ^  T2
 InfixT1 = ['^']
 def parseT1(S):
@@ -724,7 +781,7 @@ def removeComments(FS):
         else:
             # find the first } after firstLb that is not in the function definition
             #firstRb = firstIndex(separators,S[firstLb[1]:])+firstLb[1]
-            firstRb = closeParentesis(S[firstLb[1]:])+firstLb[1]
+            firstRb = closeParentesis('{',S[firstLb[1]:])+firstLb[1]
             allFunctionsText += S[firstLb[1]-1: firstRb] + '  '
             S = S[firstRb+1:]
     return allFunctionsText
@@ -733,7 +790,14 @@ def removeComments(FS):
 This is a function definition: {def f(x) = {x}+{x+2} }
 closeParentesis(S) finds the first } that does not match any { in S
 '''
-def closeParentesis(S):
+def closeParentesis(L,S):
+    R = '}'
+    if L=='{':
+        R = '}'
+    if L=='[':
+        R = ']'
+    if L =='(':
+        R = ')'
     S = list(S)
     #create an empty stack S
     index = 0
@@ -742,18 +806,18 @@ def closeParentesis(S):
         # read a character ch
         ch = S[0]
         #If ch is an opening paren (of any kind), push it onto stack
-        if ch =='{':
+        if ch ==L:
             stack.append(ch)
         else:
             # If  ch  is a closing paren }, look at the top of stack.
-            if ch=='}':
+            if ch==R:
                 #If stack is empty at this point, retrun index.
                 if len(stack)==0:
                     return index
                 top = stack[-1]
                 # If the top of stack is the opening paren that corresponds to {, 
                 # then pop stack and continue, this paren matches OK.
-                if top=='{':
+                if top==L:
                     stack=stack[:-1]
                     S=S[1:]
                     index+=1
