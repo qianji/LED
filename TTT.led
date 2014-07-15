@@ -1,0 +1,136 @@
+program Tic Tac Toe
+J. Nelson Rushton, Texas Tech University
+July 12, 2014
+
+This is an LED program that defines a simple tic tac toe game to 
+run in the Easel enviornment.
+
+The game begins with an empty grid and `x to move. When an empty
+cell is clicked, the player whose turn it occupies that cell and 
+it becomes the other player's turn, until the game is over. When 
+the game is over a message is displayed giving the result of the 
+game. The player can press the restart button at any time to 
+restart the game.
+======================================================================
+DATA MODEL
+
+The types *player*, *cell*, *move*, and *state* are defined as follows:
+
+ *) A *player* is the symbol `x or the symbol `o.
+ *) A *cell* is an integer in {1..9}. Cells represent squares on the 
+    tic tac toe board as pictured below:
+
+     1|2|3
+     -----
+     4|5|6
+     -----
+     7|8|9
+
+ *) A *move* is a pair (c, p) where c is a cell and p is a player. 
+    The move (c, p)represents a move by player p in cell c.
+ *) A *state* is a set of moves, thought of as the set of moves made 
+    so far in the game. In this case, the state of the game is also the 
+    state of the program.
+
+In this program, the variables p, c, and m will range over players, 
+cells, and moves, respectively.
+
+======================================================================
+GAME RULES
+
+This section defines the rules of tic-tac-toe in LED. 
+
+Since the game state is the set of moves made so far in the game, it 
+begins as the empty set.
+/-----------------
+ startState := {}
+------------------/
+
+The *game board* is the set of all cells on the board:
+/---------------------
+  gameBoard := {1..9}
+----------------------/
+
+We say that player p *occupies* cell c if the pair (p,c) is a member 
+of Gamma, and that cell c is *occupied* if it is occupied by `x or by `o.
+
+/--------------------------------------------------
+ occupies(p,c) iff (p,c) in Gamma
+ occupied(c) iff occupies(x,c) or occupies(o,c)
+---------------------------------------------------/
+
+A *row* is a set of cells that form three in a row either horizontal-
+ly, vertically, or diagonally. Techincally, they should be called 
+'lines', but "three in a row" is an Anglo-American cultural idiom, 
+while "three in a line" is not.
+
+/--------------------------------------------
+ rows := hRows union vRows union diagonals
+
+ hRows := {{1,2,3},{4,5,6},{7,8,9}}
+ vRows := {{1,4,7},{2,5,8},{3,6,9}}
+ diagonals := {{1,5,9},{3,5,7}}
+--------------------------------------------/
+
+Player p has *three in a row* if he occupies all of the cells in 
+some row.
+
+/---------------------------------------------
+ threeInRow(p) iff 
+   some R in rows: all c in R: occupies(p,c)
+---------------------------------------------/
+
+The *board is full* if all the cells on the game board are occupied.
+
+/------------------------------------
+ boardFull iff
+   all c in gameBoard: occupied(c)
+-------------------------------------/
+
+The *game is over* if either the board is full, or one of the players 
+has three in a row.
+
+/------------------------------------------------- 
+gameOver iff
+   boardFull or threeInRow(x) or threeInRow(o)
+-------------------------------------------------/
+
+The *player to move* is `x if an even number of moves have been made, 
+and `o otherwise (where, as usual, an integer is even if it is divisible 
+by 2).
+
+/-----------------------
+ playerToMove:=
+   `x if even(|Gamma|);
+   `o otherwise
+
+even(n) iff n mod 2=0
+------------------------/
+
+The move (c,p) is *possible* in Gamma if it is player p's turn, cell c 
+is not occupied, and the game is not over
+
+/-----------------------------------------------
+possible(c,p) iff 
+  (playerToMove=p) & ~occupied(c) & ~gameOver
+------------------------------------------------/
+
+Finally, if move m is possible in the current state Gamma, we write 
+result(m) for the state that results from making move m in state 
+Gamma. Since the game state is just the set of moves that have been 
+made, this is simple to define.
+
+/---------------------------
+ result(m) := Gamma union m
+-----------------------------/
+
+======================================================================
+
+A sample game state. In the actual game this value would be provided
+by the environment:
+
+
+/- Gamma := {(`x,5),(`o,3),(`x,2),(`o,8)}  -/
+
+
+
