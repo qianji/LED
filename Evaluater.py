@@ -13,11 +13,11 @@ In this program, the variable E will vary over AST's.
 import numbers, math
 from GlobalVars import Program 
 def isNumber(E): return isinstance(E,numbers.Number)
-def isScalar(E): return isNumber(E)
+def isScalar(E): return isNumber(E) or isAtom(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
 def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
 def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
-
+def isAtom(x): return x[0]=='`' and len(x)>1 
 # If E is an expression, val(E) is the value of E.
 def val(E):
     if isScalar(E): return E

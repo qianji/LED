@@ -16,7 +16,8 @@ An *AST* is either a 3-tuple (root,left,right), where root is a node, left and r
 If *AST* is a 3-tuple (r,l,r), it represents a abstract syntax tree with r as its root node, l its left tree and r its right tree
 If *AST* is a node r, it represents an abstract syntax tree with r as its root node and no subtrees.
 A *var* or an *identifier* is a nonempty string of letters and digits beginning with a letter.
-A *num* is a nonempty string of digits
+A *numeral* is a nonempty string of digits
+An *atom* is an identifier preceded by a backquote, such as `x and `o.
 '''
 '''
 # All the functions in this file that starts with the word "parse" have the same signature as follows if their function signatures are not provided:
@@ -206,10 +207,14 @@ def parseSomeAll(S):
         except ValueError:
             return (None,False)
     return (None,False)
-#rule S0  ->   term   infpred   term 
+#rule S0  ->   term   infpred   term | identifier
 InfpredS0 = ['=','<','>','<=','>=','in','subeq']
 def parseS0(S):
     if len(S)==0: return(None,False)
+    # parse identifier
+    if len(S)==1:
+        if isIdentifier(S[0]):
+            return (S[0],True)
     for i in range(len(S)):
         for infpred in InfpredS0:
             if S[i]==infpred:
@@ -407,7 +412,7 @@ def parseT1(S):
         return (tree,True)    
     return (None,False) 
     
-#rule 0: T0 -> numeral | identifier | (term) | pipe term pipe | floor(term) | ceil(term) | prefun(terms) | 
+#rule 0: T0 -> atom | numeral | identifier | (term) | pipe term pipe | floor(term) | ceil(term) | prefun(terms) | 
 #              vector | set | tuple | Pow (vector) | choose(vector)| { term .. term } | { term pipe Stmt }
 def parseT0(S):
     if len(S)==0:
@@ -432,7 +437,7 @@ def parseT0(S):
         # Pow(vector)
         if S[0]=='Pow' and S[1]=='(' and S[len(S)-1]==')':
             (tree,flag)=parseVector(S[2:len(S)-1])
-            if flag: return (('pow',[tree]),True)
+            if flag: return (('Pow',[tree]),True)
         # choose(vector)
         if S[0]=='choose' and S[1]=='(' and S[len(S)-1]==')':
             (tree,flag)=parseVector(S[2:len(S)-1])
@@ -461,10 +466,21 @@ def parseT0(S):
         # parse { term pipe Stmt }
         (tree,flag) = parseTermPipeStmt(S)
         if flag: return (tree,True)
+        # parse atom
+        (tree,flag) = parseAtom(S)
+        if flag: return (tree,True)
+        
     except IndexError:
         return(None,False) 
     return (None,False)
 
+# rule: T0 -> atom
+def parseAtom(S):
+    if len(S)==1:
+        if len(S[0])>1:
+            if S[0][0]=='`' and isIdentifier(S[0][1:]):
+                return(S[0],True)
+    return (None,False)
 # rule: T0 -> prefun ( terms )
 def parseUserDefinedFun(S):
     try:
@@ -511,6 +527,7 @@ def parseTerms(S):
 # isIdentifier(S) iff S is an *identifier*
 '''
 def isIdentifier(S):
+    if len(S)==0: return False
     if not alpha(S[0]): return False
     for c in S:
         if not (alphaNum(c)): return False

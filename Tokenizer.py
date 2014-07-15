@@ -18,7 +18,7 @@ def remInitialWhite(S):
 
 # A *special token* is a string that is a member of the following list.
 
-specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','..',',',';','[',']','{','}','\\',':']
+specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','..',',',';','[',']','{','}','\\',':','`']
 
 
 # An *identifier* is a nonempty string of letters and digits
@@ -44,7 +44,7 @@ def munch(S):
     if validToken(state): return (''.join(chars),True)
     else: return (chars,False)
         
-def validToken(state): return state in ['id','num','spec1','lessgreat','equal','period','digitsAndPoint','colon','colonEqual','doublePeriod']
+def validToken(state): return state in ['id','num','spec1','lessgreat','equal','period','digitsAndPoint','colon','colonEqual','doublePeriod','backquote']
 
 # States are 'empty', 'id', 'num', 'lessgreat', or 'spec1'. Each state
 # corresponds to an assertion about the stack. 
@@ -79,6 +79,7 @@ def canPush(S,state):
     if state == 'doublePeriod': return False
     if state == 'colonEqual': return False
     if state == 'spec1' : return False
+    if state == 'backquote': return alpha(c)
     
 # beginSpecial(c) iff c is the beginning of a special token that is not ":-"
 def beginsSpecial(c): return any([c==x[0] for x in specialTokens])
@@ -94,6 +95,7 @@ def newState(state,c):
                'colon' if c==':' else\
                'period' if c=='.' else\
                'equal' if c=='=' else\
+               'backquote' if c=='`' else\
                'spec1'  
     if state =='id':return 'id'
     if state == 'num': return 'digitsAndPoint' if c=='.' else 'num'
@@ -103,6 +105,7 @@ def newState(state,c):
     if state == 'colonEqual': return 'spec1'
     if state =='equal': return 'spec1'
     if state =='period': return 'digitsAndPoint' if digit(c) else 'doublePeriod' if c=='.' else 'spec1'
+    if state =='backquote': return 'id' if alphaNum(c) else 'spec1'
     if state =='digitsAndPoint': return 'digitsAndPoint' if digit(c) else 'spec1'
 
 

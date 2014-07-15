@@ -12,7 +12,7 @@ from GlobalVars import *
 # import the global variable Program
 
 def prettyString(E):
-    if isNumber(E): return(str(E))
+    if isNumber(E) or isAtom(E): return(str(E))
     if isSet(E): return('{' + prettyStack(E[1]) + '}')
     if isVector(E): return( '<' + prettyStack(E[1]) + '>')
     if isTuple(E): return( '(' + prettyStack(E[1]) + ')')

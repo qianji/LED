@@ -96,5 +96,13 @@ the expression g-4 would evaluate to 8.
 ---------------------------------------------------------------/
 
 A dummy test function for constant
-/--  Z:= 0 --/
+/--  
+
+Z:= 0 
+
+
+T := {(0,2),(3,2),(2,4),(`x,2)}
+--/
+
+
 
