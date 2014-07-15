@@ -17,21 +17,42 @@ def isScalar(E): return isNumber(E) or isAtom(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
 def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
 def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
-def isAtom(x): return x[0]=='`' and len(x)>1 
+def isAtom(x): return False if x==None else len(x)>1 and x[0]=='`'  
 # If E is an expression, val(E) is the value of E.
 def val(E):
+    
     if isScalar(E): return E
     if isinstance(E,str) and (E,0) in Program: return valDefined(E,[])
     (Op,X) = E
-    if Op in {'and','=>'}: Args=X  
+    if Op in {'and','=>','some','all'}: Args=X  
     else: Args = [val(E) for E in X]
     if Op=='vector': return ('vector',Args)
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
+    if Op=='some'  : return valSome(Args)
+    if Op=='all'   : return valAll(Args)
     if Op in builtIns : return valBuiltIn(Op,Args)
     if (Op,len(Args)) in Program : return valDefined(Op,Args)
 
+# quantifiers
+def valSome(Args):
+    # The AST of some var  in  t : s  is ('some',[var, A, B]), where A and B are the respective AST's of t and s. 
+    # [var, A, B] = X
+    var,t,s = Args
+    for i in val(t)[1]:
+        if val(sub(i,var,s))==True:
+            return True
+    return False
+def valAll(Args):
+    # The AST of all var  in  t : s  is ('all',[var, A, B]), where A and B are the respective AST's of t and s. 
+    # [var, A, B] = X
+    var,t,s = Args
+    for i in val(t)[1]:
+        if not val(sub(i,var,s))==True:
+            return False
+    return True
 
+    
 def valBuiltIn(Op,Args):
         F = builtIns[Op]
         return F(Args)
