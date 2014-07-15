@@ -56,7 +56,7 @@ of Gamma, and that cell c is *occupied* if it is occupied by `x or by `o.
 
 /--------------------------------------------------
  occupies(p,c) iff (p,c) in Gamma
- occupied(c) iff occupies(x,c) or occupies(o,c)
+ occupied(c) iff occupies(`x,c) or occupies(`o,c)
 ---------------------------------------------------/
 
 A *row* is a set of cells that form three in a row either horizontal-
@@ -92,7 +92,7 @@ has three in a row.
 
 /------------------------------------------------- 
 gameOver iff
-   boardFull or threeInRow(x) or threeInRow(o)
+   boardFull or threeInRow(`x) or threeInRow(`o)
 -------------------------------------------------/
 
 The *player to move* is `x if an even number of moves have been made, 
@@ -121,7 +121,7 @@ Gamma. Since the game state is just the set of moves that have been
 made, this is simple to define.
 
 /---------------------------
- result(m) := Gamma union m
+ result(m) := Gamma union set(m)
 -----------------------------/
 
 ======================================================================
@@ -130,7 +130,7 @@ A sample game state. In the actual game this value would be provided
 by the environment:
 
 
-/- Gamma := {(`x,5),(`o,3),(`x,2),(`o,8)}  -/
+/- Gamma := {(`x,5),(`o,3),(`x,2),(`o,7),(`x,8)}  -/
 
 
 
