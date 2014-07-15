@@ -17,10 +17,9 @@ def isScalar(E): return isNumber(E) or isAtom(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
 def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
 def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
-def isAtom(x): return False if x==None else len(x)>1 and x[0]=='`'  
+def isAtom(x): return False if x==None else isinstance(x,str) and len(x)>1 and x[0]=='`'  
 # If E is an expression, val(E) is the value of E.
 def val(E):
-    
     if isScalar(E): return E
     if isinstance(E,str) and (E,0) in Program: return valDefined(E,[])
     (Op,X) = E
@@ -151,7 +150,13 @@ def valPow(X):
     return ('set',S[1] + a)
         
 def valChoose(X): return X[0][1][0]
-
+def valIntRange(X):
+    s = []
+    l,u = X
+    for i in range(l,u+1):
+        s.append(i)
+    return ('set',s)
+        
 # Boolean connectives
 def valAnd(X):
     p = val(X[0])
@@ -179,6 +184,7 @@ def valEq(X):
     if isVector(a) and isVector(b): return respEqual(X)
     if isTuple(a) and isTuple(b): return respEqual(X)
     if isNumber(a) and isNumber(b): return a==b
+    if isAtom(a) and isAtom(b): return a==b
     return False
 def valStar(X):
     if isNumber(X[0]) and isNumber(X[1]): return valMult(X)
@@ -192,5 +198,5 @@ builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             'and':valAnd,'or' :valOr,'~':valNot,'=>':valImplies,'<=>':valIff,
             'sub':valSub,
             'in':valIn,'subeq':valSubeq,'union':valUnion,'nrsec':valNrsec,'\\':valSetSubtr,
-            'Pow':valPow,'choose':valChoose}
+            'Pow':valPow,'choose':valChoose,'intRange':valIntRange}
 
