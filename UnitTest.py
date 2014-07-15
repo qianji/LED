@@ -105,7 +105,7 @@ class ParserTest(unittest.TestCase):
         expected =parseRange(S)
         self.assertEqual(expected,actural)
 
-    '''   
+     
     def test_evaluater(self):  
         # test for operators of tuple  
         expressions = ['(1,2)[1]']
@@ -119,11 +119,12 @@ class ParserTest(unittest.TestCase):
         expected = [1,('vector',[2,3,4,5])]
         self.assertEqual(expected,actural)
         
-        # test for operator of set   
-        expressions = ['{1,2}[0]','{2,3}+{4,3}+{4}']
+        # test for quantifier some 
+        expressions = ['some x in {2,3,4} : x>2 ', 'some x in {0,1,2} : x<0','all x in {2,3,4} : x>2','all x in {2,3,4} : x>1' ,\
+                       'some R in {{2,3,4},{0,1},{5,6,7}}: all c in R: c>2','all R in {{2,3,4},{0,1},{5,6,7}}: all c in R: c>2']
         actural = expressionValues(expressions)
-        expected = [1,{2,3,4}]
+        expected = [True,False,False,True,True,False]
         self.assertEqual(expected,actural)
-      '''  
+       
 if __name__ == '__main__':
     unittest.main()   
