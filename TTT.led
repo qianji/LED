@@ -40,12 +40,6 @@ GAME RULES
 
 This section defines the rules of tic-tac-toe in LED. 
 
-Since the game state is the set of moves made so far in the game, it 
-begins as the empty set.
-/-----------------
- startState := {}
-------------------/
-
 The *game board* is the set of all cells on the board:
 /---------------------
   gameBoard := {1..9}
@@ -126,11 +120,158 @@ made, this is simple to define.
 
 ======================================================================
 
-A sample game state. In the actual game this value would be provided
-by the environment:
+======================================================================
+
+This section define *init*, *display* and *update* for Easel LED game engine
+
+*init* is the initial state of the game.
+
+/----- init := {} -----/
+
+ *update* is the game state resulting from the current game state and the most recent mouse click.
+/-------------------------------------------------
+   newState := 
+      init if gameOver & clickedPlayAgain;
+      result((playerToMove,1)) if possible(1,playerToMove) ;
+      result((playerToMove,2)) if possible(2,playerToMove);
+      result((playerToMove,3)) if possible(3,playerToMove);
+      result((playerToMove,4)) if possible(4,playerToMove) ;
+      result((playerToMove,5)) if possible(5,playerToMove) ;
+      result((playerToMove,6)) if possible(6,playerToMove) ;
+      result((playerToMove,7)) if possible(7,playerToMove) ;
+      result((playerToMove,8)) if possible(8,playerToMove) ;
+      result((playerToMove,9)) if possible(9,playerToMove) ;
+      Gamma otherwise
+--------------------------------------------------/
+
+It won't compile if using the following code.
+   newState := 
+      init if gameOver & clickedPlayAgain;
+      result((playerToMove,1)) if possible(1,playerToMove) & insideCell(click,1);
+      result((playerToMove,2)) if possible(2,playerToMove) & insideCell(click,2);
+      result((playerToMove,3)) if possible(3,playerToMove) & insideCell(click,3);
+      result((playerToMove,4)) if possible(4,playerToMove) & insideCell(click,4);
+      result((playerToMove,5)) if possible(5,playerToMove) & insideCell(click,5);
+      result((playerToMove,6)) if possible(6,playerToMove) & insideCell(click,6);
+      result((playerToMove,7)) if possible(7,playerToMove) & insideCell(click,7);
+      result((playerToMove,8)) if possible(8,playerToMove) & insideCell(click,8);
+      result((playerToMove,9)) if possible(9,playerToMove) & insideCell(click,9);
+      Gamma otherwise
+
+However, it compiles if using the following code:
+   newState := 
+      init if gameOver & clickedPlayAgain;
+      result((playerToMove,1)) if possible(1,playerToMove) & insideCell(click,1);
+      result((playerToMove,2)) if possible(2,playerToMove) & insideCell(click,2);
+      result((playerToMove,3)) if possible(3,playerToMove) & insideCell(click,3);
+      result((playerToMove,4)) if possible(4,playerToMove) & insideCell(click,4);
+      result((playerToMove,5)) if possible(5,playerToMove) & insideCell(click,5);
+      Gamma otherwise
+      
+*display* is the screen display for the current game state
+/-------------------------------------------------
+ display := gameOverDisplay if gameOver;
+            gameInPlayDisplay otherwise
+--------------------------------------------------/
+
+/---
+insideCell(p,c) iff xInCell(p,c) & yInCell(p,c)
+---/
+
+/- xInCell(p,c) iff lowerBound(c)<xCoord(p) & xCoord(p)<upperBound(c)-/
+/- yInCell(p,c) iff lowerBound(c)<yCoord(p) & yCoord(p)<upperBound(c)-/
+
+/- lowerBound(c):=100+100*((c-1) mod 3) -/
+/- upperBound(c):= 200+100*((c-1) mod 3) -/
 
 
-/- Gamma := {(`x,5),(`o,3),(`x,2),(`o,7),(`x,8)}  -/
+The x and y coordinates of a point are its 1st and 2nd coordinates,
+respectively.
+
+/------------------
+ xCoord(p) := p[1]
+ yCoord(p) := p[2]
+-------------------/
+
+/-------------------------------------------------
+  clickedPlayAgain iff 400 < xCoord(click) & xCoord(click) < 500 & yCoord(click)>425 & 725>yCoord(click)
+--------------------------------------------------/
 
 
+/-------------------------------------------------
+ gameOverDisplay := background union playerImages union playAgainButton union winnerMessage
+ 
+--------------------------------------------------/
 
+/-------------------------------------------------
+ gameInPlayDisplay := background union playerImages union turnMessage
+--------------------------------------------------/
+
+
+/-------------------------------------------------
+    L1 := (100,100,100,400)
+    L2 := (100,400,400,400)
+    L3 := (400,400,400,100)
+    L4 := (400,100,100,100)
+    L5 := (200,100,200,400)
+    L6 := (300,100,300,400)
+    L7 := (100,200,400,200)
+    L8 := (100,300,400,300)
+--------------------------------------------------/
+
+/-------------------------------------------------
+    A1 := (400,475,500,475)
+    A2 := (400,425,500,425)
+    A3 := (400,475,400,425)
+    A4 := (500,475,500,425)
+    T1 := (`PlayAgain, 450, 450, 15)
+    
+--------------------------------------------------/
+
+/-------------------------------------------------
+background := {L1,L2,L3,L4,L5,L6,L7,L8}
+--------------------------------------------------/
+
+
+/-------------------------------------------------
+playAgainButton:={A1,A2,A3,A4,T1}
+--------------------------------------------------/
+
+
+/-------------------------------------------------
+playerImages:= playerInCell(1) union playerInCell(2) union playerInCell(3) union playerInCell(4) union playerInCell(5) union
+               playerInCell(6) union playerInCell(7) union playerInCell(8) union playerInCell(9)
+               
+--------------------------------------------------/
+
+/-------------------------------------------------
+turnMessage:= {(`playerXturn,100,450,15)} if playerToMove=`x;
+              {(`playerOturn,100,450,15)} if playerToMove=`o
+--------------------------------------------------/
+
+/-------------------------------------------------
+winnerMessage := {(`xWon,100,450,15)} if threeInRow(`x);
+                 {(`oWon,100,450,15)} if threeInRow(`o);
+                 {(`catWon,100,450,15)} otherwise
+--------------------------------------------------/
+
+/-------------------------------------------------
+playerInCell(cell):={(`x, playerX(cell), playerY(cell), fontSize)} if (`x,cell) in Gamma;
+                    {(`o, playerX(cell), playerY(cell), fontSize)} if (`o,cell) in Gamma; 
+                    {} otherwise
+--------------------------------------------------/
+
+/-------------------------------------------------
+playerX(cell):=150+100*((cell-1) mod 3)
+--------------------------------------------------/
+
+/-------------------------------------------------
+playerY(cell):=350-100*(floor((cell-1)/3))
+--------------------------------------------------/
+
+font size
+/-------------------------------------------------
+fontSize :=15
+--------------------------------------------------/
+
+======================================================================

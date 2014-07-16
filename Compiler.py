@@ -12,7 +12,7 @@ string ->
 If F is the name of the file containing the function definitions of LED with .led as its extension, then compile(F) compile the functions in the file 
 and update the content of the program in the global variable "Program"
 otherwise 
-For example, the following program let f(x) = x^2 let g(x,y) = y+2*x would be represented by the following dictionary: 
+For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
 {('f',1):(['x'],('^',['x',2])) , 
 ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
 '''
@@ -29,13 +29,17 @@ def compile(F):
     t = removeComments(programText)
     #tokenize the file
     text,tokenF = tokens(t)
+    #print(text)
     #text,tokenF = tokens(programText)
     if tokenF:
         # get a list of function definitions from text
         funcs= parseProgram(text)
         for i in range(len(funcs)):    
+            if funcs[i][0]=='newState':
+                print(funcs[i])
             p,programF = parseDfn(funcs[i])
             if programF:
+                print(p)
                 Program.update(p)
             else:
                 print("Failed parsing #",i," program: ", ' '.join(funcs[i]))
