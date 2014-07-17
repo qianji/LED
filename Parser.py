@@ -29,12 +29,12 @@ An *atom* is an identifier preceded by a backquote, such as `x and `o.
 
 # rule: funcBody -> Expression | conditional
 def parseFuncBody(S):
-    tree2,flag2 = parseExpression(S)
-    if flag2:
-        return (tree2,True)
     tree1,flag1 = parseConditional(S)
     if flag1:
         return (tree1,True)
+    tree2,flag2 = parseExpression(S)
+    if flag2:
+        return (tree2,True)
     return (None,False)
 
 # rule: conditional -> ifClauses | ifClauses ; term otherwise
@@ -448,7 +448,12 @@ def parseT0(S):
             if flag: return (tree,True)
         if len(S)==1: 
             # numeral    
-            if isNumeral(S[0]): return (eval(S[0]),True)
+            if isNumeral(S[0]): 
+                # if the numeral starts with 0 and numeral !=0
+                if len(S[0])>1 and S[0][0]=='0':
+                    return(eval(S[0][1:]),True)
+                else:
+                    return (eval(S[0]),True) 
             # identifier
             if isIdentifier(S[0]): return (S[0],True)
         # parse vector   
