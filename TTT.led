@@ -1,22 +1,22 @@
-program Tic Tac Toe
-J. Nelson Rushton, Texas Tech University
+
+Tic Tac Toe
+by J. Nelson Rushton, Texas Tech University
 July 12, 2014
 
 This is an LED program that defines a simple tic tac toe game to 
 run in the Easel enviornment.
 
-The game begins with an empty grid and `x to move. When an empty
-cell is clicked, the player whose turn it occupies that cell and 
-it becomes the other player's turn, until the game is over. When 
-the game is over a message is displayed giving the result of the 
-game. The player can press the restart button at any time to 
-restart the game.
+The game begins with an empty grid and player x to move. When an empty cell is clicked, the player whose turn it occupies that cell and it becomes the other player's turn, until the game is over. When the game is over a message is displayed giving the result of the  game. The player can press the restart button at any time to restart the game.
+
+
 ======================================================================
 DATA MODEL
+======================================================================
 
 The types *player*, *cell*, *move*, and *state* are defined as follows:
 
  *) A *player* is the symbol `x or the symbol `o.
+
  *) A *cell* is an integer in {1..9}. Cells represent squares on the 
     tic tac toe board as pictured below:
 
@@ -26,8 +26,9 @@ The types *player*, *cell*, *move*, and *state* are defined as follows:
      -----
      7|8|9
 
- *) A *move* is a pair (c, p) where c is a cell and p is a player. 
+ *) A *move* is a pair (c,p) where c is a cell and p is a player. 
     The move (c, p)represents a move by player p in cell c.
+
  *) A *state* is a set of moves, thought of as the set of moves made 
     so far in the game. In this case, the state of the game is also the 
     state of the program.
@@ -35,36 +36,44 @@ The types *player*, *cell*, *move*, and *state* are defined as follows:
 In this program, the variables p, c, and m will range over players, 
 cells, and moves, respectively.
 
+Additionally, the data model of EaselLED.py is used for images and displays.
+
+
 ======================================================================
 GAME RULES
+======================================================================
 
-This section defines the rules of tic-tac-toe in LED. 
+This section defines the rules of tic-tac-toe in LED, in terms of its initial state *init*, which moves are *possible* in each state, the *result* of each possible move in each state, and the conditions *gameOver* under which the game is over. 
+
+
+Since the state of the game is the set of moves that have been made, it begins as the empty set.
+
+/----------
+ init := {} 
+-----------/
 
 The *game board* is the set of all cells on the board:
-/---------------------
-  gameBoard := {1..9}
-----------------------/
 
-We say that player p *occupies* cell c if the pair (p,c) is a member 
-of Gamma, and that cell c is *occupied* if it is occupied by `x or by `o.
+/---------------------
+ gameBoard := {1..9}
+---------------------/
+
+Player p *occupies* cell c if the move (p,c) is a member of Gamma; and cell c is *occupied* if it is occupied by `x or by `o.
 
 /--------------------------------------------------
  occupies(p,c) iff (p,c) in Gamma
- occupied(c) iff occupies(`x,c) or occupies(`o,c)
+ occupied(c)   iff occupies(`x,c) or occupies(`o,c)
 ---------------------------------------------------/
 
-A *row* is a set of cells that form three in a row either horizontal-
-ly, vertically, or diagonally. Techincally, they should be called 
-'lines', but "three in a row" is an Anglo-American cultural idiom, 
-while "three in a line" is not.
+A *row* is a set of cells that form three in a row either horizontally, vertically, or diagonally. Techincally, they should be called 'lines', but "three in a row" is an Anglo-American cultural idiom, while "three in a line" is not.
 
-/--------------------------------------------
- rows := hRows union vRows union diagonals
-
+/------------------------------------------
  hRows := {{1,2,3},{4,5,6},{7,8,9}}
  vRows := {{1,4,7},{2,5,8},{3,6,9}}
  diagonals := {{1,5,9},{3,5,7}}
---------------------------------------------/
+
+ rows := hRows union vRows union diagonals
+-------------------------------------------/
 
 Player p has *three in a row* if he occupies all of the cells in 
 some row.
@@ -76,13 +85,13 @@ some row.
 
 The *board is full* if all the cells on the game board are occupied.
 
-/------------------------------------
+/----------------------------------
  boardFull iff
    all c in gameBoard: occupied(c)
--------------------------------------/
+-----------------------------------/
 
-The *game is over* if either the board is full, or one of the players 
-has three in a row.
+The game is over if either the board is full, or one of the players 
+has three in a row. In this case we may write *gameOver*.
 
 /------------------------------------------------- 
 gameOver iff
@@ -90,8 +99,7 @@ gameOver iff
 -------------------------------------------------/
 
 The *player to move* is `x if an even number of moves have been made, 
-and `o otherwise (where, as usual, an integer is even if it is divisible 
-by 2).
+and `o otherwise.
 
 /-----------------------
  playerToMove:=
@@ -101,170 +109,201 @@ by 2).
 even(n) iff n mod 2=0
 ------------------------/
 
-The move (c,p) is *possible* in Gamma if it is player p's turn, cell c 
-is not occupied, and the game is not over
+The move (c,p) is *possible* in Gamma if it is player p's turn, cell c is not occupied, and the game is not over
 
-/-----------------------------------------------
+/----------------------------------------------- 
 possible(c,p) iff 
-  (playerToMove=p) & ~occupied(c) & ~gameOver & insideCell(click,c)
+  playerToMove = p & 
+  ~occupied(c) & 
+  ~gameOver  & 
+   insideCell(click,c)
 ------------------------------------------------/
 
-Finally, if move m is possible in the current state Gamma, we write 
-result(m) for the state that results from making move m in state 
-Gamma. Since the game state is just the set of moves that have been 
-made, this is simple to define.
+If move m is possible in the current state Gamma, we write 
+*result(m)* for the state that results from making move m in state Gamma. Since the game state is just the set of moves that have been made, this is simple to define.
 
-/---------------------------
- result(m) := Gamma union set(m)
+/----------------------------
+ result(m) := Gamma union {m}
+------------------------------/
+
+
+======================================================================
+VIDEO OUTPUT
+======================================================================
+
+This section defines the *display* function, specifying the images to display on the screen in each state. The data model for this section can be found in EaselLED.py.
+
+
+A *grid* of four lines forms the tic tac toe playing area.  
+
+/----------------------------
+ L1 := ((200,100),(200,400))
+ L2 := ((300,100),(300,400))
+ L3 := ((100,200),(400,200))
+ L4 := ((100,300),(400,300))
+ grid := {L1,L2,L3,L4}
 -----------------------------/
 
-======================================================================
 
-======================================================================
+The default font size for displayed text in this program is 15.
 
-This section define *init*, *display* and *update* for Easel LED game engine
+/--------------
+fontSize :=15
+---------------/
 
-*init* is the initial state of the game.
+*centerX(c)* and *centerO(c)* are the x and y coordinates of the center of cell c, respectively.
 
-/----- init := {} -----/
+/-----------------------------------
+centerX(c):=150+100*((c-1) mod 3)
+centerO(c):=350-100*(floor((c-1)/3))
+------------------------------------/
 
- *update* is the game state resulting from the current game state and the most recent mouse click.
+
+playerInCell(c) is a display of an 'x' or an 'o' in cell c, or empty, depending on who occupies c in the current state. 
+
+/-----------------------------------------------
+ xImage(c) :=
+  ((centerX(c), centerO(c)), fontSize,<120>)
+  
+oImage(c) :=
+  ((centerX(c), centerO(c)), fontSize,<111>)
+
+playerInCell(c) :=
+    {xImage(c)} if (`x,c) in Gamma;  
+    {oImage(c)} if (`o,c) in Gamma; 
+    {}          otherwise
+------------------------------------------------/
+
+
+*playerImages* is the set of all images of x's and o's on the board in the current state.
+
+/-----------------------------------------------
+ playerImages:= 
+   playerInCell(1) union playerInCell(2) union 
+   playerInCell(3) union playerInCell(4) union 
+   playerInCell(5) union playerInCell(6) union 
+   playerInCell(7) union playerInCell(8) union 
+   playerInCell(9)
+------------------------------------------------/
+
+If the game is not over, *turnMessage* is a text in the upper left hand region of the game window indicating the player to move, either "play x's turn" or "play o's turn", 
+
+/-----------------------------------------------------
+playerXturn :=
+  <112,108,97,121,32,120,39,115,32,116,117,114,110>
+playerOturn :=
+  <112,108,97,121,32,111,39,115,32,116,117,114,110>
+
+turnMessage:= 
+   {((100,450),15,playerXturn)} if playerToMove=`x;
+   {((100,450),15,playerOturn)} if playerToMove=`o
+--------------------------------------------------------/
+
+
+The *play again button* consists of a rectangle around a "Play Again" text, displayed in the upper right region of the screen. 
 
 /-------------------------------------------------
-
-   update := 
-      init if gameOver & clickedPlayAgain;
-      result((playerToMove,1)) if possible(1,playerToMove) ;
-      result((playerToMove,2)) if possible(2,playerToMove);
-      result((playerToMove,3)) if possible(3,playerToMove);
-      result((playerToMove,4)) if possible(4,playerToMove) ;
-      result((playerToMove,5)) if possible(5,playerToMove) ;
-      result((playerToMove,6)) if possible(6,playerToMove) ;
-      result((playerToMove,7)) if possible(7,playerToMove) ;
-      result((playerToMove,8)) if possible(8,playerToMove) ;
-      result((playerToMove,9)) if possible(9,playerToMove) ;
-      Gamma otherwise
+ A1 := ((400,475),(500,475))
+ A2 := ((400,425),(500,425))
+ A3 := ((400,475),(400,425))
+ A4 := ((500,475),(500,425))
+ T1 := ((450, 450), 15,playAgainText)
+ playAgainText := 
+   <80,108,97,121,32,65,103,97,105,110>
+    
+ playAgainButton:={A1,A2,A3,A4,T1}
 --------------------------------------------------/
+
+
+If the game is over, *winnerMessage* is a message in the upper left telling the result of the game
+
+/--------------------------------------------------------------
+xWon := <120,32,119,111,110,32,116,104,101,32,103,97,109,101>
+
+oWon := <111,32,119,111,110,32,116,104,101,32,103,97,109,101>
+
+catWon:= 
+  <99,97,116,32,119,111,110,32,116,104,101,32,103,97,109,101>
+
+winnerMessage := 
+  {((100,450),15,xWon)} if threeInRow(`x);
+  {((100,450),15,oWon)} if threeInRow(`o);
+  {((100,450),15,catWon)} otherwise
+----------------------------------------------------------------/
+
 
 *display* is the screen display for the current game state
-/-------------------------------------------------
- display := gameOverDisplay if gameOver;
-            gameInPlayDisplay otherwise
---------------------------------------------------/
 
-/---
-insideCell(p,c) iff xInCell(p,c) & yInCell(p,c)
----/
+/--------------------------------------------------------------------
+ gameInPlayDisplay := 
+  grid union playerImages union turnMessage
 
-/- xInCell(p,c) iff XlowerBound(c)<xCoord(p) & xCoord(p)<XupperBound(c)-/
-/- yInCell(p,c) iff YlowerBound(c)<yCoord(p) & yCoord(p)<YupperBound(c)-/
+ gameOverDisplay := 
+   grid union 
+   playerImages union 
+   playAgainButton union 
+   winnerMessage
 
-/- XlowerBound(c):=100+100*((c-1) mod 3) -/
-/- XupperBound(c):= 200+100*((c-1) mod 3) -/
+ display := 
+   gameOverDisplay if gameOver;
+   gameInPlayDisplay otherwise
+---------------------------------------------------------------------/
 
-/- YlowerBound(c):= 300-100*(floor((c-1)/3)) -/
-/- YupperBound(c):= 400-100*(floor((c-1)/3)) -/
-
-The x and y coordinates of a point are its 1st and 2nd coordinates,
-respectively.
-
-/------------------
- xCoord(p) := p[1]
- yCoord(p) := p[2]
--------------------/
-
-/-------------------------------------------------
-  clickedPlayAgain iff 400 < xCoord(click) & xCoord(click) < 500 & yCoord(click)>425 & 725>yCoord(click)
---------------------------------------------------/
-
-
-/-------------------------------------------------
- gameOverDisplay := background union playerImages union playAgainButton union winnerMessage
- 
---------------------------------------------------/
-
-/-------------------------------------------------
- gameInPlayDisplay := background union playerImages union turnMessage
---------------------------------------------------/
-
-
-/-------------------------------------------------
-    L1 := ((100,100),(100,400))
-    L2 := ((100,400),(400,400))
-    L3 := ((400,400),(400,100))
-    L4 := ((400,100),(100,100))
-    L5 := ((200,100),(200,400))
-    L6 := ((300,100),(300,400))
-    L7 := ((100,200),(400,200))
-    L8 := ((100,300),(400,300))
---------------------------------------------------/
-
-/-------------------------------------------------
-    playAgain :=<80,108,97,121,32,65,103,97,105,110>
-    A1 := ((400,475),(500,475))
-    A2 := ((400,425),(500,425))
-    A3 := ((400,475),(400,425))
-    A4 := ((500,475),(500,425))
-    T1 := ((450, 450), 15,playAgain)
-    
---------------------------------------------------/
-
-/-------------------------------------------------
-background := {L1,L2,L3,L4,L5,L6,L7,L8}
---------------------------------------------------/
-
-
-/-------------------------------------------------
-playAgainButton:={A1,A2,A3,A4,T1}
---------------------------------------------------/
-
-
-/-------------------------------------------------
-playerImages:= playerInCell(1) union playerInCell(2) union playerInCell(3) union playerInCell(4) union playerInCell(5) union
-               playerInCell(6) union playerInCell(7) union playerInCell(8) union playerInCell(9)
-               
---------------------------------------------------/
-
-/-------------------------------------------------
-playerXturn :=<112,108,97,121,32,120,39,115,32,116,117,114,110>
-playerOturn :=<112,108,97,121,32,111,39,115,32,116,117,114,110>
-turnMessage:= {((100,450),15,playerXturn)} if playerToMove=`x;
-              {((100,450),15,playerOturn)} if playerToMove=`o
---------------------------------------------------/
-
-/-------------------------------------------------
-xWon := <120,32,119,111,110,32,116,104,101,32,103,97,109,101>
-oWon := <111,32,119,111,110,32,116,104,101,32,103,97,109,101>
-catWon:= <99,97,116,32,119,111,110,32,116,104,101,32,103,97,109,101>
-winnerMessage := {((100,450),15,xWon)} if threeInRow(`x);
-                 {((100,450),15,oWon)} if threeInRow(`o);
-                 {((100,450),15,catWon)} otherwise
---------------------------------------------------/
-
-/-------------------------------------------------
-playerX := <120>
-playerO :=<111>
-playerInCell(cell):={((playerXCoord(cell), playerOCoord(cell)), fontSize,playerX)} if (`x,cell) in Gamma;
-                    {((playerXCoord(cell), playerOCoord(cell)), fontSize,playerO)} if (`o,cell) in Gamma; 
-                    {} otherwise
---------------------------------------------------/
-
-/-------------------------------------------------
-playerXCoord(cell):=150+100*((cell-1) mod 3)
---------------------------------------------------/
-
-/-------------------------------------------------
-playerOCoord(cell):=350-100*(floor((cell-1)/3))
---------------------------------------------------/
-
-font size
-/-------------------------------------------------
-fontSize :=15
---------------------------------------------------/
-
-test data
-
-Gamma:={(`x,2),(`o,1)} 
-click:=(167,222)
 
 ======================================================================
+MOUSE INPUT
+======================================================================
+
+This section defines the program's response to mouse input. We being with a few helper functions. 
+
+If c is a cell, xMin(c), xMax(c), yMin(c), and yMax(c) denote the minimum and maximum x and y values of cell c; and the x and y coordinates of a point are its 1st and 2nd coordinates,respectively.
+
+
+/----------------------------------
+ xMin(c) := 100+100*((c-1) mod 3) 
+ xMax(c) := 200+100*((c-1) mod 3)
+ yMin(c):= 300-100*(floor((c-1)/3))
+ yMax(c):= 400-100*(floor((c-1)/3)) 
+
+ xCoord(p) := p[1]
+ yCoord(p) := p[2]
+------------------------------------/
+
+We write *insideCell(p,c)* if point p is inside cell c.
+
+/---------------------------------------------
+ xInCell(p,c) iff 
+   (xMin(c)<xCoord(p)) & (xCoord(p)< xMax(c))
+
+ yInCell(p,c) iff 
+   (yMin(c)<yCoord(p)) & (yCoord(p)< yMax(c))
+
+ insideCell(p,c) iff xInCell(p,c) & yInCell(p,c)
+------------------------------------------------/
+
+*clickedPlayAgain* means the most recent mouse click is inside the play again button.
+
+/-------------------------------------------
+  clickedPlayAgain iff 
+    400<xCoord(click) & xCoord(click)<500 & 
+    yCoord(click)>425 & 725>yCoord(click)
+---------------------------------------------/
+
+*update* is the game state resulting from the current game state and the most recent mouse click.
+
+/-----------------------------------------------------------
+ update := 
+   init                     if gameOver & clickedPlayAgain;
+   result((playerToMove,1)) if possible(1,playerToMove);
+   result((playerToMove,2)) if possible(2,playerToMove);
+   result((playerToMove,3)) if possible(3,playerToMove);
+   result((playerToMove,4)) if possible(4,playerToMove);
+   result((playerToMove,5)) if possible(5,playerToMove);
+   result((playerToMove,6)) if possible(6,playerToMove);
+   result((playerToMove,7)) if possible(7,playerToMove);
+   result((playerToMove,8)) if possible(8,playerToMove);
+   result((playerToMove,9)) if possible(9,playerToMove);
+   Gamma                    otherwise
+-------------------------------------------------------------/
+
+
