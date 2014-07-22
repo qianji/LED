@@ -207,7 +207,7 @@ def parseSomeAll(S):
         except ValueError:
             return (None,False)
     return (None,False)
-#rule S0  ->   term   infpred   term | identifier
+#rule S0  ->   term   infpred   term | identifier | consecutives
 InfpredS0 = ['=','<','>','<=','>=','in','subeq']
 def parseS0(S):
     if len(S)==0: return(None,False)
@@ -230,8 +230,46 @@ def parseS0(S):
     if S[len(S)-1] ==')':
         (tree,flag) = parseUserDefinedFun(S)
         if flag: return (tree,True)
+    if len(S)>=5:
+        (tree,flag) = parseConsecutives(S)
+        if flag: return (tree,True)    
     return (None,False)      
 
+# rule: consecutives -> consecutive | term < consecutive
+def parseConsecutives(S):
+    t1,f1 = parseConsecutive(S)
+    if f1:
+        return (t1,f1)
+    try:
+        i = S.index('<')
+        (t1,f1)=parseTerm(S[0:i])
+        (t2,f2)= parseConsecutives(S[i+1:])
+        if f1 and f2:
+            #return (('<',[t1]+t2[1]),True)
+            
+            return ( ('and', [ ('<',[t1,t2[1][0][1][0]]), t2]) , True )
+    except ValueError:
+        return(None,False)
+    return (None,False)  
+
+# rule: consecutive -> term < term < term
+def parseConsecutive(S):
+    if len(S)<5:
+        return (None,False)
+    try: 
+        # get the first '<'
+        i = S.index('<')
+        # get the second '<'
+        j = S[i+1:].index('<') +i+1
+        (t1,f1)=parseTerm(S[0:i])
+        (t2,f2)= parseTerm(S[i+1:j])
+        (t3,f3) = parseTerm(S[j+1:])
+        if f1 and f2 and f3: 
+            #return (('<',[t1,t2,t3]),True) 
+            return ( ('and', [ ('<',[t1,t2]), ('<',[t2,t3]) ]) , True )
+    except ValueError:
+        return (None,False)  
+    return (None,False)  
 # rule: term  ->   T4  | lambda  vars . term
 def parseTerm(S):
     t,f = parseT4(S)

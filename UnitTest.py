@@ -125,6 +125,11 @@ class ParserTest(unittest.TestCase):
         actural = expressionValues(expressions)
         expected = [True,False,False,True,True,False]
         self.assertEqual(expected,actural)
-       
+      
+        # test for consecutive less than
+        expressions = ['1<2<3','1<2<3<4','1<2<3<4<5<6','1<2<1','1<2<3<4<5<1']
+        actural = expressionValues(expressions)
+        expected = [True,True,True,False,False]
+        self.assertEqual(expected,actural) 
 if __name__ == '__main__':
     unittest.main()   
