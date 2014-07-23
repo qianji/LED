@@ -12,6 +12,7 @@ In this program, the variable E will vary over AST's.
 """
 import numbers, math
 from GlobalVars import Program 
+from builtins import isinstance
 def isNumber(E): return isinstance(E,numbers.Number)
 def isScalar(E): return isNumber(E) or isAtom(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
@@ -28,8 +29,8 @@ def val(E):
     if Op=='vector': return ('vector',Args)
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
-    if Op=='some'  : return valSome(Args)
-    if Op=='all'   : return valAll(Args)
+    #if Op=='some'  : return valSome(Args)
+    #if Op=='all'   : return valAll(Args)
     if Op in builtIns : return valBuiltIn(Op,Args)
     if (Op,len(Args)) in Program : return valDefined(Op,Args)
 
@@ -197,6 +198,163 @@ builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             '=':valEq, '<':valLess, '>':valGreater,'<=':valLesEq,'>=':valGreatEq,
             'and':valAnd,'or' :valOr,'~':valNot,'=>':valImplies,'<=>':valIff,
             'sub':valSub,
-            'in':valIn,'subeq':valSubeq,'union':valUnion,'nrsec':valNrsec,'\\':valSetSubtr,
-            'Pow':valPow,'choose':valChoose,'intRange':valIntRange}
+            'in':valIn,'subeq':valSubeq,'U':valUnion,'nrsec':valNrsec,'\\':valSetSubtr,
+            'Pow':valPow,'choose':valChoose,'intRange':valIntRange,'some':valSome,'all':valAll}
 
+# Added by Qianji
+"""
+Solution sets
+
+A *binding* is a set of pairs (x,v) where x is a variable and v is a term. If E is an expression and b a binding, we write E.b for the term obtained from E by substituting v for the free occurrences of x in E whenever (x,v) in b. 
+For example,  x+y+z+p.{(x,1), (y,3), (z,4)} is the term 1+3+4+p. 
+Binding b is a solution of sentence S if S.b is true. 
+For example, {(x,1)} is a solution of x^2 = 1 but {(x,5)} is not.
+
+Bindings b1 and b2 are *inconsistent* if there are pairs of the form (x,c1) and (x,c2) such that (x,c1) ∈  b1, (x,c2) ∈  b2, and the statement c1=c2 is false. 
+Two bindings that are not inconsistent are said to be consistent.
+
+The solution set of a sentence p, written S(p), is defined as follows, provided it can be computed by finitely applications of the following rules.
+
+1.If p is a false ground sentence, then S(p)is the empty set { }. 
+2.If p is a true ground sentence, then S(p) = { { } }. 
+3.If p is of the form x = c, where x is a variable and c a ground term, then S(p) = {{(x,c)}}.
+4.If p is of the form (x1,...,xn) = (c1,...,cn) where n>1, the xi's are distinct variables and the ci's are ground terms, then S(p) = {{(x1,c1),...,(xn,cn)}}.
+5.If p is of the form x in c, where x is a variable and c is a ground term with value {c1,...,cn}, then S(p) = {{(x,c1)},...,{(x,cn}}. 
+    Note that, by this definition, if c is the empty set the value of S(p) is { }. 
+6.If p is of the form p1 or p2,  then S(p) = S(p1) U S(p2).
+7.If p is of the form p1 & p2, then S(p) = { b1 U b2 | b1 ∈ S(p1), b2 ∈ S(p2.b1), b1 consistent with b2 }.
+
+The intuitive interpretation of the binding {(x1,c1),...,(xn,cn)} is x1=c1 &...&xn=cn. 
+The intuitive interpretation of the solution set {b1,...,bn} is I(b1) or ... or I(bn), where I(b) is the interpretation of b. 
+By this definition, the interpretation of the binding { } is true, the interpretation of the solution set { } is false, and the solution of the solution set { { } } is true.
+"""
+# AST -> bool
+# isGround(E) iff t is a ground term
+def isGround(E):
+    if not isinstance(E,tuple) :
+        if isNumber(E):
+            return True
+        if E in builtIns:
+            return True
+        if E in ['set','tuple','vector']:
+            return True
+        else:
+            return False
+    (Op,Args) = E
+    if isGround(Op):
+        return all(isGround(i) for i in Args)
+    return False
+
+# AST -> set(bindings)
+def solutionSet(E):
+    """if E is an AST of a sentence p, then solutionSet(E) is the solution set of p """
+    slonSet = []
+    solution = []
+    if isGround(E):
+        if val(E)==False:
+            return []
+        if val(E) == True:
+            return [[]]
+    else:
+        Op,Args = E
+        if Op=='=' and isGround(Args[1]):
+            if isinstance(Args[1],tuple) and val(Args[1])[0] =='tuple':
+                C = val(Args[1])[1]
+                if isinstance(Args[0],tuple) and Args[0][0]=='tuple':
+                    X = Args[0][1]
+                    if len(X)==len(C):
+                        solution = []
+                        for i in range(len(X)):
+                            solution.append((X[i],C[i]))
+                        slonSet.append(solution)
+                        return slonSet
+            else:
+                solution.append((Args[0],Args[1]))
+                slonSet.append(solution)
+                return slonSet
+        if Op =='in' and isGround(Args[1]):
+            if isinstance(Args[0],str):
+                x = Args[0]
+                if isinstance(Args[1],tuple) and val(Args[1])[0] =='set':
+                    C = val(Args[1])[1]
+                    for i in range(len(C)):
+                        solution = []
+                        solution.append((x,C[i]))
+                        slonSet.append(solution)
+                    return slonSet
+        if Op =='or':
+            p1 = Args[0]
+            p2 = Args[1]
+            Sp1 = solutionSet(p1)
+            Sp2 = solutionSet(p2)
+            return unionSlonSets(Sp1, Sp2)
+        
+        if Op =='and':
+            p1 = Args[0]
+            p2 = Args[1]
+            Sp1 = solutionSet(p1)
+            #Sp2 = solutionSet(p2)
+            slonSet = []
+            for i in range(len(Sp1)):
+                b1 = Sp1[i]
+                Sp2_b1 = solutionSet(subExpression(p2,b1))
+                for j in range(len(Sp2_b1)):
+                    b2 = Sp2_b1[j]
+                    if areConsistent(b1, b2):
+                        union = unionBindings(b1,b2)
+                        slonSet.append(union)
+            return slonSet
+                        
+                    
+"""
+ If E is an expression and b a binding, we write E.b for the term obtained from E by substituting v for the free occurrences of x in E whenever (x,v) in b. 
+ For example,  x+y+z+p.{(x,1), (y,3), (z,4)} is the term 1+3+4+p. 
+"""            
+# AST * list(tuple) -> AST
+def subExpression(E,b): 
+    params = [ i[0] for i in b]
+    vals = [val(i[1]) for i in b]
+    sub =subAll(vals,params,E)
+    #if val(sub)==True:
+    #    return sub
+    #return ('=',[1,0])
+    return sub
+#solution set * solution set -> solution set
+def unionSlonSets(Sp1,Sp2):
+    slonSet =[]
+    slonSet = Sp1.copy()
+    for i in range(len(Sp2)):
+        if not Sp2[i] in slonSet:
+            slonSet.append(Sp2[i])
+    return slonSet
+
+# binding * binding -> binding
+def unionBindings(b1,b2):
+    b=[]
+    b = b1.copy()
+    for i in range(len(b2)):
+        if not b2[i] in b:
+            b.append(b2[i])
+    return b
+#list(tuple) * list(tuple) -> bool
+# If b1 and b2 are bindings, areConsistent(b1,b2) iff b1 is consistent with b2
+def areConsistent(b1,b2):                
+    for i in range(len(b1)):
+        for j in range(len(b2)):
+            if(b1[0]==b2[0]):
+                if not val(b1[1]) == val(b2[1]):
+                    return False
+    return True
+
+#dot(t,b) is a Python expression whose value represents t.b. 
+def dot(t,b):
+    e = subExpression(t,b)
+    return val(e)
+
+#The value of {t|p} is ('set',[val(dot(t,b)) for b in SolutionSet(p)]).
+def valSetComp(t,p):
+    return ('set',[val(dot(t,b)) for b in solutionSet(p)])
+
+# The value of Union[p] T is ('set', [x for b in S(p) for x in val(dot(T,b))[1]]
+def valBigUnion(t,p):
+    return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])

@@ -90,7 +90,7 @@ the expression g-4 would evaluate to 8.
 
   range(m,n) :=
     {}                     if m>n;
-    {m} union range(m+1,n) otherwise
+    {m} U range(m+1,n) otherwise
 
 
 ---------------------------------------------------------------/

@@ -231,42 +231,63 @@ def parseS0(S):
         (tree,flag) = parseUserDefinedFun(S)
         if flag: return (tree,True)
     if len(S)>=5:
-        (tree,flag) = parseConsecutives(S)
-        if flag: return (tree,True)    
+        (tree,flag) = parseConsecutives(['<','<='],S)
+        if flag: return (tree,True)   
+        (tree,flag) = parseConsecutives(['>','>='],S)
+        if flag: return (tree,True)  
     return (None,False)      
 
-# rule: consecutives -> consecutive | term < consecutive
-def parseConsecutives(S):
-    t1,f1 = parseConsecutive(S)
+# operators = ['<','<=']
+# rule: consecutives -> consecutive | term op consecutive   op is one of the memeber in operators
+def parseConsecutives(operators,S):
+    #operators = ['<','<=']
+    connector = 'and'
+    if operators[0]=='U':
+        connector ='U'
+    t1,f1 = parseConsecutive(operators,S)
     if f1:
         return (t1,f1)
     try:
-        i = S.index('<')
+        #i = S.index('<')
+        i = firstIndex(operators,S)
+        if i==None:
+            return (None,False)        
         (t1,f1)=parseTerm(S[0:i])
-        (t2,f2)= parseConsecutives(S[i+1:])
+        (t2,f2)= parseConsecutives(operators,S[i+1:])
         if f1 and f2:
             #return (('<',[t1]+t2[1]),True)
             
-            return ( ('and', [ ('<',[t1,t2[1][0][1][0]]), t2]) , True )
+            return ( (connector, [ (S[i],[t1,t2[1][0][1][0]]), t2]) , True )
     except ValueError:
         return(None,False)
     return (None,False)  
 
 # rule: consecutive -> term < term < term
-def parseConsecutive(S):
+def parseConsecutive(operators,S):
+    #operators = ['<','=','<=']
+    connector = 'and'
+    if operators[0]=='U':
+        connector ='U'
     if len(S)<5:
         return (None,False)
     try: 
         # get the first '<'
-        i = S.index('<')
+        #i = S.index('<')
+        i = firstIndex(operators,S)
+        if i==None:
+            return (None,False)
         # get the second '<'
-        j = S[i+1:].index('<') +i+1
+        # j = S[i+1:].index('<') +i+1
+        j = firstIndex(operators,S[i+1:])
+        if j==None:
+            return (None,False)
+        j= j+i+1
         (t1,f1)=parseTerm(S[0:i])
         (t2,f2)= parseTerm(S[i+1:j])
         (t3,f3) = parseTerm(S[j+1:])
         if f1 and f2 and f3: 
             #return (('<',[t1,t2,t3]),True) 
-            return ( ('and', [ ('<',[t1,t2]), ('<',[t2,t3]) ]) , True )
+            return ( (connector, [ (S[i],[t1,t2]), (S[j],[t2,t3]) ]) , True )
     except ValueError:
         return (None,False)  
     return (None,False)  
@@ -319,7 +340,7 @@ def parseVar(S):
             return (S[0],True)
     return (None,False)     
 # rule: T4   ->  T3   |   T4 Infix4 T3
-InfixT4 = ['+','-','union','\\']
+InfixT4 = ['+','-','U','\\']
 def parseT4(S):
     for i in range(len(S)):
         for infix in InfixT4:
@@ -512,7 +533,9 @@ def parseT0(S):
         # parse atom
         (tree,flag) = parseAtom(S)
         if flag: return (tree,True)
-        
+        # parse consecutive unions
+        (tree,flag) = parseConsecutives(['U'],S)
+        if flag: return (tree,True)
     except IndexError:
         return(None,False) 
     return (None,False)
