@@ -13,6 +13,7 @@ In this program, the variable E will vary over AST's.
 import numbers, math
 from GlobalVars import Program 
 from builtins import isinstance
+from _functools import reduce
 def isNumber(E): return isinstance(E,numbers.Number)
 def isScalar(E): return isNumber(E) or isAtom(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
@@ -24,7 +25,7 @@ def val(E):
     if isScalar(E): return E
     if isinstance(E,str) and (E,0) in Program: return valDefined(E,[])
     (Op,X) = E
-    if Op in {'and','=>','some','all'}: Args=X  
+    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec'}: Args=X  
     else: Args = [val(E) for E in X]
     if Op=='vector': return ('vector',Args)
     if Op=='set'   : return ('set',Args)
@@ -33,25 +34,6 @@ def val(E):
     #if Op=='all'   : return valAll(Args)
     if Op in builtIns : return valBuiltIn(Op,Args)
     if (Op,len(Args)) in Program : return valDefined(Op,Args)
-
-# quantifiers
-def valSome(Args):
-    # The AST of some var  in  t : s  is ('some',[var, A, B]), where A and B are the respective AST's of t and s. 
-    # [var, A, B] = X
-    var,t,s = Args
-    for i in val(t)[1]:
-        if val(sub(i,var,s))==True:
-            return True
-    return False
-def valAll(Args):
-    # The AST of all var  in  t : s  is ('all',[var, A, B]), where A and B are the respective AST's of t and s. 
-    # [var, A, B] = X
-    var,t,s = Args
-    for i in val(t)[1]:
-        if not val(sub(i,var,s))==True:
-            return False
-    return True
-
     
 def valBuiltIn(Op,Args):
         F = builtIns[Op]
@@ -62,7 +44,6 @@ def valDefined(Op,Args):
         params,funBody = Program[F]
         groundBody = subAll(Args,params,funBody)
         return DefVal( groundBody)
-
 
 def DefVal(fbody):
     if not isinstance(fbody,tuple):
@@ -191,6 +172,54 @@ def valStar(X):
     if isNumber(X[0]) and isNumber(X[1]): return valMult(X)
     if isSet(X[0]) and isSet(X[1]): return valCrossProd(X)
 
+# quantifiers
+def valSome(Args):
+    # The AST of some var  in  t : s  is ('some',[var, A, B]), where A and B are the respective AST's of t and s. 
+    # [var, A, B] = X
+    var,t,s = Args
+    for i in val(t)[1]:
+        if val(sub(i,var,s))==True:
+            return True
+    return False
+def valAll(Args):
+    # The AST of all var  in  t : s  is ('all',[var, A, B]), where A and B are the respective AST's of t and s. 
+    # [var, A, B] = X
+    var,t,s = Args
+    for i in val(t)[1]:
+        if not val(sub(i,var,s))==True:
+            return False
+    return True
+
+# Big Operations
+
+#The value of {t|p} is ('set',[val(dot(t,b)) for b in SolutionSet(p)]).
+def valSetComp(Args):
+    t= Args[0]
+    p= Args[1]
+    return ('set',[val(dot(t,b)) for b in solutionSet(p)])
+
+# The value of Union[p] T is ('set', [x for b in S(p) for x in val(dot(T,b))[1]]
+def valBigUnion(Args):
+    t= Args[1]
+    p= Args[0]
+    return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])
+
+def valBigSum(Args):
+    t= Args[1]
+    p= Args[0]
+    return sum([val(dot(t,b)) for b in solutionSet(p)])
+
+from operator import mul
+def valBigProd(Args):
+    t= Args[1]
+    p= Args[0]
+    l = [val(dot(t,b)) for b in solutionSet(p)]
+    return reduce(mul, l)
+
+def valBigNrsec(Args):
+    t= Args[1]
+    p= Args[0]
+    return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])
 # builtIns is a dictionary of the functions that evaluate each built-in
 builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             '+1':valUnaryPlus, '-1':valUnaryMinus,
@@ -199,7 +228,8 @@ builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             'and':valAnd,'or' :valOr,'~':valNot,'=>':valImplies,'<=>':valIff,
             'sub':valSub,
             'in':valIn,'subeq':valSubeq,'U':valUnion,'nrsec':valNrsec,'\\':valSetSubtr,
-            'Pow':valPow,'choose':valChoose,'intRange':valIntRange,'some':valSome,'all':valAll}
+            'Pow':valPow,'choose':valChoose,'intRange':valIntRange,'some':valSome,'all':valAll,'setComp':valSetComp,
+            'Union':valBigUnion,'Sum':valBigSum,'Prod':valBigProd,'Nrsec':valBigNrsec}
 
 # Added by Qianji
 """
@@ -241,6 +271,7 @@ def isGround(E):
         else:
             return False
     (Op,Args) = E
+    if (Op,len(Args)) in Program : return True
     if isGround(Op):
         return all(isGround(i) for i in Args)
     return False
@@ -350,11 +381,3 @@ def areConsistent(b1,b2):
 def dot(t,b):
     e = subExpression(t,b)
     return val(e)
-
-#The value of {t|p} is ('set',[val(dot(t,b)) for b in SolutionSet(p)]).
-def valSetComp(t,p):
-    return ('set',[val(dot(t,b)) for b in solutionSet(p)])
-
-# The value of Union[p] T is ('set', [x for b in S(p) for x in val(dot(T,b))[1]]
-def valBigUnion(t,p):
-    return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])

@@ -94,6 +94,7 @@ This is a helper function for testing evaluater
 If L is a list of expressions, then expressionValues(L) is a list of values corresponds to L
 '''
 def expressionValues(L):
+    compile('test.led')
     values = []
     for e in L:
         e=tokens(e)[0]

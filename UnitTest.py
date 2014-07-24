@@ -131,14 +131,22 @@ class ParserTest(unittest.TestCase):
         actural = expressionValues(expressions)
         expected = [True,True,True,False,False]
         self.assertEqual(expected,actural) 
-        
-      
+    
         # test for consecutive greater than
         expressions = ['3>2>1','4>3>=3>2','6>=5>4>=3>=2','1>2>=3','1>3>3>=3']
         actural = expressionValues(expressions)
         expected = [True,True,True,False,False]
         self.assertEqual(expected,actural) 
         
+        # test for set comprehension 
+        expressions = ['{x|x in {1..9} & 1<x<3}',  '{x | x in {-2..2} & nonnegative(x)}' , '{x | x in {-2..2} & nonnegative(x) & even(x)}']
+        actural = expressionValues(expressions)
+        expected = [('set',[2]), ('set',[0,1,2]),('set',[0,2])]
+        self.assertEqual(expected,actural) 
+        
+        # test for Sum
+        
+        # test for
     def test_solutionSet(self):
         S = 'x in {1,2} U {3,4}'
         expected = [[('x', 1)], [('x', 2)], [('x', 3)], [('x', 4)]]
@@ -195,6 +203,6 @@ class ParserTest(unittest.TestCase):
         expression = parseExpression(t)[0]
         actural = solutionSet(expression)
         self.assertEqual(expected,actural) 
-
+            
 if __name__ == '__main__':
     unittest.main()   
