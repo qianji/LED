@@ -202,8 +202,11 @@ def valSetComp(Args):
 def valBigUnion(Args):
     t= Args[1]
     p= Args[0]
-    return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])
-
+    #return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])
+    slonSet = solutionSet(p)
+    d = [[x for x in val(dot(t,b))[1]] for b in solutionSet(p)]
+    return ('set',list(set(d[0]).union(*d)))
+    
 def valBigSum(Args):
     t= Args[1]
     p= Args[0]
@@ -219,7 +222,9 @@ def valBigProd(Args):
 def valBigNrsec(Args):
     t= Args[1]
     p= Args[0]
-    return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])
+    slonSet = solutionSet(p)
+    d = [[x for x in val(dot(t,b))[1]] for b in solutionSet(p)]
+    return ('set',list(set(d[0]).intersection(*d)))
 # builtIns is a dictionary of the functions that evaluate each built-in
 builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             '+1':valUnaryPlus, '-1':valUnaryMinus,

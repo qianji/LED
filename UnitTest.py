@@ -145,8 +145,25 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(expected,actural) 
         
         # test for Sum
+        expressions = ['Sum[i in {1..10} & even(i) ] i^2']
+        actural = expressionValues(expressions)
+        expected = [220]
+        self.assertEqual(expected,actural) 
         
-        # test for
+        # test for Nrsec
+        # g2 = x^2+4
+        expressions = ['Nrsec[x in {1..3}]{y|y in {1..x} & y<4}', 'Union[k in {1,2,3} & k<=2] {k+1}']
+        
+        actural = expressionValues(expressions)
+        expected = [('set',[1]),('set',[2,3])]
+        self.assertEqual(expected,actural) 
+        
+        # test for Union
+        expressions = ['Union[x in {1..3}]{y|y in {1..x} & y<4}']
+        actural = expressionValues(expressions)
+        expected = [('set',[1,2,3]),]
+        self.assertEqual(expected,actural) 
+        
     def test_solutionSet(self):
         S = 'x in {1,2} U {3,4}'
         expected = [[('x', 1)], [('x', 2)], [('x', 3)], [('x', 4)]]
