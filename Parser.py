@@ -6,6 +6,7 @@
 
 from Tokenizer import *
 from Evaluater import *
+from Utility import *
 '''
 This simple parser program parses the following grammar:
 
@@ -26,6 +27,96 @@ An *atom* is an identifier preceded by a backquote, such as `x and `o.
 # otherwise parse**(S) = (None,False).
 # Each rule is given right before the function definition
 '''
+'''
+string -> dict * bool
+If S is a string of the function definitions of funcDef or relDef defined in LED, then parseDfn(S) = (dict,True), where dict is a dictionary 
+otherwise parseDfn(S) = (None,False)
+For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
+{('f',1):(['x'],('^',['x',2])) , 
+('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
+'''
+'''
+# rule: Dfn -> funcDef | relDef
+'''
+def parseDfn(S):
+    program2,flag2 = parseFuncDef(S)
+    if flag2:
+        return (program2,True)
+    program1,flag1 = parseRelDef(S)
+    if flag1:
+        return (program1,True)
+    return (None,False) 
+
+'''
+string -> dict * bool
+If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
+otherwise parseFuncDef(S) = (None,False)
+For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
+{('f',1):(['x'],('^',['x',2])) , 
+('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
+#rule: funcDef -> identifier ( vars )  :=   funcBody
+'''
+def parseFuncDef(S):
+    program = {}
+    for i in range(len(S)):
+        if S[i]==':=':
+            t1,f1 = parseLHS(S[0:i])
+            if f1:
+                (fName,fParams)=parseLHS(S[0:i])[0]
+                paramNumber = len(fParams)
+                (t2,f2)= parseFuncBody(S[i+1:])
+                if f2: 
+                    #put the content in the dictionary
+                    program[(fName,paramNumber)] = (fParams,t2)
+                    return(program,True)    
+                else:
+                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                    print('cannot parse function definition left side: ',' '.join(S[0:i])) 
+    return (None,False)     
+
+# relDef -> identifier ( vars ) iff   sentence
+# duplicate with parseFuncDef. To be refactored soon
+def parseRelDef(S):
+    program = {}
+    for i in range(len(S)):
+        if S[i]=='iff':
+            t1,f1 = parseLHS(S[0:i])
+            if f1:
+                (fName,fParams)=parseLHS(S[0:i])[0]
+                paramNumber = len(fParams)
+                (t2,f2)= parseSentence(S[i+1:])
+                if f2: 
+                    #put the content in the dictionary
+                    program[(fName,paramNumber)] = (fParams,t2)
+                    return(program,True)    
+                else:
+                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                    print('cannot parse function definition left side: ',' '.join(S[0:i]))    
+    return (None,False) 
+
+'''
+list<str> -> (str * list<str>) * bool
+If S is a list of string that comply to the format of the left hand side of the function definition, 
+then parseLHS(S) = ((fName,fParams),True), where fname is a string and fParams is a list of strings
+otherwise, parseLHS(S) = (None,False)
+'''
+def parseLHS(S):
+    if len(S)==1 and isIdentifier(S[0]):
+        return ((S[0],[]),True)
+    if isIdentifier(S[0]) and S[1]=='(' and S[len(S)-1]==')':
+        fName = S[0] # the name of the function
+        # f()
+        if len(S)==3:
+            return ((fName,[]),True)
+        t,f = parseTerms(S[2:-1])
+        if f:
+            S = S[2:len(S)-1]
+            fParams = params(S)
+            return ((fName,fParams),True)
+    return (None,False)
+ 
 
 # rule: funcBody -> Expression | conditional
 def parseFuncBody(S):
@@ -661,162 +752,6 @@ def hasIdentifier(T):
             return True
     return False
 
-'''
-string -> dict * bool
-If S is a string of the function definitions of funcDef or relDef defined in LED, then parseDfn(S) = (dict,True), where dict is a dictionary 
-otherwise parseDfn(S) = (None,False)
-For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
-{('f',1):(['x'],('^',['x',2])) , 
-('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
-'''
-'''
-# rule: Dfn -> funcDef | relDef
-'''
-def parseDfn(S):
-    program2,flag2 = parseFuncDef(S)
-    if flag2:
-        return (program2,True)
-    program1,flag1 = parseRelDef(S)
-    if flag1:
-        return (program1,True)
-    return (None,False)  
-
-'''
-string -> dict * bool
-If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
-otherwise parseFuncDef(S) = (None,False)
-For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
-{('f',1):(['x'],('^',['x',2])) , 
-('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
-#rule: funcDef -> identifier ( vars )  :=   funcBody
-'''
-def parseFuncDef(S):
-    program = {}
-    for i in range(len(S)):
-        if S[i]==':=':
-            t1,f1 = parseLHS(S[0:i])
-            if f1:
-                (fName,fParams)=parseLHS(S[0:i])[0]
-                paramNumber = len(fParams)
-                (t2,f2)= parseFuncBody(S[i+1:])
-                if f2: 
-                    #put the content in the dictionary
-                    program[(fName,paramNumber)] = (fParams,t2)
-                    return(program,True)    
-                else:
-                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
-            else:
-                    print('cannot parse function definition left side: ',' '.join(S[0:i])) 
-    return (None,False)     
-
-# relDef -> identifier ( vars ) iff   sentence
-# duplicate with parseFuncDef. To be refactored soon
-def parseRelDef(S):
-    program = {}
-    for i in range(len(S)):
-        if S[i]=='iff':
-            t1,f1 = parseLHS(S[0:i])
-            if f1:
-                (fName,fParams)=parseLHS(S[0:i])[0]
-                paramNumber = len(fParams)
-                (t2,f2)= parseSentence(S[i+1:])
-                if f2: 
-                    #put the content in the dictionary
-                    program[(fName,paramNumber)] = (fParams,t2)
-                    return(program,True)    
-                else:
-                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
-            else:
-                    print('cannot parse function definition left side: ',' '.join(S[0:i]))    
-    return (None,False) 
-
-'''
-# string -> list< list<string> >
-# if S is a string of the program that has f1, f2, ... fn functions, then parseProgram(S)=([L1, L2, ... Ln],True), where L1... Ln 
-# are lists of corresponding function to f1, f2,... fn.
-'''
-def parseProgram(S):
-    allFunctions = []
-    separators = ['iff',':=']
-    lpI = 0
-    while len(S)>0:
-        # find the first iff or := in S
-        firstI = firstIndex(separators,S)
-        if firstI ==None:
-            allFunctions.append(S)
-            S=[]
-        else:
-            # find the second iff or := in S
-            secondI = firstIndex(separators,S[firstI+1:])
-            # if there is only one iff or :=
-            if secondI==None:
-                allFunctions.append(S)
-                S=[]
-            else:
-                # secondeI is the index-1 of the second iff or := in S
-                secondI += firstI
-                # if there are no '(' or ')'  in the function head
-                if not S[secondI] ==')':
-                    lpI =secondI+1
-                else:
-                    # search backward from secondI to find the first '('
-                    lpI = firstIndexBack('(',secondI,S)
-                # find the end of the first function definition
-                end = lpI -2 
-                eachFunc = S[:end+1]
-                allFunctions.append(eachFunc)
-                if end+1==0:
-                    S = []
-                else:
-                    S = S[end+1:]
-    return allFunctions
-
-'''
-# helper function
-# char * int * str -> int
-firstIndexBack(C, secondeI, S) searches backward from index of secondI of S to find the first C in S
-'''        
-def firstIndexBack(C,secondI,S):
-    for i in range(secondI,-1, -1):
-        if S[i]==C:
-            return i
-    return None
-
-'''
-# helper function
-# str * list<str> -> int
-# If Cs is a string and S is a list of string, firstIndex(Cs, S) is the first index of one of the member of Cs in S,
-# otherwise firstIndex(Cs, S) = None
-
-'''
-def firstIndex(Cs, S):
-    index = 0
-    for i in range(len(S)):
-        for C in Cs:
-            if(S[i]==C):
-                return i
-    return None
-
-'''
-list<str> -> (str * list<str>) * bool
-If S is a list of string that comply to the format of the left hand side of the function definition, 
-then parseLHS(S) = ((fName,fParams),True), where fname is a string and fParams is a list of strings
-otherwise, parseLHS(S) = (None,False)
-'''
-def parseLHS(S):
-    if len(S)==1 and isIdentifier(S[0]):
-        return ((S[0],[]),True)
-    if isIdentifier(S[0]) and S[1]=='(' and S[len(S)-1]==')':
-        fName = S[0] # the name of the function
-        # f()
-        if len(S)==3:
-            return ((fName,[]),True)
-        t,f = parseTerms(S[2:-1])
-        if f:
-            S = S[2:len(S)-1]
-            fParams = params(S)
-            return ((fName,fParams),True)
-    return (None,False)
 
 '''
 # helper function
@@ -835,173 +770,8 @@ def params(S):
 def definedFuns(P):
     return {Def[0] for Def in P}
 
-# helper function for removeComments
-# canPushHead(S,state) iff, in the current state S with the current stack stk,
-# stk+[S[0]] is the beginning of a token.
-def canPushHead(S,state):
-    if S==[]: return False
-    if state =='success': return False
-    if state == 'spec1' : return False
-    c=S[0]
-    if state == 'empty': 
-        return c == '/'
-    if state == 'slash': return c=='-'
-    if state == 'dash': return True
-    if state == 'white': return True
-    if state == 'lb': return c=='d' or white(c)
-    if state=='d': return 'e'
-    if state == 'e': return c=='f'
-    if state == 'f': return white(c) or c == 's'
-    if state == 's': return white(c)
-    if state =='w1' : return c=='d' or white(c)
-    if state == 'w2' : return 'w2'
-    return False
-'''
-# helper function for removeComments
-# If newStateHead(S,state) and c=S[0], the newState(state,c) is the
-# state resulting from pushing c onto the stack.
-'''
-def newStateHead(state,c):
-    if state == 'empty':
-        return 'slash' if c=='/' else \
-               'spec1'
-    if state == 'slash': return 'dash' if c=='-' else 'spec1'
-    if state == 'dash': return 'dash' if c=='-' else 'white' if white(c) else 'success'
-    if state =='white': return 'white' if white(c) else 'success'  
-    if state =='lb':return 'd' if c =='d' else 'lb' if white(c) else 'spec1'
-    if state == 'd': return 'e' if c=='e' else 'spec1'
-    if state == 'e': return 'f' if c=='f' else 'spec1'
-    if state == 'f': return 's' if c=='s' else 'w2' if white(c) else 'spec1'
-    if state == 's': return 'w2' if white(c) else 'spec1'
-    if state =='w2': return 'w2' if white(c) else 'success'
 
-'''
-# If S is a string, then firstFuncHead(S)=(s,e), where s is the first index of / 
-# followed by 1 or more - and e is the first non white space character after that
-# For example, if S = '/-- daf--/' then firstFuncHead(S) = (0,4)
-'''
-def firstFuncHead(S):
-    for i in range(len(S)):
-        if S[i]=='/':
-            state = 'empty'
-            temp = list(S[i:])
-            end = i
-            while canPushHead(temp,state):
-                state = newStateHead(state,temp[0])
-                temp.pop(0)
-                end= end +1
-            if state == 'success':
-                return (i,end-1)
-    return None
 
-'''
-# If S is a string, then firstFuncEnd(S)=(s,e), where s is the first index of - 
-# followed by 0 or more - and followed by /, e is the index of / above
-# For example, if S = '/-- daf--/' then firstFuncEnd(S) = (7,9)
-'''
-def firstFuncEnd(S):
-    for i in range(len(S)):
-        if S[i]=='-':
-            state = 'empty'
-            temp = list(S[i:])
-            end = i
-            while canPushEnd(temp,state):
-                state = newStateEnd(state,temp[0])
-                temp.pop(0)
-                end= end +1
-            if state == 'success':
-                return (i,end-1)
-    return None
-
-# helper function for removeComments
-# canPushEnd(S,state) iff, in the current state S with the current stack stk,
-# stk+[S[0]] is the beginning of a token.
-def canPushEnd(S,state):
-    if S==[]: return False
-    if state == 'spec1' : return False
-    c=S[0]
-    if state == 'empty': 
-        return c == '-'
-    if state == 'success': return False
-    if state == 'dash': return c=='-' or c=='/'
-    return False
-'''
-# helper function for removeComments
-# If canPushEnd(S,state) and c=S[0], the newState(state,c) is the
-# state resulting from pushing c onto the stack.
-'''
-def newStateEnd(state,c):
-    if state == 'empty':
-        return 'dash' if c=='-' else \
-               'spec1'
-    if state == 'dash': return 'dash' if c=='-' else 'success' if c=='/' else 'spec1'
-'''
-str -> str
-If S is a string, then removeComments(S) is a string that does not have any comments in S
-'''
-def removeComments(FS):
-    S = FS
-    allFunctionsText = ''
-    while len(S)>0:
-        # find the head of the function definition  /--
-        funcHead = firstFuncHead(S)
-        if funcHead == None:
-            S= []
-        else:
-            head = funcHead[1]
-            # find the end of the function definition  --/
-            funcEnd = firstFuncEnd(S[head:])
-            if funcEnd ==None:
-                S=[]
-            else:
-                end = funcEnd[0] + head
-                allFunctionsText += S[head: end] + '  '
-                S = S[end+1:]
-    return allFunctionsText
-'''
-# helper function for removeComments
-This is a function definition: {def f(x) = {x}+{x+2} }
-closeParentesis(S) finds the first } that does not match any { in S
-'''
-def closeParentesis(L,S):
-    R = '}'
-    if L=='{':
-        R = '}'
-    if L=='[':
-        R = ']'
-    if L =='(':
-        R = ')'
-    if L =='/':
-        R == '/'
-    S = list(S)
-    #create an empty stack S
-    index = 0
-    stack = []
-    while(len(S)>0):
-        # read a character ch
-        ch = S[0]
-        #If ch is an opening paren (of any kind), push it onto stack
-        if ch ==L:
-            stack.append(ch)
-        else:
-            # If  ch  is a closing paren }, look at the top of stack.
-            if ch==R:
-                #If stack is empty at this point, retrun index.
-                if len(stack)==0:
-                    return index
-                top = stack[-1]
-                # If the top of stack is the opening paren that corresponds to {, 
-                # then pop stack and continue, this paren matches OK.
-                if top==L:
-                    stack=stack[:-1]
-                    S=S[1:]
-                    index+=1
-                    continue
-                else:
-                    return index   
-        S=S[1:]
-        index+=1 
-    return None    
             
 # rule: vector -> <  >  | <  terms >
 def parseVector(S):

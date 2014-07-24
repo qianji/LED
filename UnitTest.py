@@ -104,7 +104,6 @@ class ParserTest(unittest.TestCase):
         actural = (('intRange', [('-1', [1]), 2]), True)
         expected =parseRange(S)
         self.assertEqual(expected,actural)
-
      
     def test_evaluater(self):  
         # test for operators of tuple  
