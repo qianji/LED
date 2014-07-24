@@ -72,7 +72,7 @@ A *row* is a set of cells that form three in a row either horizontally, vertical
  vRows := {{1,4,7},{2,5,8},{3,6,9}}
  diagonals := {{1,5,9},{3,5,7}}
 
- rows := hRows union vRows union diagonals
+ rows := hRows U vRows U diagonals
 -------------------------------------------/
 
 Player p has *three in a row* if he occupies all of the cells in 
@@ -123,7 +123,7 @@ If move m is possible in the current state Gamma, we write
 *result(m)* for the state that results from making move m in state Gamma. Since the game state is just the set of moves that have been made, this is simple to define.
 
 /----------------------------
- result(m) := Gamma union {m}
+ result(m) := Gamma U {m}
 ------------------------------/
 
 
@@ -179,10 +179,10 @@ playerInCell(c) :=
 
 /-----------------------------------------------
  playerImages:= 
-   playerInCell(1) union playerInCell(2) union 
-   playerInCell(3) union playerInCell(4) union 
-   playerInCell(5) union playerInCell(6) union 
-   playerInCell(7) union playerInCell(8) union 
+   playerInCell(1) U playerInCell(2) U 
+   playerInCell(3) U playerInCell(4) U 
+   playerInCell(5) U playerInCell(6) U 
+   playerInCell(7) U playerInCell(8) U 
    playerInCell(9)
 ------------------------------------------------/
 
@@ -236,12 +236,12 @@ winnerMessage :=
 
 /--------------------------------------------------------------------
  gameInPlayDisplay := 
-  grid union playerImages union turnMessage
+  grid U playerImages U turnMessage
 
  gameOverDisplay := 
-   grid union 
-   playerImages union 
-   playAgainButton union 
+   grid U 
+   playerImages U 
+   playAgainButton U 
    winnerMessage
 
  display := 
