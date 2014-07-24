@@ -388,14 +388,17 @@ def parseT2(S):
     return (None,False)    
 
 Bigop = ['Sum','Prod','Union','Nrsec']
-# rule: Bigop [  Stmt  ] T2  |  Bigop [ Stmt ] ^ [ Stmt ] T2
+# rule: Bigop [  Stmt  ] T2  |  Bigop [ Stmt ] ^ [ Stmt ] T2 | Bigop[var = term] ^ [term] T2
 def parseBigop(S):
     (tree,flag) = parseBigop1(S)
     if flag: 
         return (tree,True) 
     (tree,flag) = parseBigop2(S)
     if flag: 
-        return (tree,True)      
+        return (tree,True)  
+    (tree,flag) = parseBigop3(S)
+    if flag: 
+        return (tree,True)     
     return (None,False)  
 # rule: Bigop [  Stmt  ] T2
 def parseBigop1(S):
@@ -438,6 +441,41 @@ def parseBigop2(S):
             t3,f3 = parseT2(S[k+1:])
             if f1 and f2 and f3:
                 return ((S[0],[t1,t2,t3]),True)
+        except ValueError:
+            return (None,False)
+    return (None,False)
+
+# rule: Bigop[var = term] ^ [term] T2
+# Bigop[var = term1]^[term2] term3 should parse with the same AST as Bigop[var in {term1...term2}] term3
+def parseBigop3(S):
+    if len(S)<11:
+        return(None,False)
+    if S[0] in Bigop:
+        try:
+            # find the first '=', except will catch it if not found 
+            e = S.index('=')
+            f = S.index('^')
+            # starting from the next char of the first '[', find the first ']' that does not match '['
+            i = closeParentesis('[',S[2:])
+            if i==None:
+                return (None,False)
+            # add 2 to get the correct index
+            i=i+2
+            
+            j = i+1
+            k = closeParentesis('[',S[j+2:])
+            if k == None:
+                return (None,False)
+            k=k+2+j
+            t1a,f1a = parseVar(S[2:e])
+            t1b,f1b = parseTerm(S[e+1:i])
+            t2,f2 = parseTerm(S[j+2:k])
+            
+            t3,f3 = parseT2(S[k+1:])
+            if f1a and f1b and f2 and f3 :
+                # Bigop[var = term1]^[term2] term3 should parse with the same AST as Bigop[var in {term1...term2}] term3
+                ts = ('in',[t1a,('intRange',[t1b,t2]) ])
+                return ((S[0],[ts,t3]),True)
         except ValueError:
             return (None,False)
     return (None,False)
@@ -672,6 +710,7 @@ def parseFuncDef(S):
     return (None,False)     
 
 # relDef -> identifier ( vars ) iff   sentence
+# duplicate with parseFuncDef. To be refactored soon
 def parseRelDef(S):
     program = {}
     for i in range(len(S)):

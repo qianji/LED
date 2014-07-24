@@ -145,9 +145,9 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(expected,actural) 
         
         # test for Sum
-        expressions = ['Sum[i in {1..10} & even(i) ] i^2']
+        expressions = ['Sum[i in {1..10} & even(i) ] i^2', 'Sum[x=1]^[9]x', 'Sum[x=1]^[9](x+1)']
         actural = expressionValues(expressions)
-        expected = [220]
+        expected = [220,45,54]
         self.assertEqual(expected,actural) 
         
         # test for Nrsec
