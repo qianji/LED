@@ -36,17 +36,56 @@ For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represe
 ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
 '''
 '''
-# rule: Dfn -> funcDef | relDef
+# rule: Dfn -> funcDef | relDef | ifThenDef
 '''
 def parseDfn(S):
+    program3,flag3 = parseIfThenDef(S)
+    if flag3:
+        return (program3,True)
     program2,flag2 = parseFuncDef(S)
     if flag2:
         return (program2,True)
     program1,flag1 = parseRelDef(S)
     if flag1:
         return (program1,True)
+
     return (None,False) 
 
+'''
+string -> dict * bool
+If S is a string of the function definitions of IfThenDef defined in LED, then parseIfThenDef(S) = (dict,True), where dict is a dictionary 
+otherwise parseIfThenDef(S) = (None,False)
+For example, the following program If x=2 & y=3 then h := x+y  would be represented by the following dictionary: 
+{('h',0):([],('+',[2,3]))} 
+#rule: IfThenDef -> If sentence then funcDef
+'''
+def parseIfThenDef(S):
+    program = {}
+    try:
+        i = S.index('If')
+        j = S.index('then')
+    except ValueError:
+        return(None,False)
+    t1,f1 = parseSentence(S[i+1:j])
+    if f1:
+        (p,f2)= parseFuncDef(S[j+1:])
+        if f2: 
+            #put the content in the dictionary
+            key,value = p.popitem()
+            #sub the expression
+            #print(t1)
+            b = solutionSet(t1)
+            if b==None or len(b)==0:
+                expr = value[1]
+            else:
+                expr = subExpression(value[1],b[0])
+            program[key] = (value[0],expr)
+            return(program,True)    
+        else:
+            print('cannot parse then statement definition: ',' '.join(S[j+1:])) 
+    else:
+            print('cannot parse if statement definition: ',' '.join(S[i+1:j])) 
+    return (None,False)
 '''
 string -> dict * bool
 If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
@@ -200,9 +239,16 @@ def parseExpression(S):
         return (tree1,True)
     return (None,False)
 
-# rule: Sentence -> S6
+# rule: Sentence -> S6 | ( S6 )
 def parseSentence(S):
-    return parseS6(S)
+    tree2,flag2 = parseS6(S)
+    if flag2:
+        return (tree2,True)
+    if S[0]=='(' and S[-1]==')':
+        tree1,flag1 = parseS6(S[1:-1])
+        if flag1:
+            return (tree1,True)
+    return (None,False)
 
 # rule: S6 -> S5    |   S5 <=>  S6
 def parseS6(S):
@@ -256,7 +302,7 @@ def parseS3(S):
         return (tree,True)    
     return (None,False)
 
-#rule: S2  ->  S0   |  ~ S2
+#rule: S2  ->  S1   |  ~ S2
 def parseS2(S):
     if len(S)==0:
         return (None,False)
@@ -269,7 +315,7 @@ def parseS2(S):
         return (tree,True)    
     return (None,False)
 
-#rule S1 -> S0    |   some  var  in  term : S1    |   all   var  in  term : S1
+#rule S1 -> S0    |   some  var  in  term : S2    |   all   var  in  term : S2
 def parseS1(S):
     # some  var  in  term : S1 | all   var  in  term : S1
     (tree,flag) = parseSomeAll(S)
@@ -281,7 +327,7 @@ def parseS1(S):
         return (tree,True)    
     return (None,False)
 
-# rule: some  var  in  term : S1 | all   var  in  term : S1
+# rule: some  var  in  term : S2 | all   var  in  term : S2
 def parseSomeAll(S):
     separators = ['some','all']
     if len(S)<6:
@@ -292,7 +338,7 @@ def parseSomeAll(S):
             j = S.index(':')
             t1,f1 = parseVar(S[1])
             t2,f2 = parseTerm(S[i+1:j])
-            t3,f3 = parseS1(S[j+1:])
+            t3,f3 = parseS2(S[j+1:])
             if f1 and f2 and f3:
                 return ((S[0],[t1,t2,t3]),True)
         except ValueError:

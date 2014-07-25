@@ -93,20 +93,26 @@ def convertText(x):
 # play(F) executes the game defined in LED file F. 
 
 def play(F):
+    global images, Gamma, click
+    displayWindow = GraphWin("My game", displaySize()[0], displaySize()[1])
+#     c = displayWindow.getMouse()
+#     click = (c.getX(),displaySize()[1] - c.getY())
+    Program.update({('click',0):[[],('tuple',[0,0])]})
+    Program.update({('Gamma',0):[[],('set',[])]})
     compile(F+'.led')
     DefinedFuns = definedFuns(Program)
-    global images, Gamma, click
     # initialize the state in LED program memory
     Program.update({('Gamma',0):[[],val('init')]})
     images = [convert(x) for x in val('display')[1]]
     # Create a window to play in
-    displayWindow = GraphWin("My game", displaySize()[0], displaySize()[1])
     while(True):
         for x in images: x.draw(displayWindow)
         c = displayWindow.getMouse()
         click = (c.getX(),displaySize()[1] - c.getY())
         Program.update({('click',0):[[],('tuple',[click[0],click[1]])]})
-        Program.update({('Gamma',0):[[],val('update')]})
+        #print("state before click is ", Program[('newState',0)])
+        Program.update({('Gamma',0):[[],val('newState')]})
+        #print("state after click is ", Program[('newState',0)])
         for I in images: I.undraw()
         images = [convert(x) for x in val('display')[1]]
   

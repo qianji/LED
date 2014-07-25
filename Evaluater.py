@@ -22,11 +22,15 @@ def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
 def isAtom(x): return False if x==None else isinstance(x,str) and len(x)>1 and x[0]=='`'  
 # If E is an expression, val(E) is the value of E.
 def val(E):
+    #print(E)
+    #print("Program is ",Program)
     if isScalar(E): return E
     if isinstance(E,str) and (E,0) in Program: return valDefined(E,[])
     (Op,X) = E
     if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec'}: Args=X  
-    else: Args = [val(E) for E in X]
+    else: 
+        #print(E)
+        Args = [val(E) for E in X]
     if Op=='vector': return ('vector',Args)
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
@@ -37,6 +41,7 @@ def val(E):
     
 def valBuiltIn(Op,Args):
         F = builtIns[Op]
+        #print(F,Op,Args)
         return F(Args)
 
 def valDefined(Op,Args): 
@@ -47,6 +52,9 @@ def valDefined(Op,Args):
 
 def DefVal(fbody):
     if not isinstance(fbody,tuple):
+        # function body is a user defined constant
+        if (fbody,0) in Program:
+            return val(fbody)
         return fbody
     if not fbody[0] == 'cond' :
         return val(fbody)
@@ -202,10 +210,13 @@ def valSetComp(Args):
 def valBigUnion(Args):
     t= Args[1]
     p= Args[0]
-    #return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])
-    slonSet = solutionSet(p)
-    d = [[x for x in val(dot(t,b))[1]] for b in solutionSet(p)]
-    return ('set',list(set(d[0]).union(*d)))
+    return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])
+#     slonSet = solutionSet(p)
+#     #print(slonSet)
+#     d = [[x for x in val(dot(t,b))[1]] for b in solutionSet(p)]
+#     #print(Args)
+#     #print(d)
+#     return ('set',list(set(d[0]).union(*d)))
     
 def valBigSum(Args):
     t= Args[1]
@@ -267,17 +278,21 @@ By this definition, the interpretation of the binding { } is true, the interpret
 # isGround(E) iff t is a ground term
 def isGround(E):
     if not isinstance(E,tuple) :
-        if isNumber(E):
+        if isScalar(E):
             return True
         if E in builtIns:
             return True
         if E in ['set','tuple','vector']:
             return True
+        if (E,0) in Program:
+            return True
         else:
             return False
     (Op,Args) = E
-    if (Op,len(Args)) in Program : return True
-    if isGround(Op):
+    # special case for some/all var in term: sentence 
+    if Op in ['some','all']:
+        return True
+    if isGround(Op) or (Op,len(Args)) in Program:
         return all(isGround(i) for i in Args)
     return False
 
@@ -287,37 +302,40 @@ def solutionSet(E):
     slonSet = []
     solution = []
     if isGround(E):
+        #case 1
+        #print(E,"is a ground term")
         if val(E)==False:
             return []
+        #case 2
         if val(E) == True:
             return [[]]
     else:
         Op,Args = E
-        if Op=='=' and isGround(Args[1]):
-            if isinstance(Args[1],tuple) and val(Args[1])[0] =='tuple':
-                C = val(Args[1])[1]
-                if isinstance(Args[0],tuple) and Args[0][0]=='tuple':
-                    X = Args[0][1]
-                    if len(X)==len(C):
-                        solution = []
-                        for i in range(len(X)):
-                            solution.append((X[i],C[i]))
-                        slonSet.append(solution)
-                        return slonSet
-            else:
-                solution.append((Args[0],Args[1]))
+        #case 3
+        if Op =='=' and isinstance(Args[0],str) and isGround(Args[1]) :
+            solution.append((Args[0],val(Args[1])))
+            slonSet.append(solution)
+            return slonSet
+        # case 4
+        if Op=='=' and isinstance(Args[0],tuple) and Args[0][0]=='tuple' and isGround(Args[1]) and val(Args[1])[0]=='tuple':
+            C = val(Args[1])[1]
+            X = Args[0][1]
+            if len(X)==len(C):
+                solution = []
+                for i in range(len(X)):
+                    solution.append((X[i],C[i]))
                 slonSet.append(solution)
                 return slonSet
-        if Op =='in' and isGround(Args[1]):
-            if isinstance(Args[0],str):
-                x = Args[0]
-                if isinstance(Args[1],tuple) and val(Args[1])[0] =='set':
-                    C = val(Args[1])[1]
-                    for i in range(len(C)):
-                        solution = []
-                        solution.append((x,C[i]))
-                        slonSet.append(solution)
-                    return slonSet
+        #case 5    
+        if Op =='in' and isinstance(Args[0],str) and isGround(Args[1]) and val(Args[1])[0] =='set' :
+            x = Args[0]
+            C = val(Args[1])[1]
+            for i in range(len(C)):
+                solution = []
+                solution.append((x,C[i]))
+                slonSet.append(solution)
+            return slonSet
+        #case 6
         if Op =='or':
             p1 = Args[0]
             p2 = Args[1]
@@ -325,11 +343,14 @@ def solutionSet(E):
             Sp2 = solutionSet(p2)
             return unionSlonSets(Sp1, Sp2)
         
+        # case 7
         if Op =='and':
             p1 = Args[0]
             p2 = Args[1]
+#             if p1 ==('all', ['c', 'gameBoard', ('~', [('moveMade', ['c'])])]):
+#                 print(p1)
+            #print(p1)
             Sp1 = solutionSet(p1)
-            #Sp2 = solutionSet(p2)
             slonSet = []
             for i in range(len(Sp1)):
                 b1 = Sp1[i]
@@ -348,6 +369,7 @@ def solutionSet(E):
 """            
 # AST * list(tuple) -> AST
 def subExpression(E,b): 
+    if b==None: return E
     params = [ i[0] for i in b]
     vals = [val(i[1]) for i in b]
     sub =subAll(vals,params,E)

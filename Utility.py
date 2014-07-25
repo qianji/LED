@@ -73,3 +73,4 @@ def closeParentesis(L,S):
         S=S[1:]
         index+=1 
     return None    
+

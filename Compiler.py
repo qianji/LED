@@ -38,10 +38,12 @@ def compile(F):
         for i in range(len(funcs)):    
             p,programF = parseDfn(funcs[i])
             if programF:
+                print('parsing #',i,"function successfully",' '.join(funcs[i]))
                 Program.update(p)
             else:
-                print("Failed parsing #",i," program: ", ' '.join(funcs[i]))
+                print("Failed parsing #",i," function: ", ' '.join(funcs[i]))
                 return
+        print('Parsed program ', F, " successfully")
         # TODO:  Write program to log.txt instead of printing.
         # Separate the functions by line breaks.
     else:
@@ -102,8 +104,14 @@ def parseProgram(S):
                 else:
                     # search backward from secondI to find the first '('
                     lpI = firstIndexBack('(',secondI,S)
+                # try to find the first 'If' 
+                
+                ifIndex = firstIndexBack('If',lpI,S)
                 # find the end of the first function definition
-                end = lpI -2 
+                if ifIndex == None or ifIndex==0:
+                    end = lpI -2 
+                else:
+                    end = ifIndex-1
                 eachFunc = S[:end+1]
                 allFunctions.append(eachFunc)
                 if end+1==0:
