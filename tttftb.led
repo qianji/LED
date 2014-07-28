@@ -105,7 +105,7 @@ and `o otherwise.
 
 /-----------------------
  If ~gameOver then
-   playerToMove:=
+   currentPlayer:=
      `x if even(|Gamma|);
      `o otherwise
  
@@ -174,7 +174,7 @@ cellDisplay(c) :=
    Union[c in gameBoard] cellDisplay(c)
 ---------------------------------------/
 
-If the game is not over, *playerToMoveDisplay* is a text in the upper left hand region of the game window indicating the player to move, either "play x's turn" or "play o's turn", 
+If the game is not over, *currentPlayerDisplay* is a text in the upper left hand region of the game window indicating the player to move, either "play x's turn" or "play o's turn", 
 
 /-----------------------------------------------------
  playXsTurnStr :=
@@ -182,9 +182,9 @@ If the game is not over, *playerToMoveDisplay* is a text in the upper left hand 
  playOsTurnStr :=
    <112,108,97,121,32,111,39,115,32,116,117,114,110>
 
- playerToMoveDisplay:= 
-   {((100,450),15,playXsTurnStr)} if playerToMove=`x;
-   {((100,450),15,playOsTurnStr)} if playerToMove=`o
+ currentPlayerDisplay:= 
+   {((100,450),15,playXsTurnStr)} if currentPlayer=`x;
+   {((100,450),15,playOsTurnStr)} if currentPlayer=`o
 --------------------------------------------------------/
 
 
@@ -245,7 +245,7 @@ The *display* is the screen display for the current game state. The grid, cell d
    gridDisplay  U cellDisplays  U restartButton 
 
  gameInPlayDisplay := 
-   alwaysDisplay U playerToMoveDisplay
+   alwaysDisplay U currentPlayerDisplay
 
  gameOverDisplay := 
    alwaysDisplay U gameResultDisplay
@@ -294,40 +294,20 @@ clicked(c) means that cell c has been clicked.
    yCoord(click)>425 & yCoord(click)<725
 ---------------------------------------------/
 
-*moveMade(c)* means that cell c has been clicked and the player to move may legally move there. 
-
-/---------------------------------------------
- moveMade(c) iff clicked(c) & legalToMoveIn(c)
-----------------------------------------------/
-
-If a move is made in cell c and p is the player to move, the new state will be Gamma U {(p,c)}.
-
-/-------------------------------------------------
- If c in cells & moveMade(c) & p=playerToMove then
-   newState := Gamma U {(p,c)} 
---------------------------------------------------/        
-
-If the restart button is clicked, then the new state will be init
-
-/----------------------
- If restartClicked then 
-   newState := init 
------------------------/
-
-If no move is made in any cell, and the restart button is not clicked, then the new state will be Gamma.
+*moveMade(c)* means that cell c has been clicked and the player to move may legally move there. *movesMade* is the set of all moves made by the most recent mouse click, which will either be a singleton or empty.
 
 /-------------------------------------------------------------
-If (all c in gameBoard: ~moveMade(c)) & ~restartClicked then
-  newState := Gamma
----------------------------------------------------------------/
+ moveMadeIn(c) iff clicked(c) & legalToMoveIn(c)
 
-/-------------------------------------------------------------
-player := { (p,c) | p in {`x,`o} & c in cells & moveMade(c) & p=playerToMove }
+ movesMade := {(currentPlayer,c) | c in cells & moveMadeIn(c)}
+--------------------------------------------------------------/
+
+
+/---------------------------------------
 newState := 
-			init if restartClicked;
-			Gamma if (all c in gameBoard: ~moveMade(c)) & ~restartClicked;
-			Gamma U player otherwise
----------------------------------------------------------------/
+  init               if restartClicked;
+  Gamma U movesMade  otherwise
+----------------------------------------/
 
 
 
