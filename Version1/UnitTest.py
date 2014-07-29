@@ -160,7 +160,7 @@ class ParserTest(unittest.TestCase):
         # test for Union
         expressions = ['Union[x in {1..3}]{y|y in {1..x} & y<4}']
         actural = expressionValues(expressions)
-        expected = [('set',[1,2,3]),]
+        expected = [('set',[1, 1, 2, 1, 2, 3])]
         self.assertEqual(expected,actural) 
         
     def test_solutionSet(self):
