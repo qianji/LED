@@ -50,7 +50,7 @@ def run(F=''):
             if eFlag:
                 tree, tFlag = parseExpression(expression)
                 if tFlag:
-                    print(prettyString(val(tree)))
+                    print(prettyString(tree.val()))
                     print()
                 else:
                     print('Cannot parse the tree.')
@@ -94,11 +94,13 @@ This is a helper function for testing evaluater
 If L is a list of expressions, then expressionValues(L) is a list of values corresponds to L
 '''
 def expressionValues(L):
-    compile('test.led')
+    #compile('test.led')
     values = []
     for e in L:
         e=tokens(e)[0]
-        v = val(parseExpression(e)[0])
+        #v = val(parseExpression(e)[0])
+        tree = parseExpression(e)[0]
+        v = tree.val()
         values.append(v)
     return values
 '''

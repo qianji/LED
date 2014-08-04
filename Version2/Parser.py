@@ -194,7 +194,7 @@ def parseIfClauses(S):
             (t1,f1)=parseIfClause(S[0:i])
             (t2,f2)= parseIfClauses(S[i+1:])
             if f1 and f2: 
-                if(isinstance(t2,tuple) and t2[0]=='cond'):
+                if(isinstance(t2.tree,list) and t2[0]=='cond'):
                     return (('cond',[t1]+t2[1]),True) 
                 else:
                     return (('cond',[t1,t2]),True)
@@ -257,7 +257,7 @@ def parseS6(S):
             (t1,f1)=parseS5(S[0:i])
             (t2,f2)= parseS6(S[i+1:])
             if f1 and f2: 
-                return (('<=>',[t1,t2]),True) 
+                return (AST('<=>',[t1,t2]),True) 
     (tree,flag) = parseS5(S)
     if flag: 
         return (tree,True)    
@@ -270,7 +270,7 @@ def parseS5(S):
             (t1,f1)=parseS4(S[0:i])
             (t2,f2)= parseS5(S[i+1:])
             if f1 and f2: 
-                return (('=>',[t1,t2]),True) 
+                return (AST('=>',[t1,t2]),True) 
     (tree,flag) = parseS4(S)
     if flag: 
         return (tree,True)    
@@ -283,7 +283,7 @@ def parseS4(S):
             (t1,f1)=parseS4(S[0:i])
             (t2,f2)= parseS3(S[i+1:])
             if f1 and f2: 
-                return (('or',[t1,t2]),True) 
+                return (AST('or',[t1,t2]),True) 
     (tree,flag) = parseS3(S)
     if flag: 
         return (tree,True)    
@@ -296,7 +296,7 @@ def parseS3(S):
             (t1,f1)=parseS3(S[0:i])
             (t2,f2)= parseS2(S[i+1:])
             if f1 and f2: 
-                return (('and',[t1,t2]),True) 
+                return (AST('and',[t1,t2]),True) 
     (tree,flag) = parseS2(S)
     if flag: 
         return (tree,True)    
@@ -309,7 +309,7 @@ def parseS2(S):
     if S[0]=='~':
         (t1,f1)= parseS2(S[1:])
         if f1: 
-            return (('~',[t1]),True) 
+            return (AST('~',[t1]),True) 
     (tree,flag) = parseS1(S)
     if flag: 
         return (tree,True)    
@@ -340,7 +340,7 @@ def parseSomeAll(S):
             t2,f2 = parseTerm(S[i+1:j])
             t3,f3 = parseS2(S[j+1:])
             if f1 and f2 and f3:
-                return ((S[0],[t1,t2,t3]),True)
+                return (AST(S[0],[t1,t2,t3]),True)
         except ValueError:
             return (None,False)
     return (None,False)
@@ -351,14 +351,14 @@ def parseS0(S):
     # parse identifier
     if len(S)==1:
         if isIdentifier(S[0]):
-            return (S[0],True)
+            return (AST(S[0]),True)
     for i in range(len(S)):
         for infpred in InfpredS0:
             if S[i]==infpred:
                 (t1,f1)=parseTerm(S[0:i])
                 (t2,f2)= parseTerm(S[i+1:])
                 if f1 and f2: 
-                    return ((infpred,[t1,t2]),True)    
+                    return (AST(infpred,[t1,t2]),True)    
     # (Sentence)
     if S[0]=='(' and S[len(S)-1]==')':
         (tree,flag)=parseSentence(S[1:len(S)-1])
@@ -391,10 +391,9 @@ def parseConsecutives(operators,S):
             return (None,False)        
         (t1,f1)=parseTerm(S[0:i])
         (t2,f2)= parseConsecutives(operators,S[i+1:])
-        if f1 and f2:
-            #return (('<',[t1]+t2[1]),True)
-            
-            return ( (connector, [ (S[i],[t1,t2[1][0][1][0]]), t2]) , True )
+        if f1 and f2:            
+            #return ( AST(connector, [ (S[i],[t1,t2[1][0][1][0]]), t2]) , True )
+            return ( AST(connector, [ AST (S[i],[t1,(t2.args()[0]).args()[0]]) , t2]) , True )
     except ValueError:
         return(None,False)
     return (None,False)  
@@ -424,7 +423,7 @@ def parseConsecutive(operators,S):
         (t3,f3) = parseTerm(S[j+1:])
         if f1 and f2 and f3: 
             #return (('<',[t1,t2,t3]),True) 
-            return ( (connector, [ (S[i],[t1,t2]), (S[j],[t2,t3]) ]) , True )
+            return ( AST(connector, [ AST(S[i],[t1,t2]) , AST( S[j],[t2,t3] ) ]) , True )
     except ValueError:
         return (None,False)  
     return (None,False)  
@@ -451,10 +450,10 @@ def parseLambda(S):
         (t1,f1)=parseVars(S[1:i])
         (t2,f2)= parseTerm(S[i+1:])
         if f1 and f2: 
-            if isinstance(t1,tuple) and t1[0]=='cstack':
-                return (('lambda',[t1[1],t2]))
+            if isinstance(t1.tree,list) and t1.op()=='cstack':
+                return (AST('lambda',[t1.args(),t2]))
             else:
-                return (('lambda',[[t1],t2]),True) 
+                return (AST('lambda',[[t1],t2]),True) 
     return (None,False)
 # rule: vars -> var | var vars        
 def parseVars(S):
@@ -465,16 +464,16 @@ def parseVars(S):
     (t1,f1)=parseVar(S[0])
     (t2,f2)= parseVars(S[1:])
     if f1 and f2: 
-        if(isinstance(t2,tuple) and t2[0]=='cstack'):
-            return (('cstack',[t1]+t2[1]),True) 
+        if(isinstance(t2.tree,list) and t2.op()=='cstack'):
+            return (AST('cstack',[t1]+t2.args()),True) 
         else:
-            return (('cstack',[t1,t2]),True)
+            return (AST('cstack',[t1,t2]),True)
     return (None,False)
 # rule: var
 def parseVar(S):
     if len(S)==1:
         if isIdentifier(S):
-            return (S[0],True)
+            return (AST(S[0]),True)
     return (None,False)     
 # rule: T4   ->  T3   |   T4 Infix4 T3
 InfixT4 = ['+','-','U','\\']
@@ -485,7 +484,7 @@ def parseT4(S):
                 (t1,f1)=parseT4(S[0:i])
                 (t2,f2)= parseT3(S[i+1:])
                 if f1 and f2: 
-                    return ((infix,[t1,t2]),True) 
+                    return (AST(infix,[t1,t2]),True) 
     (tree,flag) = parseT3(S)
     if flag: 
         return (tree,True)    
@@ -500,7 +499,7 @@ def parseT3(S):
                 (t1,f1)=parseT3(S[0:i])
                 (t2,f2)= parseT2(S[i+1:])
                 if f1 and f2: 
-                    return ((infix,[t1,t2]),True) 
+                    return (AST(infix,[t1,t2]),True) 
     (tree,flag) = parseT2(S)
     if flag: 
         return (tree,True)    
@@ -515,7 +514,7 @@ def parseT2(S):
         if S[0]==prefix:
             (t,f)= parseT2(S[1:])
             if f: 
-                return ((prefix+'1',[t]),True) 
+                return (AST(prefix+'1',[t]),True) 
     (tree,flag) = parseT1(S)
     if flag: 
         return (tree,True)   
@@ -551,7 +550,7 @@ def parseBigop1(S):
             t1,f1 = parseSentence(S[2:i])
             t2,f2 = parseT2(S[i+1:])
             if f1 and f2:
-                return ((S[0],[t1,t2]),True)
+                return (AST(S[0],[t1,t2]),True)
         except ValueError:
             return (None,False)
     return (None,False)
@@ -577,7 +576,7 @@ def parseBigop2(S):
             t2,f2 = parseSentence(S[j+2:k])
             t3,f3 = parseT2(S[k+1:])
             if f1 and f2 and f3:
-                return ((S[0],[t1,t2,t3]),True)
+                return (AST(S[0],[t1,t2,t3]),True)
         except ValueError:
             return (None,False)
     return (None,False)
@@ -611,8 +610,8 @@ def parseBigop3(S):
             t3,f3 = parseT2(S[k+1:])
             if f1a and f1b and f2 and f3 :
                 # Bigop[var = term1]^[term2] term3 should parse with the same AST as Bigop[var in {term1...term2}] term3
-                ts = ('in',[t1a,('intRange',[t1b,t2]) ])
-                return ((S[0],[ts,t3]),True)
+                ts = AST('in',[t1a,AST('intRange',[t1b,t2]) ])
+                return (AST(S[0],[ts,t3]),True)
         except ValueError:
             return (None,False)
     return (None,False)
@@ -631,7 +630,7 @@ def parseT1(S):
             t1,f1 = parseT1(S[:lb])
             t2,f2 = parseTerm(S[lb+1:len(S)-1])
             if f1 and f2:
-                return (('sub',[t1,t2]),True)
+                return (AST('sub',[t1,t2]),True)
     # T0 ^ T2
     for i in range(len(S)):
         for infix in InfixT1:
@@ -639,7 +638,7 @@ def parseT1(S):
                 (t1,f1)=parseT0(S[0:i])
                 (t2,f2)= parseT2(S[i+1:])
                 if f1 and f2: 
-                    return ((infix,[t1,t2]),True) 
+                    return (AST(infix,[t1,t2]),True) 
     # T0
     (tree,flag) = parseT0(S)
     if flag: 
@@ -659,23 +658,23 @@ def parseT0(S):
         # |term|
         if S[0]=='|' and S[len(S)-1]=='|':
             (tree,flag)=parseTerm(S[1:len(S)-1])
-            if flag: return (('pipes',[tree]),True)        
+            if flag: return (AST('pipes',[tree]),True)        
         # floor ( term )
         if S[0]=='floor' and S[1]=='(' and S[len(S)-1]==')':
             (tree,flag)=parseTerm(S[2:len(S)-1])
-            if flag: return (('floor',[tree]),True)   
+            if flag: return (AST('floor',[tree]),True)   
         # ceil ( term )
         if S[0]=='ceil' and S[1]=='(' and S[len(S)-1]==')':
             (tree,flag)=parseTerm(S[2:len(S)-1])
-            if flag: return (('ceil',[tree]),True)
+            if flag: return (AST('ceil',[tree]),True)
         # Pow(vector)
         if S[0]=='Pow' and S[1]=='(' and S[len(S)-1]==')':
             (tree,flag)=parseVector(S[2:len(S)-1])
-            if flag: return (('Pow',[tree]),True)
+            if flag: return (AST('Pow',[tree]),True)
         # choose(vector)
         if S[0]=='choose' and S[1]=='(' and S[len(S)-1]==')':
             (tree,flag)=parseVector(S[2:len(S)-1])
-            if flag: return (('choose',[tree]),True)
+            if flag: return (AST('choose',[tree]),True)
         # prefun (terms)
         if S[len(S)-1] ==')':
             (tree,flag) = parseUserDefinedFun(S)
@@ -685,11 +684,11 @@ def parseT0(S):
             if isNumeral(S[0]): 
                 # if the numeral starts with 0 and numeral !=0
                 if len(S[0])>1 and S[0][0]=='0':
-                    return(eval(S[0][1:]),True)
+                    return(AST(eval(S[0][1:])),True)
                 else:
-                    return (eval(S[0]),True) 
+                    return (AST(eval(S[0])),True) 
             # identifier
-            if isIdentifier(S[0]): return (S[0],True)
+            if isIdentifier(S[0]): return (AST(S[0]),True)
         # parse vector   
         (tree,flag) = parseVector(S)
         if flag: return (tree,True)
@@ -720,7 +719,7 @@ def parseAtom(S):
     if len(S)==1:
         if len(S[0])>1:
             if S[0][0]=='`' and isIdentifier(S[0][1:]):
-                return(S[0],True)
+                return(AST(S[0]),True)
     return (None,False)
 # rule: T0 -> prefun ( terms )
 def parseUserDefinedFun(S):
@@ -731,10 +730,10 @@ def parseUserDefinedFun(S):
             (t1,f1)=parsePrefun(S[0:i])
             (t2,f2)= parseTerms(S[i+1:len(S)-1])
             if f1 and f2: 
-                if(isinstance(t2,tuple) and t2[0]=='cstack'):
-                    return ((t1,t2[1]),True) 
+                if(isinstance(t2.tree,list) and t2.op()=='cstack'):
+                    return (AST(t1,t2.args()),True) 
                 else:
-                    return ((t1,[t2]),True)
+                    return (AST(t1,[t2]),True)
     except ValueError:
         return(None,False)         
     return (None,False)
@@ -743,7 +742,7 @@ def parseUserDefinedFun(S):
 def parsePrefun(S):
     if(len(S)==1):
         if isIdentifier(S[0]):
-            return (S[0],True)
+            return (AST(S[0]),True)
     return (None,False)
 
 # rule: terms -> term | term , terms
@@ -753,10 +752,10 @@ def parseTerms(S):
             (t1,f1)=parseTerm(S[0:i])
             (t2,f2)= parseTerms(S[i+1:])
             if f1 and f2: 
-                if(isinstance(t2,tuple) and t2[0]=='cstack'):
-                    return (('cstack',[t1]+t2[1]),True) 
+                if(isinstance(t2.tree,list) and t2.op()=='cstack'):
+                    return (AST('cstack',[t1]+t2.args()),True) 
                 else:
-                    return (('cstack',[t1,t2]),True)
+                    return (AST('cstack',[t1,t2]),True)
     (tree,flag) = parseTerm(S)
     if flag: 
         return (tree,True)    
@@ -826,15 +825,15 @@ def parseVector(S):
     # < >
     if len(S)==2:
         if (S[0]=='<' and S[1]=='>'):
-            return (('vector',[]),True)
+            return (AST('vector',[]),True)
     # <term>
     if S[0]=='<' and S[len(S)-1]=='>':
         (tree,flag)=parseTerms(S[1:len(S)-1])
         if flag: 
-            if(isinstance(tree,tuple) and tree[0]=='cstack'):
-                return (('vector',tree[1]),True)
+            if(isinstance(tree.tree,list) and tree.op()=='cstack'):
+                return (AST('vector',tree.args()),True)
             else:
-                return(('vector',[tree]),True)
+                return(AST('vector',[tree]),True)
  
     return (None,False)
     
@@ -845,15 +844,15 @@ def parseSet(S):
     # {}
     if len(S)==2:
         if (S[0]=='{' and S[1]=='}'):
-            return (('set',[]),True)
+            return (AST('set',[]),True)
     # {term}
     if S[0]=='{' and S[len(S)-1]=='}':
         (tree,flag)=parseTerms(S[1:len(S)-1])
         if flag: 
-            if(isinstance(tree,tuple) and tree[0]=='cstack'):
-                return (('set',tree[1]),True)
+            if(isinstance(tree.tree,list) and tree.op()=='cstack'):
+                return (AST('set',tree.args()),True)
             else:
-                return(('set',[tree]),True)
+                return(AST('set',[tree]),True)
  
     return (None,False)
 
@@ -866,10 +865,10 @@ def parseTuple(S):
     if S[0]=='(' and S[len(S)-1]==')':
         (tree,flag)=parseTerms(S[1:len(S)-1])
         if flag: 
-            if(isinstance(tree,tuple) and tree[0]=='cstack'):
-                return (('tuple',tree[1]),True)
+            if(isinstance(tree.tree,list) and tree.op()=='cstack'):
+                return (AST('tuple',tree.args()),True)
             else:
-                return(('tuple',[tree]),True)
+                return(AST('tuple',[tree]),True)
  
     return (None,False)
 
@@ -887,7 +886,7 @@ def parseRange(S):
         (t1,f1)= parseTerm(S[1:i])
         (t2,f2)=parseTerm(S[i+1:-1])
         if f1 and f2: 
-            return(('intRange',[t1,t2]),True)
+            return(AST('intRange',[t1,t2]),True)
     return (None,False)
 
 # rule: T0 -> { term pipe Stmt }
@@ -904,7 +903,7 @@ def parseTermPipeStmt(S):
         (t1,f1)= parseTerm(S[1:i])
         (t2,f2)=parseSentence(S[i+1:-1])
         if f1 and f2: 
-            return(('setComp',[t1,t2]),True)
+            return(AST('setComp',[t1,t2]),True)
     return (None,False)
 #print(parseTerms(tokens('2+2,3,x2')[0]))
 #print(isIdentifier('2'))

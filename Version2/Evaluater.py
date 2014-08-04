@@ -14,16 +14,74 @@ import numbers, math
 from GlobalVars import Program 
 from builtins import isinstance
 from _functools import reduce
+
+class AST:
+    def __init__(self,E,args=[]):
+        self.tree = None
+        if len(args)==0:
+            if isAtom(E):
+                self.tree = E
+        else:
+            self.tree = [E]+args
+    def isAtom(self):
+        return isAtom(self.tree)
+    def isSet(self):
+        return isSet(self.tree)
+    def isTuple(self):
+        return isTuple(self.tree)
+    def isVector(self):
+        return isVector(self.tree)
+    def op(self):
+        if not isAtom(self.tree):
+            return self.tree[0]
+        return self.tree
+
+    def args(self):
+        if not isAtom(self.tree):
+            return self.tree[1:]
+        return []
+
+    def sub(self,vals,vars):
+        if isAtom(self.tree):
+            return subAll(vals,vars,self.tree)
+        else:
+            return subAll(vals,vars,toExpression(self))
+    
+    def val(self):
+        if isAtom(self.tree):
+            return val(self.tree)
+        else: 
+            
+            return val(toExpression(self))
+
+    def __str__(self):
+        if self.isAtom():
+            return str(self.tree)
+        else:
+            return str ([self.op()]+[str(x) for x in self.args()])               
+
+def toExpression(ast):
+    if isAtom(ast.tree):
+        return ast.tree
+    else:
+        args = [toExpression(x) for x in ast.args()]
+        return (ast.op(),args)
+    
 def isNumber(E): return isinstance(E,numbers.Number)
-def isScalar(E): return isNumber(E) or isAtom(E)
+def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
 def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
 def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
-def isAtom(x): return False if x==None else isinstance(x,str) and len(x)>1 and x[0]=='`'  
+def isSymbol(x): return False if x==None else isinstance(x,str) and len(x)>1 and x[0]=='`'  
+def isVar(x): return isinstance(x,str) and not isSymbol(x)
+def isBool(x): return isinstance(x,bool)
+def isAtom(x): return False if x==None else isScalar(x) or isVar(x)
+
 # If E is an expression, val(E) is the value of E.
 def val(E):
     #print(E)
     #print("Program is ",Program)
+    #E=self.tree
     if isScalar(E): return E
     if isinstance(E,str) and (E,0) in Program: return valDefined(E,[])
     (Op,X) = E
@@ -38,7 +96,7 @@ def val(E):
     #if Op=='all'   : return valAll(Args)
     if Op in builtIns : return valBuiltIn(Op,Args)
     if (Op,len(Args)) in Program : return valDefined(Op,Args)
-    
+
 def valBuiltIn(Op,Args):
         F = builtIns[Op]
         #print(F,Op,Args)
@@ -67,7 +125,7 @@ def DefVal(fbody):
             if guardValue: return val(term)
         if op == 'ow':
             term = Args[0]
-            return val(term)
+        return val(term)
 
 def subAll(Vals,Vars,E):
     a = E
@@ -174,7 +232,7 @@ def valEq(X):
     if isVector(a) and isVector(b): return respEqual(X)
     if isTuple(a) and isTuple(b): return respEqual(X)
     if isNumber(a) and isNumber(b): return a==b
-    if isAtom(a) and isAtom(b): return a==b
+    if isSymbol(a) and isSymbol(b): return a==b
     return False
 def valStar(X):
     if isNumber(X[0]) and isNumber(X[1]): return valMult(X)
