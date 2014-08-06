@@ -1,0 +1,114 @@
+
+
+LED sample program
+Nelson Rushton, Texas Tech University
+July 2014
+
+A few simple test functions to start off:
+/---------------------------------------------------------------
+  f(x,y) :=
+    33      if g2(x) < 1; 
+    x*y     if x >=1 & y > 0;
+    x+2*y   otherwise             
+
+  g2(x) := x^2+4
+
+  g3(x) := g2(x+2)
+---------------------------------------------------------------/
+
+Integer m is a *divisor* of n if there exists an integer k such 
+that k*m=n. An effective definition is as follows:
+/---------------------------------------------------------------
+  divisor(m,n) iff 
+    m=0 & n=0 or 
+    ~m=0 & n mod m = 0   
+---------------------------------------------------------------/
+
+An integer is *even* 2 is a divisor of it.
+/---------------------------------------------------------------
+  even(n) iff divisor(2,n) 
+---------------------------------------------------------------/
+
+A number is *negative* if it is less than 0, and otherwise
+it is *nonnegative*.
+/---------------------------------------------------------------
+
+ 
+  negative(x)    iff  x < 0 
+  nonnegative(x) iff  ~negative(x)
+
+---------------------------------------------------------------/
+
+Integer n is *prime* if n>1 and n has no divisors in {2..n-1}
+/---------------------------------------------------------------
+
+  prime(n) iff n>1 & noDivisors(n,2,n-1)
+
+  noDivisors(k,lowr,uppr) iff
+    lowr > uppr or
+    ~divisor(lowr,k) & noDivisors(k,lowr+1,uppr)   
+---------------------------------------------------------------/
+
+
+An integer k is *perfect* if it is the sum of its divisors in the 
+interval {1..k-1}. 
+
+We will write sumDivisors(k,L,U) for the sum of all divisors of 
+k in the interval [L,U].
+
+/---------------------------------------------------------------
+
+  perfect(k) iff k = sumDivisors(k,1,k-1)
+
+  sumDivisors(k,L,U) :=
+    0                       if L>U;
+    L+sumDivisors(k,L+1,U)  if L<=U & divisor(L,k);
+    sumDivisors(k,L+1,U)    otherwise
+
+---------------------------------------------------------------/
+A dummy test function for testing nested brackets
+/- t(x) := {x,x+1}  -/
+
+If S is a set of numbers, write Sum(S) for the sum of the members
+of S.
+/---------------------------------------------------------------
+
+  Sum(S):=
+    0                              if S={};
+    choose(S) + Sum(S\{choose(S)}) otherwise   
+
+---------------------------------------------------------------/
+
+
+
+ /- g() := 12 -/
+
+A nullary function. Currently it must be defined with parens but 
+called without them. So, given the following definition, e.g.,
+the expression g-4 would evaluate to 8.
+/---------------------------------------------------------------
+
+  range(m,n) :=
+    {}                     if m>n;
+    {m} U range(m+1,n) otherwise
+
+
+---------------------------------------------------------------/
+
+A dummy test function for constant
+/--  
+
+If x=(1,2) & y=(3,4) then h := {x,y}
+
+Z:= 0   T := {(0,2),(3,2),(2,4),(`x,2)}
+
+If even(2) then e := 2
+positiveTen(x) := 0<x<11
+
+
+--/
+
+If A1 = ((400,475),(500,475)) & A2 = ((400,425),(500,425)) & A3 = ((400,475),(400,425)) & A4 = ((500,475),(500,425))  then L:={A1,A2,A3,A4}
+
+
+

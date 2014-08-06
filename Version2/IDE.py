@@ -34,7 +34,7 @@ def run(F=''):
     if not F=='':
         compile(F+'.led')
     #print(Compiler.Program)
-    DefinedFuns = definedFuns(Program)
+    DefinedFuns = Program.definedSymbols()
     if len(DefinedFuns)>0:
         print('Defined functions: ',DefinedFuns)
         print()
@@ -85,7 +85,7 @@ def functionValues(F,FunN,ParamsL):
         if eFlag:
             tree, tFlag = parseExpression(expression)
             if tFlag:
-                values.append(val(tree))
+                values.append(tree.val())
     return values      
 
 '''
@@ -94,7 +94,7 @@ This is a helper function for testing evaluater
 If L is a list of expressions, then expressionValues(L) is a list of values corresponds to L
 '''
 def expressionValues(L):
-    #compile('test.led')
+    compile('test.led')
     values = []
     for e in L:
         e=tokens(e)[0]

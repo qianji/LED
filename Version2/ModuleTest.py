@@ -36,7 +36,7 @@ def test_tokens():
 #print( E[0].val())
 #ast = AST(1)
 #print(ast)
-run()
+#run('test')
 #a1 = AST('tuple',[AST(1),AST(2),AST(3)])
 #a2 = AST('+',[AST(1),AST(2)])
 #a3 = AST(1)

@@ -55,5 +55,83 @@ class ParserTest(unittest.TestCase):
         actural = expressionValues(expressions)
         expected = [('set',[1, 1, 2, 1, 2, 3])]
         self.assertEqual(expected,actural) 
+        
+    def test_file(self):
+        '''
+        # copy and fill in the values for the parameters to test the functions in the program
+        
+        Fname = ''
+        ParamsL = [[]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = []
+        self.assertEqual(expected,actural)
+
+        '''
+        # test for function f
+        F = 'test' # name of the test file
+        Fname = 'f' # name of the function
+        ParamsL = [ [2,3],[0,0],[0,1],[0,-1],[-1,0]] # f(2,3), f(0,0), f(0,1) ......
+        actural = functionValues(F,Fname,ParamsL)
+        # expected value of function calls
+        expected = [6,0,2,-2,-1]    
+        self.assertEqual(expected,actural)
+        
+        # test for g2
+        Fname = 'g2' # name of the function
+        ParamsL = [ [-1],[0],[1],[2]] # f(2,3), f(0,0), f(0,1) ......
+        actural = functionValues(F,Fname,ParamsL)
+        # expected value of function calls
+        expected = [5,4,5,8]    
+        self.assertEqual(expected,actural)      
+        
+        # test for 
+        Fname = 'divisor'
+        ParamsL = [[2,4],[2,0],[3,2]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [True,True,False]
+        self.assertEqual(expected,actural)  
+        
+        # test for 
+        Fname = 'even'
+        ParamsL = [[2],[3]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [True,False]
+        self.assertEqual(expected,actural)  
+        
+        Fname = 'negative'
+        ParamsL = [[-1],[1],[0]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [True,False,False]
+        self.assertEqual(expected,actural)
+        
+        Fname = 'prime'
+        ParamsL = [[1],[2],[3],[4],[5]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [False,True,True,False,True]
+        self.assertEqual(expected,actural)
+
+        Fname = 'perfect'
+        ParamsL = [[1],[28]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [False,True]
+        self.assertEqual(expected,actural)
+
+        Fname = 'sumDivisors'
+        ParamsL = [[8,0,5]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [7]
+        self.assertEqual(expected,actural)  
+        
+        Fname = 'g'
+        ParamsL = [[],[],[]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [12,12,12]
+        self.assertEqual(expected,actural) 
+        
+        Fname = 'Z'
+        ParamsL = [[],[],[]]
+        actural = functionValues(F,Fname,ParamsL)
+        expected = [0,0,0]
+        self.assertEqual(expected,actural)      
 if __name__ == '__main__':
     unittest.main()  

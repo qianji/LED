@@ -16,13 +16,19 @@ from builtins import isinstance
 from _functools import reduce
 
 class AST:
+    # An AST is either a variable, a number, a quoted symbol, 
+    # or a non-empty list, whose first element is an operator and whose remaining elements are AST's. 
     def __init__(self,E,args=[]):
         self.tree = None
         if len(args)==0:
-            if isAtom(E):
-                self.tree = E
+            if E in ['set','tuple','vector']:
+                self.tree = [E]
+            else:
+                if isAtom(E):
+                    self.tree = E
         else:
             self.tree = [E]+args
+    # T is an atomic expression, i.e.,a variable or scalar
     def isAtom(self):
         return isAtom(self.tree)
     def isSet(self):
@@ -31,41 +37,52 @@ class AST:
         return isTuple(self.tree)
     def isVector(self):
         return isVector(self.tree)
+    #get the oparator of T, if T is not an atomic expression
     def op(self):
         if not isAtom(self.tree):
             return self.tree[0]
         return self.tree
-
+    # get the argument list of T, if T is not an atomic expression
     def args(self):
         if not isAtom(self.tree):
             return self.tree[1:]
         return []
-
+    # if vals is a list of terms and vars is a list of variables, 
+    # sub(vals, vars) is the AST of substituting vars[i] with vals vals[i], 0<=i<len(vals)
     def sub(self,vals,vars):
         if isAtom(self.tree):
             return subAll(vals,vars,self.tree)
         else:
             return subAll(vals,vars,toExpression(self))
-    
+    #get the value of T
     def val(self):
         if isAtom(self.tree):
             return val(self.tree)
         else: 
             
             return val(toExpression(self))
-
+    # convert AST class to a string
     def __str__(self):
         if self.isAtom():
             return str(self.tree)
         else:
-            return str ([self.op()]+[str(x) for x in self.args()])               
-
+            return str ([self.op()]+[str(x) for x in self.args()])     
+                  
+# convert the class AST to the expression form of tuple or atom expression
+# example, if t is the AST of x^2 then toExpression(t) = ('^',['x',2]
 def toExpression(ast):
     if isAtom(ast.tree):
         return ast.tree
     else:
         args = [toExpression(x) for x in ast.args()]
-        return (ast.op(),args)
+        if isinstance(ast.op(),str): return (ast.op(),args)
+        else: return (toExpression(ast.op()),args)
+# convert the expression of the form of tuple or atom expression to an AST
+def toAST(E):
+    if isAtom(E):
+        return AST(E)
+    else:
+        return AST(E[0],[AST(arg) for arg in E[1:]])
     
 def isNumber(E): return isinstance(E,numbers.Number)
 def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E)
@@ -83,7 +100,7 @@ def val(E):
     #print("Program is ",Program)
     #E=self.tree
     if isScalar(E): return E
-    if isinstance(E,str) and (E,0) in Program: return valDefined(E,[])
+    if isinstance(E,str) and Program.defined(E,0) : return valDefined(E,[])
     (Op,X) = E
     if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec'}: Args=X  
     else: 
@@ -95,7 +112,7 @@ def val(E):
     #if Op=='some'  : return valSome(Args)
     #if Op=='all'   : return valAll(Args)
     if Op in builtIns : return valBuiltIn(Op,Args)
-    if (Op,len(Args)) in Program : return valDefined(Op,Args)
+    if Program.defined(Op,len(Args)): return valDefined(Op,Args)
 
 def valBuiltIn(Op,Args):
         F = builtIns[Op]
@@ -104,14 +121,15 @@ def valBuiltIn(Op,Args):
 
 def valDefined(Op,Args): 
         F=(Op,len(Args))
-        params,funBody = Program[F]
-        groundBody = subAll(Args,params,funBody)
+        params,funBody,g = Program.body(Op,len(Args))
+        groundBody = subAll(Args,params,toExpression(funBody))
         return DefVal( groundBody)
 
 def DefVal(fbody):
+    #print(fbody)
     if not isinstance(fbody,tuple):
         # function body is a user defined constant
-        if (fbody,0) in Program:
+        if Program.defined(fbody,0):
             return val(fbody)
         return fbody
     if not fbody[0] == 'cond' :
@@ -125,7 +143,7 @@ def DefVal(fbody):
             if guardValue: return val(term)
         if op == 'ow':
             term = Args[0]
-        return val(term)
+            return val(term)
 
 def subAll(Vals,Vars,E):
     a = E
@@ -342,7 +360,7 @@ def isGround(E):
             return True
         if E in ['set','tuple','vector']:
             return True
-        if (E,0) in Program:
+        if Program.defined(E,0):
             return True
         else:
             return False
@@ -350,7 +368,7 @@ def isGround(E):
     # special case for some/all var in term: sentence 
     if Op in ['some','all']:
         return True
-    if isGround(Op) or (Op,len(Args)) in Program:
+    if isGround(Op) or Program.defined(Op,len(Args)):
         return all(isGround(i) for i in Args)
     return False
 
@@ -362,6 +380,7 @@ def solutionSet(E):
     if isGround(E):
         #case 1
         #print(E,"is a ground term")
+        #print(E)
         if val(E)==False:
             return []
         #case 2
