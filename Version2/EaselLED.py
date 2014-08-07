@@ -100,8 +100,7 @@ def play(F):
 #     click = (c.getX(),displaySize()[1] - c.getY())
     #Program.update({('click',0):[[],('tuple',[0,0])]})
     #Program.update({('Gamma',0):[[],('set',[])]})
-    clickDef = Definition('click',[],AST('tuple',[AST(0),AST(0)]))
-
+    clickDef = Definition('click',[],AST('tuple',[0,0]))
     gammaDef = Definition('Gamma',[],AST('set',[]))
     Program.update(clickDef)
     Program.update(gammaDef)
@@ -113,29 +112,27 @@ def play(F):
     initBody = Program.body('init',0)
     gammaDef = Definition('Gamma',[],initBody[1])
     Program.update(gammaDef)
-    #Program.update({('Gamma',0):[[],val('init')]})
-    display = Program.body('display',0)
-    print(display[1])
-    #images = [convert(x) for x in val('display')[1]]
-    images = [convert(x) for x in display[1].val()[1]]
+    images = [convert(x) for x in AST('display').val()[1]]
     # Create a window to play in
     while(True):
         for x in images: x.draw(displayWindow)
         c = displayWindow.getMouse()
         click = (c.getX(),displaySize()[1] - c.getY())
-        clickAST = AST('tuple',AST(click[0]),AST(click[1]))
-        clickDef = Defintion('click',[],clickAST)
+        clickAST = AST('tuple',[click[0],click[1] ])
+        clickDef = Definition('click',[],clickAST)
         Program.update(clickDef)
         #Program.update({('click',0):[[],('tuple',[click[0],click[1]])]})
         #print("state before click is ", Program[('newState',0)])
+        print(Program.definitions)
         newStateBody = Program.body('newState',0)
-        gammaDef = Definition('Gamma',[],newStateBody[1])
+        print(AST('newState').val())
+        gammaDef = Definition('Gamma',[],toAST(AST('newState').val()))
         Program.update(gammaDef)
+        print(Program.definitions)
         #Program.update({('Gamma',0):[[],val('newState')]})
         #print("state after click is ", Program[('newState',0)])
         for I in images: I.undraw()
-        display = Program.body('display',0)
-        images = [convert(x) for x in display[1].val()[1]]
+        images = [convert(x) for x in AST('display').val()[1]]
         #images = [convert(x) for x in val('display')[1]]
   
     

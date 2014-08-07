@@ -83,7 +83,7 @@ def toAST(E):
     if isAtom(E):
         return AST(E)
     else:
-        return AST(E[0],[AST(arg) for arg in E[1:]])
+        return AST(E[0],[toAST(arg) for arg in E[1]])
     
 def isNumber(E): return isinstance(E,numbers.Number)
 def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E)
@@ -97,7 +97,6 @@ def isAtom(x): return False if x==None else isScalar(x) or isVar(x)
 
 # If E is an expression, val(E) is the value of E.
 def val(E):
-    #print(E)
     #print("Program is ",Program)
     #E=self.tree
     if isScalar(E): return E

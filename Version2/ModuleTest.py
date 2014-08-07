@@ -7,6 +7,7 @@ from Evaluater import val
 from Parser import *
 from GlobalVars import *
 from IDE import *
+from EaselLED import *
 
 '''
 Test tokens(S) in Tokenizer.py
@@ -42,3 +43,5 @@ def test_tokens():
 #a3 = AST(1)
 #a = AST('com',[a1,a2,a3])
 #print(a.toString())
+play('tttftb')
+#run('test')
