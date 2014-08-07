@@ -30,6 +30,10 @@ class LEDProgram:
     #a set of all definition names in P
     def definedSymbols(self):
         return [s[0] for s in self.definitions.keys()]
+    # if P contains a definition of a function symbol f with arity n, then definition(f,n) is the definition
+    def definition(self,f,n):
+        head = (f,n)
+        return self.definitions.get(head)
 
 class Definition:
     # A Definition is a 4-tuple (s, p, b,g), 

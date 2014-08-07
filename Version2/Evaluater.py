@@ -27,7 +27,8 @@ class AST:
                 if isAtom(E):
                     self.tree = E
         else:
-            self.tree = [E]+args
+            astArgs = [AST(arg) if not isinstance(arg,AST) else arg for arg in args ]
+            self.tree = [E]+astArgs
     # T is an atomic expression, i.e.,a variable or scalar
     def isAtom(self):
         return isAtom(self.tree)
@@ -116,7 +117,6 @@ def val(E):
 
 def valBuiltIn(Op,Args):
         F = builtIns[Op]
-        #print(F,Op,Args)
         return F(Args)
 
 def valDefined(Op,Args): 

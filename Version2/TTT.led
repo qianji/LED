@@ -292,7 +292,7 @@ We write *insideCell(p,c)* if point p is inside cell c.
 *update* is the game state resulting from the current game state and the most recent mouse click.
 
 /-----------------------------------------------------------
- update := 
+ newState := 
    init                     if gameOver & clickedPlayAgain;
    result((playerToMove,1)) if possible(1,playerToMove);
    result((playerToMove,2)) if possible(2,playerToMove);
