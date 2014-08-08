@@ -65,19 +65,19 @@ def parseIfThenDef(S):
         j = S.index('then')
     except ValueError:
         return(None,False)
-    t1,f1 = parseSentence(S[i+1:j])
+    t,f1 = parseSentence(S[i+1:j])
     if f1:
         (p,f2)= parseFuncDef(S[j+1:])
         if f2: 
             #put the content in the dictionary
             key,value = p.head,p.body
             #sub the expression
-            t1 = toExpression(t1)
+            t1 = t.expression()
             b = solutionSet(t1)
             if b==None or len(b)==0:
                 expr = value[1]
             else:
-                expr = subExpression(toExpression(value[1]),b[0])
+                expr = subExpression(value[1].expression(),b[0])
                 expr = toAST(expr)
             d = Definition(key[0], value[0], expr,True)
             #program.update(d)

@@ -3,12 +3,12 @@ LED evaluator
 Dr. Nelson Rushton, Texas Tech University
 July, 2014
 
-An *AST* is one of the following
+An *Expression* is one of the following
 
   1. a number
   2. A pair (F,X) where F is an operator and X is a list of expressions.
 
-In this program, the variable E will vary over AST's.
+In this program, the variable E will vary over Expression's.
 """
 import numbers, math
 from GlobalVars import Program 
@@ -54,14 +54,14 @@ class AST:
         if isAtom(self.tree):
             return subAll(vals,vars,self.tree)
         else:
-            return subAll(vals,vars,toExpression(self))
+            return subAll(vals,vars,self.expression())
     #get the value of T
     def val(self):
         if isAtom(self.tree):
             return val(self.tree)
         else: 
             
-            return val(toExpression(self))
+            return val(self.expression())
     # convert AST class to a string
     def __str__(self):
         if self.isAtom():
@@ -69,15 +69,17 @@ class AST:
         else:
             return str ([self.op()]+[str(x) for x in self.args()])     
                   
-# convert the class AST to the expression form of tuple or atom expression
-# example, if t is the AST of x^2 then toExpression(t) = ('^',['x',2]
-def toExpression(ast):
-    if isAtom(ast.tree):
-        return ast.tree
-    else:
-        args = [toExpression(x) for x in ast.args()]
-        if isinstance(ast.op(),str): return (ast.op(),args)
-        else: return (toExpression(ast.op()),args)
+    # convert the class AST to an Expression
+    # example, if t is the AST of x^2 then t.expression() = ('^',['x',2])
+    def expression(self):
+        if self.isAtom():
+            return self.tree
+        else:
+            F,args = self.op(),self.args()
+            # convert each of the AST in args to an expression
+            eArgs = [x.expression() for x in self.args()]
+            if isinstance(F,str): return (F,eArgs)
+            else: return (F.expression(),eArgs)
 # convert the expression of the form of tuple or atom expression to an AST
 def toAST(E):
     if isAtom(E):
@@ -121,7 +123,7 @@ def valBuiltIn(Op,Args):
 def valDefined(Op,Args): 
         F=(Op,len(Args))
         params,funBody,g = Program.body(Op,len(Args))
-        groundBody = subAll(Args,params,toExpression(funBody))
+        groundBody = subAll(Args,params,funBody.expression())
         return DefVal( groundBody)
 
 def DefVal(fbody):

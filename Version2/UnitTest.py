@@ -167,57 +167,57 @@ class ParserTest(unittest.TestCase):
         S = 'x in {1,2} U {3,4}'
         expected = [[('x', 1)], [('x', 2)], [('x', 3)], [('x', 4)]]
         t = tokens(S)[0]
-        expression = parseExpression(t)[0]
-        actural = solutionSet(toExpression(expression))
+        ast = parseExpression(t)[0]
+        actural = solutionSet(ast.expression())
         self.assertEqual(expected,actural) 
         
         S = 'x = 5 & y=10 & z = 20'
         expected = [[('x', 5), ('y', 10), ('z', 20)]]
         t = tokens(S)[0]
-        expression = parseExpression(t)[0]
-        actural = solutionSet(toExpression(expression))
+        ast = parseExpression(t)[0]
+        actural = solutionSet(ast.expression())
         self.assertEqual(expected,actural) 
 
         S = 'x in {2,3} & y in {10,20} & x*y < 40'
         expected = [[('x', 2), ('y', 10)], [('x', 3), ('y', 10)]]
         t = tokens(S)[0]
-        expression = parseExpression(t)[0]
-        actural = solutionSet(toExpression(expression))
+        ast = parseExpression(t)[0]
+        actural = solutionSet(ast.expression())
         self.assertEqual(expected,actural) 
 
         S = 'x in {1..10} & x < 1'
         expected = []
         t = tokens(S)[0]
-        expression = parseExpression(t)[0]
-        actural = solutionSet(toExpression(expression))
+        ast = parseExpression(t)[0]
+        actural = solutionSet(ast.expression())
         self.assertEqual(expected,actural) 
         
         S = '(x,y,z) = (10,20,30) & x=z'
         expected = []
         t = tokens(S)[0]
-        expression = parseExpression(t)[0]
-        actural = solutionSet(toExpression(expression))
+        ast = parseExpression(t)[0]
+        actural = solutionSet(ast.expression())
         self.assertEqual(expected,actural) 
         
         S = 'x=2 & x in {3,4}'
         expected = []
         t = tokens(S)[0]
-        expression = parseExpression(t)[0]
-        actural = solutionSet(toExpression(expression))
+        ast = parseExpression(t)[0]
+        actural = solutionSet(ast.expression())
         self.assertEqual(expected,actural) 
         
         S = 'x in {1,2} & x in {2,3}'
         expected = [[('x', 2)]]
         t = tokens(S)[0]
-        expression = parseExpression(t)[0]
-        actural = solutionSet(toExpression(expression))
+        ast = parseExpression(t)[0]
+        actural = solutionSet(ast.expression())
         self.assertEqual(expected,actural) 
         
         S = 'x=2 & x=3'
         expected = []
         t = tokens(S)[0]
-        expression = parseExpression(t)[0]
-        actural = solutionSet(toExpression(expression))
+        ast = parseExpression(t)[0]
+        actural = solutionSet(ast.expression())
         self.assertEqual(expected,actural) 
             
 if __name__ == '__main__':
