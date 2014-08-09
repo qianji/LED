@@ -64,7 +64,7 @@ right square if Gamma is 2.
 The display consists of the background and the circle.
 
 /------------------------------------
- display := background union {circ}
+ display := background U {circ}
 -------------------------------------/
 
 The x and y coordinates of a point are its 1st and 2nd coordinates,
@@ -79,7 +79,7 @@ The new state will be 1 if the left box is clicked, and 2
 if the right box is clicked. Otherwise it will remain unchanged.
 
 /-----------------------------------------------
-update:=
+newState:=
    1 if leftClicked;
    2 if rightClicked;
    Gamma otherwise

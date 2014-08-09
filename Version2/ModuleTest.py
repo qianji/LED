@@ -43,5 +43,5 @@ def test_tokens():
 #a3 = AST(1)
 #a = AST('com',[a1,a2,a3])
 #print(a.toString())
-play('tttftb')
+play('boxClick')
 #run('test')

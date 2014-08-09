@@ -12,11 +12,9 @@ This simple parser program parses the following grammar:
 
 '''
 '''
-A *node* is a string
-If *AST* is a node r, it represents an abstract syntax tree with r as its root node and no subtrees.
 A *var* or an *identifier* is a nonempty string of letters and digits beginning with a letter.
 A *numeral* is a nonempty string of digits
-An *atom* is an identifier preceded by a backquote, such as `x and `o.
+Please refer Evaluater.py for the definition of AST
 '''
 
 '''
@@ -38,15 +36,15 @@ For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represe
 # rule: Dfn -> funcDef | relDef | ifThenDef
 '''
 def parseDfn(S):
-    program3,flag3 = parseIfThenDef(S)
+    def3,flag3 = parseIfThenDef(S)
     if flag3:
-        return (program3,True)
-    program2,flag2 = parseFuncDef(S)
+        return (def3,True)
+    def2,flag2 = parseFuncDef(S)
     if flag2:
-        return (program2,True)
-    program1,flag1 = parseRelDef(S)
+        return (def2,True)
+    def1,flag1 = parseRelDef(S)
     if flag1:
-        return (program1,True)
+        return (def1,True)
 
     return (None,False) 
 
@@ -59,7 +57,6 @@ For example, the following program If x=2 & y=3 then h := x+y  would be represen
 #rule: IfThenDef -> If sentence then funcDef
 '''
 def parseIfThenDef(S):
-    #program = LEDProgram({})
     try:
         i = S.index('If')
         j = S.index('then')
@@ -78,11 +75,8 @@ def parseIfThenDef(S):
                 expr = value[1]
             else:
                 expr = subExpression(value[1].expression(),b[0])
-                expr = toAST(expr)
+                expr = AST(expr)
             d = Definition(key[0], value[0], expr,True)
-            #program.update(d)
-            #program[d.head] = d.body
-            #program[key] = (value[0],expr)
             return(d,True)    
         else:
             print('cannot parse then statement definition: ',' '.join(S[j+1:])) 
@@ -99,7 +93,6 @@ For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represe
 #rule: funcDef -> identifier ( vars )  :=   funcBody
 '''
 def parseFuncDef(S):
-    #program = LEDProgram({})
     for i in range(len(S)):
         if S[i]==':=':
             t1,f1 = parseLHS(S[0:i])
@@ -110,9 +103,6 @@ def parseFuncDef(S):
                 if f2: 
                     #put the content in the dictionary
                     d = Definition(fName, fParams, t2, True)
-                    #program.update(d)
-                    #program[d.head] = d.body
-                    #program[(fName,paramNumber)] = (fParams,t2)
                     return(d,True)    
                 else:
                     print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
@@ -123,7 +113,6 @@ def parseFuncDef(S):
 # relDef -> identifier ( vars ) iff   sentence
 # duplicate with parseFuncDef. To be refactored soon
 def parseRelDef(S):
-    #program = LEDProgram({})
     for i in range(len(S)):
         if S[i]=='iff':
             t1,f1 = parseLHS(S[0:i])
@@ -134,8 +123,6 @@ def parseRelDef(S):
                 if f2: 
                     #put the content in the dictionary
                     d = Definition(fName, fParams, t2, True)
-                    #program.update(d)
-                    #program[d.head] = d.body
                     return(d,True)    
                 else:
                     print('cannot parse function definition right side: ',' '.join(S[i+1:])) 

@@ -18,17 +18,20 @@ from _functools import reduce
 class AST:
     # An AST is either a variable, a number, a quoted symbol, 
     # or a non-empty list, whose first element is an operator and whose remaining elements are AST's. 
-    def __init__(self,E,args=[]):
+    def __init__(self,F,args=[]):
         self.tree = None
+        # if F is Expression of the form of a pair
+        if isinstance(F,tuple):
+            self.tree= AST(F[0],F[1]).tree
         if len(args)==0:
-            if E in ['set','tuple','vector']:
-                self.tree = [E]
+            if F in ['set','tuple','vector']:
+                self.tree = [F]
             else:
-                if isAtom(E):
-                    self.tree = E
+                if isAtom(F):
+                    self.tree = F
         else:
             astArgs = [AST(arg) if not isinstance(arg,AST) else arg for arg in args ]
-            self.tree = [E]+astArgs
+            self.tree = [F]+astArgs
     # T is an atomic expression, i.e.,a variable or scalar
     def isAtom(self):
         return isAtom(self.tree)
@@ -80,12 +83,6 @@ class AST:
             eArgs = [x.expression() for x in self.args()]
             if isinstance(F,str): return (F,eArgs)
             else: return (F.expression(),eArgs)
-# convert the expression of the form of tuple or atom expression to an AST
-def toAST(E):
-    if isAtom(E):
-        return AST(E)
-    else:
-        return AST(E[0],[toAST(arg) for arg in E[1]])
     
 def isNumber(E): return isinstance(E,numbers.Number)
 def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E)
@@ -101,6 +98,7 @@ def isAtom(x): return False if x==None else isScalar(x) or isVar(x)
 def val(E):
     #print("Program is ",Program)
     #E=self.tree
+    #print(E)
     if isScalar(E): return E
     if isinstance(E,str) and Program.defined(E,0) : return valDefined(E,[])
     (Op,X) = E

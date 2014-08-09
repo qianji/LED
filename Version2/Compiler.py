@@ -36,10 +36,10 @@ def compile(F):
         # get a list of function definitions from text
         funcs= parseProgram(text)
         for i in range(len(funcs)):    
-            p,programF = parseDfn(funcs[i])
-            if programF:
+            d,defFlag = parseDfn(funcs[i])
+            if defFlag:
                 print('parsing #',i,"function successfully",' '.join(funcs[i]))
-                Program.update(p)
+                Program.update(d)
             else:
                 print("Failed parsing #",i," function: ", ' '.join(funcs[i]))
                 return

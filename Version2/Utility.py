@@ -2,12 +2,7 @@
 '''
 This file provides the utilities for the LED 
 '''
-
-'''
-# helper function
-# char * int * str -> int
-firstIndexBack(C, secondeI, S) searches backward from index of secondI of S to find the first C in S
-'''       
+      
 class LEDProgram:
     # A Program is a dictionary, 
     # whose key is a pair (s, n), 
@@ -46,7 +41,11 @@ class Definition:
         self.parms = p 
         self.head = (s,len(p)) 
         self.body = (p,b,g)
-
+'''
+# helper function
+# char * int * str -> int
+firstIndexBack(C, secondeI, S) searches backward from index of secondI of S to find the first C in S
+''' 
 def firstIndexBack(C,secondI,S):
     for i in range(secondI,-1, -1):
         if S[i]==C:

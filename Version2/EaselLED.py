@@ -17,16 +17,16 @@ This engine will operate game programs written in LED. To play a game,
      extension.
 
 The LED game program must define *init*, *display*, and
-*update*, as follows:
+*newState*, as follows:
 
   *) *init* is the initial state of the game.
   *) *display* is the screen display for the current game state
-  *) *update* is the game state resulting from the current game
+  *) *newState* is the game state resulting from the current game
      state and the most recent mouse click.
 
 Function bodies in an LED game program may use to the constant symbols
 *Gamma* and *click*, denoting the current game state and most recent
-mouse click, respectively. The valuses of *init* and *update*  may be
+mouse click, respectively. The valuses of *init* and *newState*  may be
 any arbitrary LED objects. The value of *display* must be a screen
 display, as defined below.
       
@@ -96,21 +96,17 @@ def convertText(x):
 def play(F):
     global images, Gamma, click
     displayWindow = GraphWin("My game", displaySize()[0], displaySize()[1])
-#     c = displayWindow.getMouse()
-#     click = (c.getX(),displaySize()[1] - c.getY())
-    #Program.update({('click',0):[[],('tuple',[0,0])]})
-    #Program.update({('Gamma',0):[[],('set',[])]})
     clickDef = Definition('click',[],AST('tuple',[0,0]))
     gammaDef = Definition('Gamma',[],AST('set',[]))
     Program.update(clickDef)
     Program.update(gammaDef)
     compile(F+'.led')
-    #DefinedFuns = definedFuns(Program)
     DefinedFuns = Program.definedSymbols()
     print('defined funs:', DefinedFuns)
     # initialize the state in LED program memory
     initBody = Program.body('init',0)
     gammaDef = Definition('Gamma',[],initBody[1])
+    # update Gamma in the program
     Program.update(gammaDef)
     images = [convert(x) for x in AST('display').val()[1]]
     # Create a window to play in
@@ -118,22 +114,16 @@ def play(F):
         for x in images: x.draw(displayWindow)
         c = displayWindow.getMouse()
         click = (c.getX(),displaySize()[1] - c.getY())
+        # update click in Program
         clickAST = AST('tuple',[click[0],click[1] ])
         clickDef = Definition('click',[],clickAST)
         Program.update(clickDef)
-        #Program.update({('click',0):[[],('tuple',[click[0],click[1]])]})
-        #print("state before click is ", Program[('newState',0)])
-        print(Program.definitions)
+        # update newState in Program
         newStateBody = Program.body('newState',0)
-        print(AST('newState').val())
-        gammaDef = Definition('Gamma',[],toAST(AST('newState').val()))
+        # convert the value of newState into a AST and put it as the body of Gamma
+        gammaDef = Definition('Gamma',[],AST(AST('newState').val()))
         Program.update(gammaDef)
-        print(Program.definitions)
-        #Program.update({('Gamma',0):[[],val('newState')]})
-        #print("state after click is ", Program[('newState',0)])
         for I in images: I.undraw()
-        images = [convert(x) for x in AST('display').val()[1]]
-        #images = [convert(x) for x in val('display')[1]]
-  
+        images = [convert(x) for x in AST('display').val()[1]]  
     
 
