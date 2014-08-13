@@ -45,14 +45,11 @@ The game runs in a 600 by 500 window, with (0,0) as the lower left corner.
 
 
 """
-
-from Compiler import compile
-from Tokenizer import tokens
-from Evaluater import val
-from Parser import *
-from GlobalVars import *
+from Expression import *
+from LEDProgram import *
+from Evaluater import *
 from graphics import *
-from Utility import *
+
 
 # displaySize() is the size of the display window, (width, height)
 
@@ -89,41 +86,4 @@ def convertText(x):
     T = Text(Point(x,H-y),''.join([chr(x) for x in chars]))
     T.setSize(height)
     return T
-
-
-# play(F) executes the game defined in LED file F. 
-
-def play(F):
-    global images, Gamma, click
-    displayWindow = GraphWin("My game", displaySize()[0], displaySize()[1])
-    clickDef = Definition('click',[],AST('tuple',[0,0]))
-    gammaDef = Definition('Gamma',[],AST('set',[]))
-    Program.update(clickDef)
-    Program.update(gammaDef)
-    compile(F+'.led')
-    DefinedFuns = Program.definedSymbols()
-    print('defined funs:', DefinedFuns)
-    # initialize the state in LED program memory
-    initBody = Program.body('init',0)
-    gammaDef = Definition('Gamma',[],initBody[1])
-    # update Gamma in the program
-    Program.update(gammaDef)
-    images = [convert(x) for x in AST('display').val()[1]]
-    # Create a window to play in
-    while(True):
-        for x in images: x.draw(displayWindow)
-        c = displayWindow.getMouse()
-        click = (c.getX(),displaySize()[1] - c.getY())
-        # update click in Program
-        clickAST = AST('tuple',[click[0],click[1] ])
-        clickDef = Definition('click',[],clickAST)
-        Program.update(clickDef)
-        # update newState in Program
-        newStateBody = Program.body('newState',0)
-        # convert the value of newState into a AST and put it as the body of Gamma
-        gammaDef = Definition('Gamma',[],AST(AST('newState').val()))
-        Program.update(gammaDef)
-        for I in images: I.undraw()
-        images = [convert(x) for x in AST('display').val()[1]]  
-    
 

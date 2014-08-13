@@ -5,8 +5,7 @@
 ######################################################################
 
 from Tokenizer import *
-from Evaluater import *
-from Utility import *
+from Expression import *
 '''
 This simple parser program parses the following grammar:
 
@@ -24,112 +23,6 @@ Please refer Evaluater.py for the definition of AST
 # otherwise parse**(S) = (None,False).
 # Each rule is given right before the function definition
 '''
-'''
-string -> dict * bool
-If S is a string of the function definitions of funcDef or relDef defined in LED, then parseDfn(S) = (dict,True), where dict is a dictionary 
-otherwise parseDfn(S) = (None,False)
-For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
-{('f',1):(['x'],('^',['x',2])) , 
-('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
-'''
-'''
-# rule: Dfn -> funcDef | relDef | ifThenDef
-'''
-def parseDfn(S):
-    def3,flag3 = parseIfThenDef(S)
-    if flag3:
-        return (def3,True)
-    def2,flag2 = parseFuncDef(S)
-    if flag2:
-        return (def2,True)
-    def1,flag1 = parseRelDef(S)
-    if flag1:
-        return (def1,True)
-
-    return (None,False) 
-
-'''
-string -> dict * bool
-If S is a string of the function definitions of IfThenDef defined in LED, then parseIfThenDef(S) = (dict,True), where dict is a dictionary 
-otherwise parseIfThenDef(S) = (None,False)
-For example, the following program If x=2 & y=3 then h := x+y  would be represented by the following dictionary: 
-{('h',0):([],('+',[2,3]))} 
-#rule: IfThenDef -> If sentence then funcDef
-'''
-def parseIfThenDef(S):
-    try:
-        i = S.index('If')
-        j = S.index('then')
-    except ValueError:
-        return(None,False)
-    t,f1 = parseSentence(S[i+1:j])
-    if f1:
-        (p,f2)= parseFuncDef(S[j+1:])
-        if f2: 
-            #put the content in the dictionary
-            key,value = p.head,p.body
-            #sub the expression
-            t1 = t.expression()
-            b = solutionSet(t1)
-            if b==None or len(b)==0:
-                expr = value[1]
-            else:
-                expr = subExpression(value[1].expression(),b[0])
-                expr = AST(expr)
-            d = Definition(key[0], value[0], expr,True)
-            return(d,True)    
-        else:
-            print('cannot parse then statement definition: ',' '.join(S[j+1:])) 
-    else:
-            print('cannot parse if statement definition: ',' '.join(S[i+1:j])) 
-    return (None,False)
-'''
-string -> dict * bool
-If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
-otherwise parseFuncDef(S) = (None,False)
-For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
-{('f',1):(['x'],('^',['x',2])) , 
-('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
-#rule: funcDef -> identifier ( vars )  :=   funcBody
-'''
-def parseFuncDef(S):
-    for i in range(len(S)):
-        if S[i]==':=':
-            t1,f1 = parseLHS(S[0:i])
-            if f1:
-                (fName,fParams)=parseLHS(S[0:i])[0]
-                paramNumber = len(fParams)
-                (t2,f2)= parseFuncBody(S[i+1:])
-                if f2: 
-                    #put the content in the dictionary
-                    d = Definition(fName, fParams, t2, True)
-                    return(d,True)    
-                else:
-                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
-            else:
-                    print('cannot parse function definition left side: ',' '.join(S[0:i])) 
-    return (None,False)     
-
-# relDef -> identifier ( vars ) iff   sentence
-# duplicate with parseFuncDef. To be refactored soon
-def parseRelDef(S):
-    for i in range(len(S)):
-        if S[i]=='iff':
-            t1,f1 = parseLHS(S[0:i])
-            if f1:
-                (fName,fParams)=parseLHS(S[0:i])[0]
-                paramNumber = len(fParams)
-                (t2,f2)= parseSentence(S[i+1:])
-                if f2: 
-                    #put the content in the dictionary
-                    d = Definition(fName, fParams, t2, True)
-                    return(d,True)    
-                else:
-                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
-            else:
-                    print('cannot parse function definition left side: ',' '.join(S[0:i]))    
-    return (None,False) 
-
 '''
 list<str> -> (str * list<str>) * bool
 If S is a list of string that comply to the format of the left hand side of the function definition, 
@@ -902,3 +795,74 @@ def parseTermPipeStmt(S):
     return (None,False)
 #print(parseTerms(tokens('2+2,3,x2')[0]))
 #print(isIdentifier('2'))
+'''
+# helper function
+# char * int * str -> int
+firstIndexBack(C, secondeI, S) searches backward from index of secondI of S to find the first C in S
+''' 
+def firstIndexBack(C,secondI,S):
+    for i in range(secondI,-1, -1):
+        if S[i]==C:
+            return i
+    return None
+
+'''
+# helper function
+# str * list<str> -> int
+# If Cs is a string and S is a list of string, firstIndex(Cs, S) is the first index of one of the member of Cs in S,
+# otherwise firstIndex(Cs, S) = None
+
+'''
+def firstIndex(Cs, S):
+    index = 0
+    for i in range(len(S)):
+        for C in Cs:
+            if(S[i]==C):
+                return i
+    return None
+
+'''
+# helper function for removeComments
+This is a function definition: {def f(x) = {x}+{x+2} }
+closeParentesis(S) finds the first } that does not match any { in S
+'''
+def closeParentesis(L,S):
+    R = '}'
+    if L=='{':
+        R = '}'
+    if L=='[':
+        R = ']'
+    if L =='(':
+        R = ')'
+    if L =='/':
+        R == '/'
+    S = list(S)
+    #create an empty stack S
+    index = 0
+    stack = []
+    while(len(S)>0):
+        # read a character ch
+        ch = S[0]
+        #If ch is an opening paren (of any kind), push it onto stack
+        if ch ==L:
+            stack.append(ch)
+        else:
+            # If  ch  is a closing paren }, look at the top of stack.
+            if ch==R:
+                #If stack is empty at this point, retrun index.
+                if len(stack)==0:
+                    return index
+                top = stack[-1]
+                # If the top of stack is the opening paren that corresponds to {, 
+                # then pop stack and continue, this paren matches OK.
+                if top==L:
+                    stack=stack[:-1]
+                    S=S[1:]
+                    index+=1
+                    continue
+                else:
+                    return index   
+        S=S[1:]
+        index+=1 
+    return None    
+

@@ -4,12 +4,13 @@ July 2014
 
 This program have test functions to combine the parser and evaluator together.
 '''
-from Compiler import compile
-from Tokenizer import tokens
+from Tokenizer import *
+from Expression import *
+from LEDProgram import *
 from Evaluater import val
 from Parser import *
-from GlobalVars import *
-# import the global variable Program
+from Compiler import *
+from EaselLED import *
 
 def prettyString(E):
     if isNumber(E) or isAtom(E): return(str(E))
@@ -39,73 +40,62 @@ def run(F=''):
         print('Defined functions: ',DefinedFuns)
         print()
     print('Enter an expression and hit [return] to get its value.')
-    print('Hit [return] at the prompt to exit.')
+    print('Enter quit() at the prompt to exit.')
     print()
     while True:
         e = input('> ')
         if e=='':
-            return
+            continue
         else:
             expression,eFlag = tokens(e)
             if eFlag:
+                if len(expression)==3 and expression[0]=='quit' and expression[1]=='(' and expression[-1]==')': return
+                if len(expression)>3:
+                    if expression[0]=='run' and expression[1]=='(' and expression[-1]==')':
+                        return run(expression[2])
+                    if expression[0]=='play' and expression[1]=='(' and expression[-1]==')':
+                        return play(expression[2])
                 tree, tFlag = parseExpression(expression)
                 if tFlag:
-                    print(prettyString(tree.val()))
+                    print(prettyString(val(tree)))
                     print()
                 else:
                     print('Cannot parse the tree.')
             else:
                 print('Cannot tokenize the expression.')
 
-'''
-# This function is used for UnitTest
-# str * str * list<list<num> -> list<>
-# If F is the name of the file of the program, FunN is one of the functions in F and 
-# ParamsL is a list of valid parameters of FunN
-# then functionValues(F,FunN,ParamsL) is the value of the FunN(ParamsL) in F
-'''
+# play(F) executes the game defined in LED file F. 
 
-def functionValues(F,FunN,ParamsL):        
+def play(F):
+    global images, Gamma, click
+    displayWindow = GraphWin("My game", displaySize()[0], displaySize()[1])
+    clickDef = Definition('click',[],AST('tuple',[0,0]))
+    gammaDef = Definition('Gamma',[],AST('set',[]))
+    Program.update(clickDef)
+    Program.update(gammaDef)
     compile(F+'.led')
-    values = []
-    for Params in ParamsL:        
-        # construct the params for the expression
-        paramsStr = ''
-        for i in range(len(Params)):
-            if not i == len(Params)-1:
-                paramsStr += str(Params[i])+','
-            else:
-                paramsStr += str(Params[i])
-        # check for constant definition g = 12
-        if paramsStr=='':
-            e = FunN
-        else:
-            e = FunN + '(' + paramsStr + ')'
-        expression,eFlag = tokens(e)
-        if eFlag:
-            tree, tFlag = parseExpression(expression)
-            if tFlag:
-                values.append(tree.val())
-    return values      
-
-'''
-list<str> -> list<int>
-This is a helper function for testing evaluater
-If L is a list of expressions, then expressionValues(L) is a list of values corresponds to L
-'''
-def expressionValues(L):
-    compile('test.led')
-    values = []
-    for e in L:
-        e=tokens(e)[0]
-        #v = val(parseExpression(e)[0])
-        tree = parseExpression(e)[0]
-        v = tree.val()
-        values.append(v)
-    return values
-'''
-# Program -> set
-# If P is a program, then definedFuns(P) is a set of function named defined in P.
-'''
-def definedFuns(P):
-    return {Def[0] for Def in P}
+    DefinedFuns = Program.definedSymbols()
+    print('defined funs:', DefinedFuns)
+    # initialize the state in LED program memory
+    initBody = Program.body('init',0)
+    gammaDef = Definition('Gamma',[],initBody[1])
+    # update Gamma in the program
+    Program.update(gammaDef)
+    images = [convert(x) for x in val(AST('display'))[1]]
+    # Create a window to play in
+    while(True):
+        for x in images: x.draw(displayWindow)
+        c = displayWindow.getMouse()
+        click = (c.getX(),displaySize()[1] - c.getY())
+        # update click in Program
+        clickAST = AST('tuple',[click[0],click[1] ])
+        clickDef = Definition('click',[],clickAST)
+        Program.update(clickDef)
+        # update newState in Program
+        newStateBody = Program.body('newState',0)
+        # convert the value of newState into a AST and put it as the body of Gamma
+        gammaDef = Definition('Gamma',[],AST(val(AST('newState'))))
+        Program.update(gammaDef)
+        for I in images: I.undraw()
+        images = [convert(x) for x in val(AST('display'))[1]]  
+run()

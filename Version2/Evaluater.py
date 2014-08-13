@@ -10,92 +10,16 @@ An *Expression* is one of the following
 
 In this program, the variable E will vary over Expression's.
 """
-import numbers, math
-from GlobalVars import Program 
-from builtins import isinstance
+from Expression import *
+from LEDProgram import Program
 from _functools import reduce
-
-class AST:
-    # An AST is either a variable, a number, a quoted symbol, 
-    # or a non-empty list, whose first element is an operator and whose remaining elements are AST's. 
-    def __init__(self,F,args=[]):
-        self.tree = None
-        # if F is Expression of the form of a pair
-        if isinstance(F,tuple):
-            self.tree= AST(F[0],F[1]).tree
-        if len(args)==0:
-            if F in ['set','tuple','vector']:
-                self.tree = [F]
-            else:
-                if isAtom(F):
-                    self.tree = F
-        else:
-            astArgs = [AST(arg) if not isinstance(arg,AST) else arg for arg in args ]
-            self.tree = [F]+astArgs
-    # T is an atomic expression, i.e.,a variable or scalar
-    def isAtom(self):
-        return isAtom(self.tree)
-    def isSet(self):
-        return isSet(self.tree)
-    def isTuple(self):
-        return isTuple(self.tree)
-    def isVector(self):
-        return isVector(self.tree)
-    #get the oparator of T, if T is not an atomic expression
-    def op(self):
-        if not isAtom(self.tree):
-            return self.tree[0]
-        return self.tree
-    # get the argument list of T, if T is not an atomic expression
-    def args(self):
-        if not isAtom(self.tree):
-            return self.tree[1:]
-        return []
-    # if vals is a list of terms and vars is a list of variables, 
-    # sub(vals, vars) is the AST of substituting vars[i] with vals vals[i], 0<=i<len(vals)
-    def sub(self,vals,vars):
-        if isAtom(self.tree):
-            return subAll(vals,vars,self.tree)
-        else:
-            return subAll(vals,vars,self.expression())
-    #get the value of T
-    def val(self):
-        if isAtom(self.tree):
-            return val(self.tree)
-        else: 
-            
-            return val(self.expression())
-    # convert AST class to a string
-    def __str__(self):
-        if self.isAtom():
-            return str(self.tree)
-        else:
-            return str ([self.op()]+[str(x) for x in self.args()])     
-                  
-    # convert the class AST to an Expression
-    # example, if t is the AST of x^2 then t.expression() = ('^',['x',2])
-    def expression(self):
-        if self.isAtom():
-            return self.tree
-        else:
-            F,args = self.op(),self.args()
-            # convert each of the AST in args to an expression
-            eArgs = [x.expression() for x in self.args()]
-            if isinstance(F,str): return (F,eArgs)
-            else: return (F.expression(),eArgs)
-    
-def isNumber(E): return isinstance(E,numbers.Number)
-def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E)
-def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
-def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
-def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
-def isSymbol(x): return False if x==None else isinstance(x,str) and len(x)>1 and x[0]=='`'  
-def isVar(x): return isinstance(x,str) and not isSymbol(x)
-def isBool(x): return isinstance(x,bool)
-def isAtom(x): return False if x==None else isScalar(x) or isVar(x)
-
-# If E is an expression, val(E) is the value of E.
+# If E is an expression or AST, val(E) is the value of E.
 def val(E):
+    if isinstance(E,AST):
+        if E.isAtom():
+            return val(E.tree)
+        else:
+            return val(E.expression())
     #print("Program is ",Program)
     #E=self.tree
     #print(E)

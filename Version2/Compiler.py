@@ -3,11 +3,12 @@ Qianji Zheng
 July 2014
 '''
 
+from Expression import *
+from LEDProgram import *
+from Parser import *
 from Tokenizer import *
-from Evaluater import val
-from Parser import parseDfn
-from Utility import *
-from GlobalVars import *
+
+from Evaluater import *
 '''    
 string -> 
 If F is the name of the file containing the function definitions of LED with .led as its extension, then compile(F) compile the functions in the file 
@@ -26,6 +27,7 @@ def compile(F):
     except FileNotFoundError as e:
         print(e)
         return
+    print('parsing the program ...........')
     # read the file as a string
     t = removeComments(programText)
     #tokenize the file
@@ -38,7 +40,7 @@ def compile(F):
         for i in range(len(funcs)):    
             d,defFlag = parseDfn(funcs[i])
             if defFlag:
-                print('parsing #',i,"function successfully",' '.join(funcs[i]))
+                #print('parsing #',i,"function successfully",' '.join(funcs[i]))
                 Program.update(d)
             else:
                 print("Failed parsing #",i," function: ", ' '.join(funcs[i]))
@@ -120,7 +122,117 @@ def parseProgram(S):
                     S = S[end+1:]
     return allFunctions
 
+'''
+string -> dict * bool
+If S is a string of the function definitions of funcDef or relDef defined in LED, then parseDfn(S) = (dict,True), where dict is a dictionary 
+otherwise parseDfn(S) = (None,False)
+For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
+{('f',1):(['x'],('^',['x',2])) , 
+('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
+'''
+'''
+# rule: Dfn -> funcDef | relDef | ifThenDef
+'''
+def parseDfn(S):
+    def3,flag3 = parseIfThenDef(S)
+    if flag3:
+        return (def3,True)
+    def2,flag2 = parseFuncDef(S)
+    if flag2:
+        return (def2,True)
+    def1,flag1 = parseRelDef(S)
+    if flag1:
+        return (def1,True)
+
+    return (None,False) 
+
+'''
+string -> dict * bool
+If S is a string of the function definitions of IfThenDef defined in LED, then parseIfThenDef(S) = (dict,True), where dict is a dictionary 
+otherwise parseIfThenDef(S) = (None,False)
+For example, the following program If x=2 & y=3 then h := x+y  would be represented by the following dictionary: 
+{('h',0):([],('+',[2,3]))} 
+#rule: IfThenDef -> If sentence then funcDef
+'''
+def parseIfThenDef(S):
+    try:
+        i = S.index('If')
+        j = S.index('then')
+    except ValueError:
+        return(None,False)
+    t,f1 = parseSentence(S[i+1:j])
+    if f1:
+        (p,f2)= parseFuncDef(S[j+1:])
+        if f2: 
+            #put the content in the dictionary
+            key,value = p.head,p.body
+            #sub the expression
+            t1 = t.expression()
+            b = solutionSet(t1)
+            if b==None or len(b)==0:
+                expr = value[1]
+            else:
+                expr = subExpression(value[1].expression(),b[0])
+                expr = AST(expr)
+            d = Definition(key[0], value[0], expr,True)
+            return(d,True)    
+        else:
+            print('cannot parse then statement definition: ',' '.join(S[j+1:])) 
+    else:
+            print('cannot parse if statement definition: ',' '.join(S[i+1:j])) 
+    return (None,False)
+'''
+string -> dict * bool
+If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
+otherwise parseFuncDef(S) = (None,False)
+For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
+{('f',1):(['x'],('^',['x',2])) , 
+('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
+#rule: funcDef -> identifier ( vars )  :=   funcBody
+'''
+def parseFuncDef(S):
+    for i in range(len(S)):
+        if S[i]==':=':
+            t1,f1 = parseLHS(S[0:i])
+            if f1:
+                (fName,fParams)=parseLHS(S[0:i])[0]
+                paramNumber = len(fParams)
+                (t2,f2)= parseFuncBody(S[i+1:])
+                if f2: 
+                    #put the content in the dictionary
+                    d = Definition(fName, fParams, t2, True)
+                    return(d,True)    
+                else:
+                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                    print('cannot parse function definition left side: ',' '.join(S[0:i])) 
+    return (None,False)     
+
+# relDef -> identifier ( vars ) iff   sentence
+# duplicate with parseFuncDef. To be refactored soon
+def parseRelDef(S):
+    for i in range(len(S)):
+        if S[i]=='iff':
+            t1,f1 = parseLHS(S[0:i])
+            if f1:
+                (fName,fParams)=parseLHS(S[0:i])[0]
+                paramNumber = len(fParams)
+                (t2,f2)= parseSentence(S[i+1:])
+                if f2: 
+                    #put the content in the dictionary
+                    d = Definition(fName, fParams, t2, True)
+                    return(d,True)    
+                else:
+                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                    print('cannot parse function definition left side: ',' '.join(S[0:i]))    
+    return (None,False) 
+
 # helper function for removeComments
+
+# A character is *white* if it is a space, return, tab, or vertical tab.
+def white(c): return c in [' ', '\r','\t','\v','\n']
+
 # canPushHead(S,state) iff, in the current state S with the current stack stk,
 # stk+[S[0]] is the beginning of a token.
 def canPushHead(S,state):
