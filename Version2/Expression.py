@@ -47,11 +47,7 @@ class AST:
         return []
     # convert AST class to a string
     def __str__(self):
-        if self.isAtom():
-            return str(self.tree)
-        else:
-            return str ([self.op()]+[str(x) for x in self.args()])     
-                  
+        return str(self.expression)
     # convert the class AST to an Expression
     # example, if t is the AST of x^2 then t.expression() = ('^',['x',2])
     def expression(self):

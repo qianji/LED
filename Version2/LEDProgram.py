@@ -3,7 +3,7 @@
 '''
 This file provides the the data type for the LED Program 
 '''
-      
+from Expression import * 
 class LEDProgram:
     # A LEDProgram is a dictionary, 
     # whose key is a pair (s, n), 
@@ -37,12 +37,17 @@ class Definition:
     # s is a string representing the name of defined function, p is a list of variables representing the parameters of the definition and b is an AST representing the body the definition. 
     # example: if d is the definition of f(x) := x^2, tree is the AST of x^2
     # then symbol = 'f', parms =['x'], head = ('f',1), body = (['x'],tree,True)
-    def __init__(self,s,p,b,g=True):
+    def __init__(self,s,p,b,g=AST(True)):
         self.symbol = s 
         self.parms = p 
-        self.head = (s,len(p)) 
+        self.head = (s,len(p))
+        #a body of a defintion is not a just expression but a 3 tuples,which includes params, AST of the expression and the gaurd condition
         self.body = (p,b,g)
+        self.expression=b
 
+    # convert defintion class to a string    
+    def __str__(self):
+        return '('+str(self.symbol)+','+str(self.parms)+','+str(self.head)+','+str([str(i) for i in self.body])
 # define the global variable of Program 
 # The definition f(x1,...,xn):= E is represented by the Python dictionary entry ('f',n) : ([x1,...,xn],E).
 # For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 

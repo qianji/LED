@@ -81,6 +81,14 @@ class ParserTest(unittest.TestCase):
         expected = [5,4,5,8]    
         self.assertEqual(expected,actural)      
         
+        # test for g3
+        Fname = 'g3' # name of the function
+        ParamsL = [ [-1],[0],[1],[2]] 
+        actural = self.functionValues(F,Fname,ParamsL)
+        # expected value of function calls
+        expected = [5,8,13,20]    
+        self.assertEqual(expected,actural)      
+        
         # test for 
         Fname = 'divisor'
         ParamsL = [[2,4],[2,0],[3,2]]
@@ -131,6 +139,30 @@ class ParserTest(unittest.TestCase):
         expected = [0,0,0]
         self.assertEqual(expected,actural)      
         
+        Fname = 'e'
+        ParamsL = [[],[],[]]
+        actural = self.functionValues(F,Fname,ParamsL)
+        expected = [2,2,2]
+        self.assertEqual(expected,actural)      
+        
+        Fname = 'positiveTen'
+        ParamsL = [[0],[3],[10],[11]]
+        actural = self.functionValues(F,Fname,ParamsL)
+        expected = [False,True,True,False]
+        self.assertEqual(expected,actural)      
+        
+        Fname = 'gridDisplay'
+        ParamsL = [[]]
+        actural = self.functionValues(F,Fname,ParamsL)
+        expected = [('set', [('tuple', [('tuple', [200, 100]), ('tuple', [200, 400])]), ('tuple', [('tuple', [300, 100]), ('tuple', [300, 400])]), ('tuple', [('tuple', [100, 200]), ('tuple', [400, 200])]), ('tuple', [('tuple', [100, 300]), ('tuple', [400, 300])])])]
+        self.assertEqual(expected,actural)      
+
+
+        Fname = 'currentPlayer'
+        ParamsL = [[]]
+        actural = self.functionValues(F,Fname,ParamsL)
+        expected = ['`x']
+        self.assertEqual(expected,actural)      
     '''
     This function test the function tokens in Tokenizer.py
     '''

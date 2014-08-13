@@ -7,8 +7,6 @@ from Expression import *
 from LEDProgram import *
 from Parser import *
 from Tokenizer import *
-
-from Evaluater import *
 '''    
 string -> 
 If F is the name of the file containing the function definitions of LED with .led as its extension, then compile(F) compile the functions in the file 
@@ -166,15 +164,7 @@ def parseIfThenDef(S):
         if f2: 
             #put the content in the dictionary
             key,value = p.head,p.body
-            #sub the expression
-            t1 = t.expression()
-            b = solutionSet(t1)
-            if b==None or len(b)==0:
-                expr = value[1]
-            else:
-                expr = subExpression(value[1].expression(),b[0])
-                expr = AST(expr)
-            d = Definition(key[0], value[0], expr,True)
+            d = Definition(key[0], value[0], p.body[1],t)
             return(d,True)    
         else:
             print('cannot parse then statement definition: ',' '.join(S[j+1:])) 
@@ -200,7 +190,7 @@ def parseFuncDef(S):
                 (t2,f2)= parseFuncBody(S[i+1:])
                 if f2: 
                     #put the content in the dictionary
-                    d = Definition(fName, fParams, t2, True)
+                    d = Definition(fName, fParams, t2, AST(True))
                     return(d,True)    
                 else:
                     print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
@@ -220,7 +210,7 @@ def parseRelDef(S):
                 (t2,f2)= parseSentence(S[i+1:])
                 if f2: 
                     #put the content in the dictionary
-                    d = Definition(fName, fParams, t2, True)
+                    d = Definition(fName, fParams, t2, AST(True))
                     return(d,True)    
                 else:
                     print('cannot parse function definition right side: ',' '.join(S[i+1:])) 

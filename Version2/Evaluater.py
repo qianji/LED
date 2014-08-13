@@ -44,8 +44,14 @@ def valBuiltIn(Op,Args):
 
 def valDefined(Op,Args): 
         F=(Op,len(Args))
-        params,funBody,g = Program.body(Op,len(Args))
-        groundBody = subAll(Args,params,funBody.expression())
+        (params,funBody,guardCon) = Program.body(Op,len(Args))
+        funBodyExpression = funBody.expression()
+        binding = solutionSet(guardCon.expression())
+        if binding==None or len(binding)==0:
+            expr=funBodyExpression
+        else:
+            expr=subExpression(funBodyExpression,binding[0])
+        groundBody = subAll(Args,params,expr)
         return DefVal( groundBody)
 
 def DefVal(fbody):
