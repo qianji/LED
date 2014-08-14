@@ -6,6 +6,7 @@
 
 from Tokenizer import *
 from Expression import *
+from fractions import Fraction
 '''
 This simple parser program parses the following grammar:
 
@@ -569,12 +570,10 @@ def parseT0(S):
             if flag: return (tree,True)
         if len(S)==1: 
             # numeral    
-            if isNumeral(S[0]): 
-                # if the numeral starts with 0 and numeral !=0
-                if len(S[0])>1 and S[0][0]=='0':
-                    return(AST(eval(S[0][1:])),True)
-                else:
-                    return (AST(eval(S[0])),True) 
+            if isNumeral(S[0]):
+                if S[0].isnumeric():
+                    return (AST(eval(S[0])),True)
+                return (AST(Fraction(S[0])),True)
             # identifier
             if isIdentifier(S[0]): return (AST(S[0]),True)
         # parse vector   

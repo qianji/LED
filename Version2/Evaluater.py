@@ -20,9 +20,7 @@ def val(E):
             return val(E.tree)
         else:
             return val(E.expression())
-    #print("Program is ",Program)
-    #E=self.tree
-    #print(E)
+    # if E is an expression 
     if isScalar(E): return E
     if isinstance(E,str) and Program.defined(E,0) : return valDefined(E,[])
     (Op,X) = E
