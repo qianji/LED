@@ -57,12 +57,14 @@ def run(F=''):
                         return play(expression[2])
                 tree, tFlag = parseExpression(expression)
                 if tFlag:
-                    print(prettyString(val(tree)))
+                    value = val(tree)
+                    if not value ==None:
+                        print(prettyString(value))
                     print()
                 else:
-                    print('Cannot parse the tree.')
+                    print('Failed to parse the expression. It is not a valid expressioin.')
             else:
-                print('Cannot tokenize the expression.')
+                print('Failed to tokenize the expression.The last 10 valid tokens are',expression[-10:])
 
 # play(F) executes the game defined in LED file F. 
 

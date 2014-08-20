@@ -47,7 +47,8 @@ def compile(F):
         # TODO:  Write program to log.txt instead of printing.
         # Separate the functions by line breaks.
     else:
-        print("Failed to tokenize the program")
+        #print("Failed to tokenize the program")
+        print('Failed to tokenize the program. The last 10 valid tokens are',text[-10:])
 
 '''
 str -> str

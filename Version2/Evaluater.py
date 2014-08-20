@@ -23,6 +23,9 @@ def val(E):
     # if E is an expression 
     if isScalar(E): return E
     if isinstance(E,str) and Program.defined(E,0) : return valDefined(E,[])
+    if isinstance(E,str) and not Program.defined(E,0): 
+        print("0-ary function",E,"is not defined") 
+        return
     (Op,X) = E
     if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec'}: Args=X  
     else: 
@@ -35,6 +38,9 @@ def val(E):
     #if Op=='all'   : return valAll(Args)
     if Op in builtIns : return valBuiltIn(Op,Args)
     if Program.defined(Op,len(Args)): return valDefined(Op,Args)
+    if not Program.defined(Op,len(Args)): 
+        print(str(len(Args))+"-ary function",Op,"is not defined") 
+        return
 
 def valBuiltIn(Op,Args):
         F = builtIns[Op]
@@ -259,7 +265,7 @@ For example,  x+y+z+p.{(x,1), (y,3), (z,4)} is the term 1+3+4+p.
 Binding b is a solution of sentence S if S.b is true. 
 For example, {(x,1)} is a solution of x^2 = 1 but {(x,5)} is not.
 
-Bindings b1 and b2 are *inconsistent* if there are pairs of the form (x,c1) and (x,c2) such that (x,c1) ∈  b1, (x,c2) ∈  b2, and the statement c1=c2 is false. 
+Bindings b1 and b2 are *inconsistent* if there are pairs of the form (x,c1) and (x,c2) such that (x,c1) belongs to  b1, (x,c2) belongs to  b2, and the statement c1=c2 is false. 
 Two bindings that are not inconsistent are said to be consistent.
 
 The solution set of a sentence p, written S(p), is defined as follows, provided it can be computed by finitely applications of the following rules.
@@ -271,7 +277,7 @@ The solution set of a sentence p, written S(p), is defined as follows, provided 
 5.If p is of the form x in c, where x is a variable and c is a ground term with value {c1,...,cn}, then S(p) = {{(x,c1)},...,{(x,cn}}. 
     Note that, by this definition, if c is the empty set the value of S(p) is { }. 
 6.If p is of the form p1 or p2,  then S(p) = S(p1) U S(p2).
-7.If p is of the form p1 & p2, then S(p) = { b1 U b2 | b1 ∈ S(p1), b2 ∈ S(p2.b1), b1 consistent with b2 }.
+7.If p is of the form p1 & p2, then S(p) = { b1 U b2 | b1 belongs to S(p1), b2 belongs to S(p2.b1), b1 consistent with b2 }.
 
 The intuitive interpretation of the binding {(x1,c1),...,(xn,cn)} is x1=c1 &...&xn=cn. 
 The intuitive interpretation of the solution set {b1,...,bn} is I(b1) or ... or I(bn), where I(b) is the interpretation of b. 
