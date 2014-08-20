@@ -41,7 +41,7 @@ def compile(F):
                 #print('parsing #',i,"function successfully",' '.join(funcs[i]))
                 Program.update(d)
             else:
-                print("Failed parsing #",i," function: ", ' '.join(funcs[i]))
+                print("Failed to parse #",i," function: ", ' '.join(funcs[i]))
                 return
         print('Parsed program ', F, " successfully")
         # TODO:  Write program to log.txt instead of printing.
@@ -75,11 +75,12 @@ def removeComments(FS):
     return allFunctionsText
 
 '''
+This is an function for parsing an alternative way of definition using := in a program. For example, f(x):= x+2 is a definition.
 # string -> list< list<string> >
 # if S is a string of the program that has f1, f2, ... fn functions, then parseProgram(S)=([L1, L2, ... Ln],True), where L1... Ln 
 # are lists of corresponding function to f1, f2,... fn.
 '''
-def parseProgram(S):
+def parseProgramColomnEqual(S):
     allFunctions = []
     separators = ['iff',':=']
     lpI = 0
@@ -122,6 +123,46 @@ def parseProgram(S):
     return allFunctions
 
 '''
+# string -> list< list<string> >
+# if S is a string of the program that has f1, f2, ... fn functions, then parseProgram(S)=([L1, L2, ... Ln],True), where L1... Ln 
+# are lists of corresponding function to f1, f2,... fn.
+'''
+def parseProgram(S):
+    allFunctions = []
+    separators = ['def']
+    lpI = 0
+    while len(S)>0:
+        # find the first 'def' in S
+        firstI = firstIndex(separators,S)
+        if firstI ==None:
+            allFunctions.append(S)
+            S=[]
+        else:
+            # find the second 'def' in S
+            secondI = firstIndex(separators,S[firstI+1:])
+            # if there is only one 'def'
+            if secondI==None:
+                allFunctions.append(S)
+                S=[]
+            else:
+                # secondeI is the index-1 of the second 'def' in S
+                secondI += firstI
+                # try to find the first 'If'  
+                ifIndex = firstIndexBack('If',secondI,S)
+                # find the end of the first function definition
+                if ifIndex == None or ifIndex==0:
+                    end = secondI
+                else:
+                    end = ifIndex-1
+                eachFunc = S[:end+1]
+                allFunctions.append(eachFunc)
+                if end+1==0:
+                    S = []
+                else:
+                    S = S[end+1:]
+    return allFunctions
+
+'''
 string -> dict * bool
 If S is a string of the function definitions of funcDef or relDef defined in LED, then parseDfn(S) = (dict,True), where dict is a dictionary 
 otherwise parseDfn(S) = (None,False)
@@ -136,13 +177,13 @@ def parseDfn(S):
     def3,flag3 = parseIfThenDef(S)
     if flag3:
         return (def3,True)
-    def2,flag2 = parseFuncDef(S)
-    if flag2:
-        return (def2,True)
+
     def1,flag1 = parseRelDef(S)
     if flag1:
         return (def1,True)
-
+    def2,flag2 = parseFuncDef(S)
+    if flag2:
+        return (def2,True)
     return (None,False) 
 
 '''
@@ -156,12 +197,12 @@ For example, the following program If x=2 & y=3 then h := x+y  would be represen
 def parseIfThenDef(S):
     try:
         i = S.index('If')
-        j = S.index('then')
+        j = S.index('def')
     except ValueError:
         return(None,False)
     t,f1 = parseSentence(S[i+1:j])
     if f1:
-        (p,f2)= parseFuncDef(S[j+1:])
+        (p,f2)= parseFuncDef(S[j:])
         if f2: 
             #put the content in the dictionary
             key,value = p.head,p.body
@@ -183,10 +224,10 @@ For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represe
 '''
 def parseFuncDef(S):
     for i in range(len(S)):
-        if S[i]==':=':
-            t1,f1 = parseLHS(S[0:i])
+        if S[i]=='=':
+            t1,f1 = parseLHS(S[1:i])
             if f1:
-                (fName,fParams)=parseLHS(S[0:i])[0]
+                (fName,fParams)=parseLHS(S[1:i])[0]
                 paramNumber = len(fParams)
                 (t2,f2)= parseFuncBody(S[i+1:])
                 if f2: 
@@ -204,9 +245,9 @@ def parseFuncDef(S):
 def parseRelDef(S):
     for i in range(len(S)):
         if S[i]=='iff':
-            t1,f1 = parseLHS(S[0:i])
+            t1,f1 = parseLHS(S[1:i])
             if f1:
-                (fName,fParams)=parseLHS(S[0:i])[0]
+                (fName,fParams)=parseLHS(S[1:i])[0]
                 paramNumber = len(fParams)
                 (t2,f2)= parseSentence(S[i+1:])
                 if f2: 

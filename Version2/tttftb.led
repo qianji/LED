@@ -47,48 +47,48 @@ This section defines the rules of tic-tac-toe in LED.
 Since the state of the game is the set of moves that have been made, the beginning state *init* is the empty set.
 
 /----------
- init := {} 
+ def init = {} 
 -----------/
 
 *cells* is the set of all cells on the board:
 
 /---------------------
- cells := {1..9}
+ def cells = {1..9}
 ---------------------/
 
 /---------------------
- gameBoard := {1..9}
+ def gameBoard = {1..9}
 ---------------------/
 
 Player p *occupies* cell c if the move (p,c) is a member of Gamma; and cell c is *occupied* if it is occupied by `x or by `o.
 
 /--------------------------------------------------
- occupies(p,c) iff (p,c) in Gamma
- occupied(c)   iff occupies(`x,c) or occupies(`o,c)
+ def occupies(p,c) iff (p,c) in Gamma
+ def occupied(c)   iff occupies(`x,c) or occupies(`o,c)
 ---------------------------------------------------/
 
 A *row* is a set of cells that form three in a row either horizontally, vertically, or diagonally. Techincally, they could be called 'lines', but "three in a row" is an Anglo-American cultural idiom, while "three in a line" is not.
 
 /------------------------------------------
- hRows := {{1,2,3},{4,5,6},{7,8,9}}
- vRows := {{1,4,7},{2,5,8},{3,6,9}}
- diagonals := {{1,5,9},{3,5,7}}
+ def hRows = {{1,2,3},{4,5,6},{7,8,9}}
+ def vRows = {{1,4,7},{2,5,8},{3,6,9}}
+ def diagonals = {{1,5,9},{3,5,7}}
 
- rows := hRows U vRows U diagonals
+ def rows = hRows U vRows U diagonals
 -------------------------------------------/
 
 Player p has *three in a row* if he occupies all of the cells in 
 some row.
 
 /---------------------------------------------
- threeInRow(p) iff 
+ def threeInRow(p) iff 
    some R in rows: all c in R: occupies(p,c)
 ---------------------------------------------/
 
 The *board is full* if all cells are occupied.
 
 /----------------------------------
- boardFull iff
+ def boardFull iff
    all c in cells: occupied(c)
 -----------------------------------/
 
@@ -96,26 +96,26 @@ The *game is over* if either the board is full, or one of the players
 has three in a row. 
 
 /------------------------------------------------- 
-gameOver iff
-   boardFull or threeInRow(`x) or threeInRow(`o)
+ def gameOver iff
+    boardFull or threeInRow(`x) or threeInRow(`o)
 -------------------------------------------------/
 
 If the game is not over, the *player to move* is `x if an even number of moves have been made, 
 and `o otherwise.
 
 /-----------------------
- If ~gameOver then
-   currentPlayer:=
+ If ~gameOver def
+   currentPlayer=
      `x if even(|Gamma|);
      `o otherwise
  
- even(n) iff n mod 2=0
+ def even(n) iff n mod 2=0
 ------------------------/
 
 *legalToMoveIn(c)* means that it is legal for the player whose turn it is to move in cell c in the current state of the game -- that is, if the game is not over and the cell is not occupied.
 
 /----------------------------------------------- 
- legalToMoveIn(c) iff  ~occupied(c) &  ~gameOver   
+ def legalToMoveIn(c) iff  ~occupied(c) &  ~gameOver   
 ------------------------------------------------/
 
 
@@ -134,34 +134,34 @@ If
  L2 = ((300,100),(300,400)) &
  L3 = ((100,200),(400,200)) &
  L4 = ((100,300),(400,300))
-then
- gridDisplay := {L1,L2,L3,L4}
+def
+ gridDisplay = {L1,L2,L3,L4}
 -----------------------------/
 
 
 The default font size for displayed text in this program is 15.
 
 /--------------
-fontSize :=15
+ def fontSize =15
 ---------------/
 
 *centerX(c)* and *centerO(c)* are the x and y coordinates of the center of cell c, respectively.
 
 /-----------------------------------
-centerX(c):=150+100*((c-1) mod 3)
-centerO(c):=350-100*(floor((c-1)/3))
+ def centerX(c)=150+100*((c-1) mod 3)
+ def centerO(c)=350-100*(floor((c-1)/3))
 ------------------------------------/
 
 *cellDisplay(c)* is a display of a text character 'x' or an 'o' in cell c, or the empty display, respectively in case cell c is occupied by `x, occupied by `o, or not occupied in the current game state. 
 
 /-----------------------------------------------
- xImage(c) :=
+ def xImage(c) =
   ((centerX(c), centerO(c)), fontSize,<120>)
   
-oImage(c) :=
+ def oImage(c) =
   ((centerX(c), centerO(c)), fontSize,<111>)
 
-cellDisplay(c) :=
+ def cellDisplay(c) =
     {xImage(c)} if (`x,c) in Gamma;  
     {oImage(c)} if (`o,c) in Gamma; 
     {}          otherwise
@@ -170,19 +170,19 @@ cellDisplay(c) :=
 *playerImages* is the set of all images of x's and o's on the board in the current state.
 
 /--------------------------------------
- cellDisplays:=
-   Union[c in gameBoard] cellDisplay(c)
+ def cellDisplays=
+    Union[c in gameBoard] cellDisplay(c)
 ---------------------------------------/
 
 If the game is not over, *currentPlayerDisplay* is a text in the upper left hand region of the game window indicating the player to move, either "play x's turn" or "play o's turn", 
 
 /-----------------------------------------------------
- playXsTurnStr :=
+ def playXsTurnStr =
    <112,108,97,121,32,120,39,115,32,116,117,114,110>
- playOsTurnStr :=
+ def playOsTurnStr =
    <112,108,97,121,32,111,39,115,32,116,117,114,110>
 
- currentPlayerDisplay:= 
+ def currentPlayerDisplay= 
    {((100,450),15,playXsTurnStr)} if currentPlayer=`x;
    {((100,450),15,playOsTurnStr)} if currentPlayer=`o
 --------------------------------------------------------/
@@ -197,8 +197,8 @@ The *restart button* consists of a rectangle around a "restart" text, displayed 
    A4 = ((500,475),(500,425)) &
    restartText = 
      ((450, 450), 15,<114,101,115,116,97,114,116>)
- then
-   restartButton := {A1,A2,A3,A4,restartText}
+ def
+   restartButton = {A1,A2,A3,A4,restartText}
 
 
 /--------------------------------------------------------
@@ -208,14 +208,14 @@ The *restart button* consists of a rectangle around a "restart" text, displayed 
    A3 = ((400,475),(400,425)) &
    A4 = ((500,475),(500,425))
 
- then
-   restartGrid := {A1,A2,A3,A4}
+ def
+   restartGrid = {A1,A2,A3,A4}
 ---------------------------------------------------------/
 
 /--------------------------------------------------------
 If    restartText = 
      ((450, 450), 15,<114,101,115,116,97,114,116>)
-   then restartButton := restartGrid U {restartText}
+   def restartButton = restartGrid U {restartText}
      
 ---------------------------------------------------------/
 
@@ -223,15 +223,15 @@ If    restartText =
 If the game is over, *gameResultDisplay* is a display in the upper left region of the screen telling the outcome of the game, either 'x won!', "o won!", or "The cat got it!"
 
 /-------------------------------------------------------
- xWonStr := <120, 32, 119, 111, 110, 33>
+ def xWonStr = <120, 32, 119, 111, 110, 33>
 
- oWonStr := <111, 32, 119, 111, 110, 33>
+ def oWonStr = <111, 32, 119, 111, 110, 33>
 
- catStr:= 
+ def catStr= 
   <84,104,101,32,99,97,116,32,103,111,116,32,105,116,33>
 
- If gameOver then
-   gameResultDisplay := 
+ If gameOver def
+   gameResultDisplay = 
     {((100,450),15,xWonStr)} if threeInRow(`x);
     {((100,450),15,oWonStr)} if threeInRow(`o);
     {((100,450),15,catStr)}  otherwise
@@ -241,16 +241,16 @@ If the game is over, *gameResultDisplay* is a display in the upper left region o
 The *display* is the screen display for the current game state. The grid, cell displays, and restart button are always displayed. Additionally, the display includes the game results if the game is over, and the player to move if the game is not over.  
 
 /------------------------------------------
- alwaysDisplay :=
+ def alwaysDisplay =
    gridDisplay  U cellDisplays  U restartButton 
 
- gameInPlayDisplay := 
+ def gameInPlayDisplay = 
    alwaysDisplay U currentPlayerDisplay
 
- gameOverDisplay := 
+ def gameOverDisplay = 
    alwaysDisplay U gameResultDisplay
 
- display := 
+ def display = 
    gameOverDisplay   if gameOver;
    gameInPlayDisplay otherwise
 ------------------------------------------/
@@ -266,22 +266,22 @@ This section defines *update*, which specifies the program's response to mouse i
 *xMin(c)*, *xMax(c)*, *yMin(c)*, and *yMax(c)* denote the graphical boundaries of cell c, in the obvious manner.
 
 /----------------------------------
- xMin(c) := 100+100*((c-1) mod 3) 
- xMax(c) := 200+100*((c-1) mod 3)
- yMin(c):= 300-100*(floor((c-1)/3))
- yMax(c):= 400-100*(floor((c-1)/3)) 
+ def xMin(c) = 100+100*((c-1) mod 3) 
+ def xMax(c) = 200+100*((c-1) mod 3)
+ def yMin(c)= 300-100*(floor((c-1)/3))
+ def yMax(c)= 400-100*(floor((c-1)/3)) 
 ------------------------------------/
 
 The x and y coordinates of a point are its 1st and 2nd coordinates, respectively.
 
 /-------------------------------------
- xCoord(pt):= pt[1]    yCoord(pt):= pt[2]
+ def xCoord(pt)= pt[1]    def yCoord(pt)= pt[2]
 --------------------------------------/
 
 clicked(c) means that cell c has been clicked. 
 
 /------------------------------------------------------------
- clicked(c) iff 
+ def clicked(c) iff 
      (xCoord(click)>xMin(c)) & (xCoord(click)< xMax(c)) &
      (yCoord(click)>yMin(c)) & (yCoord(click)< yMax(c))
 -------------------------------------------------------------/
@@ -289,7 +289,7 @@ clicked(c) means that cell c has been clicked.
 *restartClicked* means that the most recent mouse click is inside the region of the play again button.
 
 /-------------------------------------------
- restartClicked iff 
+ def restartClicked iff 
    xCoord(click)>400 & xCoord(click)<500 & 
    yCoord(click)>425 & yCoord(click)<725
 ---------------------------------------------/
@@ -297,14 +297,14 @@ clicked(c) means that cell c has been clicked.
 *moveMade(c)* means that cell c has been clicked and the player to move may legally move there. *movesMade* is the set of all moves made by the most recent mouse click, which will either be a singleton or empty.
 
 /-------------------------------------------------------------
- moveMadeIn(c) iff clicked(c) & legalToMoveIn(c)
+ def moveMadeIn(c) iff clicked(c) & legalToMoveIn(c)
 
- movesMade := {(currentPlayer,c) | c in cells & moveMadeIn(c)}
+ def movesMade = {(currentPlayer,c) | c in cells & moveMadeIn(c)}
 --------------------------------------------------------------/
 
 
 /---------------------------------------
-newState := 
+ def newState = 
   init               if restartClicked;
   Gamma U movesMade  otherwise
 ----------------------------------------/
