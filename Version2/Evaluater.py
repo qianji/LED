@@ -13,6 +13,7 @@ In this program, the variable E will vary over Expression's.
 from Expression import *
 from LEDProgram import Program
 from _functools import reduce
+from fractions import Fraction
 # If E is an expression or AST, val(E) is the value of E.
 def val(E):
     if isinstance(E,AST):
@@ -99,14 +100,14 @@ def sub(c,x,T):
 def valAdd(X): return(X[0]+X[1])
 def valSubtract(X): return X[0]-X[1]
 def valMult(X): return X[0]*X[1]
-def valDiv(X): return 'Zero Division Error: the division cannot be zero' if X[1]==0 else X[0] / X[1]
+def valDiv(X): return 'Zero Division Error: the division cannot be zero' if X[1]==0 else Fraction(X[0]) / Fraction(X[1])
 def valExp(X): return X[0]**X[1]
 def valUnaryPlus(X): return X[0]
 def valUnaryMinus(X): return -X[0]
 def valFloor(X): return int(math.floor(X[0]))
 def valCeil(X): return int(math.ceil(X[0]))
 def valAbs(X):return abs(X[0])
-def valMod(X): return 'Zero Division Error: the division cannot be zero' if X[1]==0 else X[0] % X[1]
+def valMod(X): return 'Zero Division Error: the division cannot be zero' if X[1]==0 else Fraction(X[0]) % Fraction(X[1])
 def valLess(X): return X[0]< X[1]
 def valGreater(X): return X[0] > X[1]
 def valLesEq(X): return X[0]<=X[1]
