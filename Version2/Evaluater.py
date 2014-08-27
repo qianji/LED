@@ -48,12 +48,17 @@ def valBuiltIn(Op,Args):
         return F(Args)
 
 def valDefined(Op,Args): 
-        F=(Op,len(Args))
+        # Op is the name of user defined function
         (params,funBody,guardCon) = Program.body(Op,len(Args))
         funBodyExpression = funBody.expression()
-        binding = solutionSet(guardCon.expression())
+        # substitute for all the instances of paramters in the function definition
+        guardConExpr = guardCon.expression()
+        subGuardConExpr = subAll(Args,params,guardConExpr)
+        # find the solution set of the guard condition
+        binding = solutionSet(subGuardConExpr)
         if binding==None or len(binding)==0:
-            expr=funBodyExpression
+            print('Erroneous call',Op,'.Guard condition of function',Op,'is not meet.')
+            return
         else:
             expr=subExpression(funBodyExpression,binding[0])
         groundBody = subAll(Args,params,expr)
