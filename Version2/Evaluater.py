@@ -23,7 +23,14 @@ def val(E):
             return val(E.expression())
     # if E is an expression 
     if isScalar(E): return E
-    if isinstance(E,str) and Program.defined(E,0) : return valDefined(E,[])
+    if isinstance(E,str) and Program.defined(E,0) :  
+        #return valDefined(E,[])
+        value = valDefined(E,[])
+        if not value==None:
+            return value
+        print('Error in evaluating call',str(E)+'()')
+        return
+    
     if isinstance(E,str) and not Program.defined(E,0): 
         print("0-ary function",E,"is not defined") 
         return
@@ -32,17 +39,43 @@ def val(E):
     else: 
         #print(E)
         Args = [val(E) for E in X]
+    # return None if one of the arguments is None
+    if hasNone(Args): 
+        #print('One of the arguments is not valid')
+        return 
     if Op=='vector': return ('vector',Args)
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
     #if Op=='some'  : return valSome(Args)
     #if Op=='all'   : return valAll(Args)
-    if Op in builtIns : return valBuiltIn(Op,Args)
-    if Program.defined(Op,len(Args)): return valDefined(Op,Args)
+    if Op in builtIns : 
+        # check if Op is one of the Big Operations
+        #if Op in ['setComp','Union','Sum','Prod','Nrsec']:
+        try:
+            return valBuiltIn(Op,Args)
+        except:
+            print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
+            return
+    if Program.defined(Op,len(Args)): 
+    #return  valDefined(Op,Args)
+        value = valDefined(Op,Args)
+        if not value == None:
+            return value
+        print('Error in evaluating call',str(Op)+'('+prettyStack(Args)+')')       
+        return
+    
     if not Program.defined(Op,len(Args)): 
         print(str(len(Args))+"-ary function",Op,"is not defined") 
         return
 
+# If Args is a list of values. hasNone(Args) is True iff there is at least one element in Args whose value is None.
+def hasNone(Args):
+    if Args == None:
+        return True
+    for arg in Args:
+        if arg==None:
+            return True
+    return False
 def valBuiltIn(Op,Args):
         F = builtIns[Op]
         return F(Args)
@@ -53,8 +86,7 @@ def valDefined(Op,Args):
         funBodyExpression = funBody.expression()
         # substitute for all the instances of paramters in the function definition
         guardConExpr = guardCon.expression()
-        subGuardConExpr = subAll(Args,params,guardConExpr)
-        # find the solution set of the guard condition
+        subGuardConExpr = subAll(Args,params,guardConExpr)     # find the solution set of the guard condition
         binding = solutionSet(subGuardConExpr)
         if binding==None or len(binding)==0:
             print('Erroneous call',Op,'.Guard condition of function',Op,'is not meet.')
@@ -102,17 +134,29 @@ def sub(c,x,T):
 # valNonStrictAnd and valNonStrictImplies.
 
 # Arithmetic ops                   
-def valAdd(X): return(X[0]+X[1])
+def valAdd(X): 
+    return X[0]+X[1]
 def valSubtract(X): return X[0]-X[1]
 def valMult(X): return X[0]*X[1]
-def valDiv(X): return 'Zero Division Error: the division cannot be zero' if X[1]==0 else Fraction(X[0]) / Fraction(X[1])
+def valDiv(X): 
+    if X[1]==0:
+        print('Zero Division Error: the division cannot be zero')
+        return
+    else:
+        return Fraction(X[0]) / Fraction(X[1])
 def valExp(X): return X[0]**X[1]
 def valUnaryPlus(X): return X[0]
 def valUnaryMinus(X): return -X[0]
 def valFloor(X): return int(math.floor(X[0]))
 def valCeil(X): return int(math.ceil(X[0]))
 def valAbs(X):return abs(X[0])
-def valMod(X): return 'Zero Division Error: the division cannot be zero' if X[1]==0 else Fraction(X[0]) % Fraction(X[1])
+def valMod(X):
+    if X[1]==0:
+        print('Zero Division Error: the division cannot be zero')
+        return
+    else:
+        return Fraction(X[0]) % Fraction(X[1])
+
 def valLess(X): return X[0]< X[1]
 def valGreater(X): return X[0] > X[1]
 def valLesEq(X): return X[0]<=X[1]
@@ -131,18 +175,36 @@ def valSub(X):
     return L[index-1]
 
 # set operations
-def valIn(X): return any({valEq([X[0],Y]) for Y in X[1][1]})
-def valSetEq(X): return valSubeq([X[0],X[1]]) and valSubeq([X[1],X[0]])
-def valSubeq(X):return  all(  {valIn([e,X[1]]) for e in X[0][1]}  )
-def valUnion(X): return ('set', X[0][1] + [e for e in X[1][1] if not valIn([e,X[0]])])
-def valNrsec(X): return ('set',[e for e in X[0][1] if valIn([e,X[1]])])
-def valSetSubtr(X): return ('set',[e for e in X[0][1] if not valIn([e,X[1]])])
-def valCrossProd(X): return ('set',[('tuple',[a,b]) for a in X[0][1] for b in X[1][1]])
+def valIn(X): 
+    if isSet(X[1]) or isTuple(X[1]) or isVector(X[1]): return any({valEq([X[0],Y]) for Y in X[1][1]})
+    print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
+def valSetEq(X): 
+    if isSet(X[0]) and isSet(X[1]): return valSubeq([X[0],X[1]]) and valSubeq([X[1],X[0]])
+    print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
+def valSubeq(X):
+    if isSet(X[0]) and isSet(X[1]) : return  all(  {valIn([e,X[1]]) for e in X[0][1]}  )
+    print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
+def valUnion(X): 
+    if isSet(X[0]) and isSet(X[1]) :return ('set', X[0][1] + [e for e in X[1][1] if not valIn([e,X[0]])])
+    print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
+def valNrsec(X):
+    if isSet(X[0]) and isSet(X[1]): return ('set',[e for e in X[0][1] if valIn([e,X[1]])])
+    print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
+def valSetSubtr(X):
+    if isSet(X[0]) and isSet(X[1]): return ('set',[e for e in X[0][1] if not valIn([e,X[1]])])
+    print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
+def valCrossProd(X):
+    if isSet(X[0]) and isSet(X[1]): return ('set',[('tuple',[a,b]) for a in X[0][1] for b in X[1][1]])
+    print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
+
 def valCardinal(X):
     Arg = X[0]
     elts = Arg[1]
     return len([i for i in range(len(elts)) if not valIn([ elts[i], ('set',elts[i+1:]) ])])
 def valPow(X):
+    if not isSet(X[0]):
+        print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
+        return
     [Arg] = X
     elts = Arg[1]
     if elts ==[] : return ('set',[('set',[])])
@@ -154,10 +216,17 @@ def valPow(X):
         a = a + [('set',[head]+e[1])]
     return ('set',S[1] + a)
         
-def valChoose(X): return X[0][1][0]
+def valChoose(X):
+    # The choice function of random is used for choosing a random element from the set.
+    import random
+    if isSet(X[0]): return random.choice(X[0][1])
+    print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valIntRange(X):
     s = []
     l,u = X
+    if not (isinstance(l,int) and isinstance(u,int)):
+        print('Operation .. not valid on arguments:',prettyArgs(Args))            
+        return
     for i in range(l,u+1):
         s.append(i)
     return ('set',s)
@@ -179,10 +248,12 @@ def valIff(X): return X[0]==X[1]
 def valPlus(X):
     if isNumber(X[0]) and isNumber(X[1]): return valAdd(X)
     if isVector(X[0]) and isVector(X[1]): return valCat(X)
+    print('Operation + not valid on arguments:',prettyString(X[0]), 'and',prettyString(X[1]) )
 def valPipes(X):
     if isNumber(X[0]): return valAbs(X)
     if isVector(X[0]): return valLen(X)
     if isSet(X[0])   : return valCardinal(X)
+    print('Operation || not valid on arguments:',prettyString(X[0]))    
 def valEq(X):
     [a,b] = X
     if isSet(a) and isSet(b) : return valSetEq(X)
@@ -194,12 +265,16 @@ def valEq(X):
 def valStar(X):
     if isNumber(X[0]) and isNumber(X[1]): return valMult(X)
     if isSet(X[0]) and isSet(X[1]): return valCrossProd(X)
+    print('Operation * not valid on arguments:',prettyString(X[0]), 'and',prettyString(X[1]) )    
 
 # quantifiers
 def valSome(Args):
     # The AST of some var  in  t : s  is ('some',[var, A, B]), where A and B are the respective AST's of t and s. 
     # [var, A, B] = X
     var,t,s = Args
+    if not isSet(val(t)):
+        print('Operation some not valid on arguments:',prettyArgs([var,t]))
+        return
     for i in val(t)[1]:
         if val(sub(i,var,s))==True:
             return True
@@ -208,6 +283,9 @@ def valAll(Args):
     # The AST of all var  in  t : s  is ('all',[var, A, B]), where A and B are the respective AST's of t and s. 
     # [var, A, B] = X
     var,t,s = Args
+    if not isSet(val(t)):
+        print('Operation some not valid on arguments:',prettyArgs([var,t]))
+        return
     for i in val(t)[1]:
         if not val(sub(i,var,s))==True:
             return False
@@ -424,3 +502,6 @@ def areConsistent(b1,b2):
 def dot(t,b):
     e = subExpression(t,b)
     return val(e)
+     # find the solution set of the guard condition
+
+

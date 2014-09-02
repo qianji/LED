@@ -12,20 +12,6 @@ from Parser import *
 from Compiler import *
 from EaselLED import *
 
-def prettyString(E):
-    if isNumber(E) or isAtom(E): return(str(E))
-    if isSet(E): return('{' + prettyStack(E[1]) + '}')
-    if isVector(E): return( '<' + prettyStack(E[1]) + '>')
-    if isTuple(E): return( '(' + prettyStack(E[1]) + ')')
-
-def prettyStack(elts):
-    Str = ''
-    if not elts==[]:
-        Str += prettyString(elts[0])
-        for e in elts[1:]:
-            Str += ',' + prettyString(e)
-    return Str  
-
 '''
 If F is a string which is the name of a .led file (without the extension) run(F)
 compiles program F and lets the user enter expressions to evaluate using the
@@ -57,10 +43,13 @@ def run(F=''):
                         return play(expression[2])
                 tree, tFlag = parseExpression(expression)
                 if tFlag:
-                    value = val(tree)
-                    if not value ==None:
-                        print(prettyString(value))
-                    print()
+                    try:
+                        value = val(tree)
+                        if not value ==None:
+                            print(prettyString(value))
+                        print()
+                    except:
+                        print('Failed to evaluate the expression. It is not a valid expression')
                 else:
                     print('Failed to parse the expression. It is not a valid expressioin.')
             else:

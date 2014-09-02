@@ -9,6 +9,7 @@ An *Expression* is one of the following
 
 '''
 import numbers, math
+from fractions import Fraction
 class AST:
     # An AST is either a variable, a number, a quoted symbol, 
     # or a non-empty list, whose first element is an operator and whose remaining elements are AST's. 
@@ -60,7 +61,7 @@ class AST:
             if isinstance(F,str): return (F,eArgs)
             else: return (F.expression(),eArgs)
     
-def isNumber(E): return isinstance(E,numbers.Number)
+def isNumber(E): return isinstance(E,numbers.Number) or isinstance(E,Fraction)
 def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
 def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
@@ -70,4 +71,30 @@ def isVar(x): return isinstance(x,str) and not isSymbol(x)
 def isBool(x): return isinstance(x,bool)
 def isAtom(x): return False if x==None else isScalar(x) or isVar(x)
 
+def prettyString(E):
+    if isNumber(E) or isAtom(E): return(str(E))
+    if isSet(E): return('{' + prettyStack(E[1]) + '}')
+    if isVector(E): return( '<' + prettyStack(E[1]) + '>')
+    if isTuple(E): return( '(' + prettyStack(E[1]) + ')')
 
+def prettyStack(elts):
+    Str = ''
+    if not elts==[]:
+        Str += prettyString(elts[0])
+        for e in elts[1:]:
+            Str += ',' + prettyString(e)
+    return Str  
+
+# if Args is a list of Expressions, then prettyArgs(Args) is the string concentated with each arg in Args, sepereated with comma
+# For example, if Args = [2,('tuple',[2,3]),3,('vector',[1,2])] then prettyArgs(Args) = '2, (2,3), 3, and [1,2]'
+def prettyArgs(elts):
+    Str = ''
+    if not elts==[]:
+        Str += prettyString(elts[0])
+        for e in elts[1:]:
+            if e == elts[-1]:
+                Str += ' and ' + prettyString(e)
+            else:
+                Str += ',' + prettyString(e)
+    return Str  
+    
