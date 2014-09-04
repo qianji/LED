@@ -176,7 +176,7 @@ def valSub(X):
 
 # set operations
 def valIn(X): 
-    if isSet(X[1]) or isTuple(X[1]) or isVector(X[1]): return any({valEq([X[0],Y]) for Y in X[1][1]})
+    if isSet(X[1]): return any({valEq([X[0],Y]) for Y in X[1][1]})
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valSetEq(X): 
     if isSet(X[0]) and isSet(X[1]): return valSubeq([X[0],X[1]]) and valSubeq([X[1],X[0]])
