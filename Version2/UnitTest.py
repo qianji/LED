@@ -186,6 +186,14 @@ class ParserTest(unittest.TestCase):
 #         self.assertEqual(expected,actural)
      
     def test_evaluater(self):  
+
+        # test for arithmatic operations  
+        expressions = ['2','002','0.2','2+2.2']
+        actural = self.expressionValues(expressions)
+        expected = [2,2,Fraction('0.2'),Fraction('4.2')]
+        self.assertEqual(expected,actural)
+
+
         # test for operators of tuple  
         expressions = ['(1,2)[1]']
         actural = self.expressionValues(expressions)
