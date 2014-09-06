@@ -3,24 +3,35 @@ LED evaluator
 Dr. Nelson Rushton, Texas Tech University
 July, 2014
 
+##########################################
+Definitions
+
 An *Expression* is one of the following
 
   1. a number
   2. A pair (F,X) where F is an operator and X is a list of expressions.
 
+An *LED data* is a rational number, an atom, a truth value, a vector of data, a finite set of data, a tuple of data 
+
 In this program, the variable E will vary over Expression's.
+The top function of this file is val
+
+##########################################
+Error handling in the evaluator
+
+The function signature of val is Expression -> LED data * str
+If E is an expression and all the operations in E are valid, val(E)=(v,None), where v is the value of E.
+If E is an expression and one of the operations in E is not valid, val(E) = (None,message), where message is a string indicating which operation is not valid.
+
+All the functions that are called within val should return the same format of the result as val, which is LED data * str.
+##########################################
+
 """
 from Expression import *
 from LEDProgram import Program
 from _functools import reduce
 from fractions import Fraction
-# If E is an expression or AST, val(E) is the value of E.
 def val(E):
-    if isinstance(E,AST):
-        if E.isAtom():
-            return val(E.tree)
-        else:
-            return val(E.expression())
     # if E is an expression 
     if isScalar(E): return E
     if isinstance(E,str) and Program.defined(E,0) :  
@@ -30,7 +41,7 @@ def val(E):
             return value
         print('Error in evaluating call',str(E)+'()')
         return
-    
+   
     if isinstance(E,str) and not Program.defined(E,0): 
         print("0-ary function",E,"is not defined") 
         return

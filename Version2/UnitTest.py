@@ -32,7 +32,7 @@ class ParserTest(unittest.TestCase):
             if eFlag:
                 tree, tFlag = parseExpression(expression)
                 if tFlag:
-                    values.append(val(tree))
+                    values.append(val(tree.expression()))
         return values      
 
     '''
@@ -47,7 +47,7 @@ class ParserTest(unittest.TestCase):
             e=tokens(e)[0]
             #v = val(parseExpression(e)[0])
             tree = parseExpression(e)[0]
-            v = val(tree)
+            v = val(tree.expression())
             #v=tree.val()
             values.append(v)
         return values

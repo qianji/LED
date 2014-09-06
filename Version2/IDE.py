@@ -44,7 +44,7 @@ def run(F=''):
                 tree, tFlag = parseExpression(expression)
                 if tFlag:
                     try:
-                        value = val(tree)
+                        value = val(tree.expression())
                         if not value ==None:
                             print(prettyString(value))
                         print()
@@ -72,7 +72,7 @@ def play(F):
     gammaDef = Definition('Gamma',[],initBody[1])
     # update Gamma in the program
     Program.update(gammaDef)
-    images = [convert(x) for x in val(AST('display'))[1]]
+    images = [convert(x) for x in val(AST('display').expression())[1]]
     # Create a window to play in
     while(True):
         for x in images: x.draw(displayWindow)
@@ -85,8 +85,8 @@ def play(F):
         # update newState in Program
         newStateBody = Program.body('newState',0)
         # convert the value of newState into a AST and put it as the body of Gamma
-        gammaDef = Definition('Gamma',[],AST(val(AST('newState'))))
+        gammaDef = Definition('Gamma',[],AST(val(AST('newState').expression())))
         Program.update(gammaDef)
         for I in images: I.undraw()
-        images = [convert(x) for x in val(AST('display'))[1]]  
+        images = [convert(x) for x in val(AST('display').expression())[1]]  
 run()
