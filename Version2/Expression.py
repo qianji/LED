@@ -12,13 +12,17 @@ import numbers, math
 from fractions import Fraction
 class AST:
     # An AST is either a variable, a number, a quoted symbol, 
-    # or a non-empty list, whose first element is an operator and whose remaining elements are AST's. 
+    # or a non-empty list, whose first element is an operator and whose remaining elements are AST's.
+	
+	# F can be either a varible, a number, a quoted symbol, an expression or an operator.
+	# args is a list of AST's
     def __init__(self,F,args=[]):
         self.tree = None
-        # if F is Expression of the form of a pair
+        # if F is an Expression of the form of a pair
         if isinstance(F,tuple):
             self.tree= AST(F[0],F[1]).tree
         if len(args)==0:
+			# deal with empty set, tuple or vector
             if F in ['set','tuple','vector']:
                 self.tree = [F]
             else:
@@ -48,7 +52,7 @@ class AST:
         return []
     # convert AST class to a string
     def __str__(self):
-        return str(self.expression)
+        return str(self.expression())
     # convert the class AST to an Expression
     # example, if t is the AST of x^2 then t.expression() = ('^',['x',2])
     def expression(self):
