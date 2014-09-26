@@ -19,9 +19,9 @@ The top function of this file is val
 ##########################################
 Error handling in the evaluator
 
-The function signature of val is Expression -> LED data * str
-If E is an expression and all the operations in E are valid, val(E)=(v,None), where v is the value of E.
-If E is an expression and one of the operations in E is not valid, val(E) = (None,message), where message is a string indicating which operation is not valid.
+The function signature of val is Expression -> LED data or Experssion -> str
+If E is an expression and all the operations in E are valid, val(E)=V, where v is the value of E.
+If E is an expression and one of the operations in E is not valid, val(E) = message, where message is a string indicating which operation is not valid.
 
 All the functions that are called within val should return the same format of the result as val, which is LED data * str.
 ##########################################
