@@ -9,7 +9,84 @@ from Expression import *
 from fractions import Fraction
 '''
 This simple parser program parses the following grammar:
+######################################################################
+Grammar of LED terms
 
+T0    →  var  |   numeral   |    definedConstant   |   ( term )   |   pipe term pipe   |
+  { term .. term }  |  prefun (  terms  )  |   {  }   |  { terms }   |  
+  { term pipe Stmt } 
+
+T1   →  T0     |    T1  [ term  ]  |    T0  ^  T2
+
+Bigop  →   Sum  |  Prod  |  Union  |  Nrsec
+
+Prefix2 →   -  |  +  |   Bigop [  Stmt  ]  
+
+T2   →  T1   |  Prefix2  T2
+
+Infix3 →    *    |   /    |   mod  |   Nrsec 
+
+T3   →  T2   |   T3 Infix3 T2  
+
+Infix4 →   +    |   -   |   Unn   |   \
+
+T4   →  T3   |    T4 Infix4 T3 
+
+term  →   T4   |   lambda  vars . term
+
+terms   →   term    |   term  , terms
+
+infpred →   =   |   <   |   >   |   <=   |   >=    |   in   |   subeq   
+
+S0  →  prerel ( terms )   |  term   infpred   term 
+
+S1  → S0    |   some  var  in  term : S1    |   all   var  in  term : S1
+
+S2  →  S1   |  ~ S2
+
+S3  →  S2     |   S3  &  S2
+
+S4  → S3     |   S4  or  S3
+
+S5  →   S4    |   S4 =>  S5
+
+S6  →  S5    |   S5 <=>  S6
+
+vars → var | var vars
+
+T0    → numeral  | ( term )  |   pipe term pipe | floor ( term ) | ceil ( term )
+
+T1   →  T0     |    T0  ^  T1
+
+Prefix2 →   -  |  +  
+
+T2   →  T1   |  Prefix2  T2
+
+Infix3 →    *    |   /     |   mod 
+
+T3   →  T2   |   T3 Infix3 T2  
+
+Infix4 →   +    |   -  
+
+T4   →  T3   |    T4 Infix4 T3 
+
+term  →   T4  
+
+infpred →   =   |   <   |   >   |   <=   |   >=  
+
+S0  →   term   infpred   term 
+
+S2  →  S0   |  ~ S2
+
+S3  →  S2     |   S3  &  S2
+
+S4  → S3     |   S4  or  S3
+
+S5  →   S4    |   S4 =>  S5
+
+S6  →  S5    |   S5 <=>  S6
+
+######################################################################
 '''
 '''
 A *var* or an *identifier* is a nonempty string of letters and digits beginning with a letter.
