@@ -17,3 +17,11 @@ Python 3.4
 5. Compiler (that is, the program parser. depends on 1-4). 
 6. Game engine (depends on 1 , 2, 3), called EaselLED.py
 7. Interface (depends on 1-6), called IDE.py
+#Mini Tutorial
+1. Download and install Python 3.4
+2. Download the files in the repository
+3.To start the LED interpreter, double-click the file IDE.py
+For "Syntax of expressions" and how to evaluate experssion using LED, please refer to the file LEDTutorial.pdf
+#Contributors
+Qianji Zheng, Ph.D. student, Texas Tech Univeristy
+Dr. Nelson Rushton, Texas Tech University
