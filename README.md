@@ -1,7 +1,7 @@
 LED Development
 ========
 #LED 
-The Language of Effective Definitions (LED) is a formal language for writing computable functions, designed by [Dr. Nelson Rushton](http://www.depts.ttu.edu/cs/faculty/faculty.php?name=J.%20Nelson%20Rushton) from Texas Tech University. 
+The Language of Effective Definitions (LED) is a formal language for writing computable functions, designed by [Dr. Nelson Rushton](http://www.depts.ttu.edu/cs/faculty/faculty.php?name=J.%20Nelson%20Rushton) at Texas Tech University. 
 LED can be used as a functional programming language, as a tool for teaching mathematics and functional programming, or as a medium for precise human-to-human communication of mathematical definitions. It is used as a teaching tool in Dr. Rushton's [CS 1382 Discrete Math](http://nelsonrushton.net/) class. The design goals of LED are rigor, imitation, and simplicity, defined as follows:
 1. *rigor*: The syntax and semantics of the language are explicitly and precisely specified.
 2. *imitation*: LED expressions denote traditional mathematical objects (numbers, symbols, sets, tuples, and functions) using notations customary in technical and educational literature, as closely as possible while writing plain text.
@@ -15,13 +15,16 @@ Python 3.4
 3. Evaluater (depends on 1,2), called Evaluater.py
 4. Parser (depends on 1, does not include program parser), called Parser.py
 5. Compiler (that is, the program parser. depends on 1-4). 
-6. Game engine (depends on 1 , 2, 3), called EaselLED.py
-7. Interface (depends on 1-6), called IDE.py
+6. Game engine (depends on 1 , 2, 3), called EaselLED.py.
+7. Interface (depends on 1-6), called IDE.py.
+
+
 #Mini Tutorial
-1. Download and install Python 3.4
-2. Download the files in the repository
-3.To start the LED interpreter, double-click the file IDE.py
+1. Download and install Python 3.4.
+2. Download the files in the repository.
+3. To start the LED interpreter, double-click the file IDE.py
 For "Syntax of expressions" and how to evaluate experssion using LED, please refer to the file LEDTutorial.pdf
+
 #Contributors
-Qianji Zheng, Ph.D. student, Texas Tech Univeristy
-Dr. Nelson Rushton, Texas Tech University
+* Dr. Nelson Rushton, Texas Tech University
+* Qianji Zheng, Ph.D. student, Texas Tech Univeristy
