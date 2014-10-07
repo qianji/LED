@@ -46,6 +46,8 @@ def run(F=''):
                     try:
                         value = val(tree.expression())
                         if not value ==None:
+                            if isinstance(value,Fraction):
+                                value = float(value)
                             print(prettyString(value))
                         print()
                     except:

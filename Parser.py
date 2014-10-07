@@ -650,9 +650,8 @@ def parseT0(S):
         if len(S)==1: 
             # numeral    
             if isNumeral(S[0]):
-                if S[0].isnumeric():
-                    return (AST(int(Fraction(S[0]))),True)
-                return (AST(Fraction(S[0])),True)
+                if isIntegerNum(S[0]):return (AST(int(Fraction(S[0]))),True)
+                if isDecimalNonRepeating(S[0]):return (AST(Fraction(S[0])),True)
             # identifier
             if isIdentifier(S[0]): return (AST(S[0]),True)
         # parse vector   
@@ -739,16 +738,59 @@ def isIdentifier(S):
         if not (alphaNum(c)): return False
     return True
 
-'''
-# helper function
-# string -> bool
-# isNumeral(S) iff S is a *numeral*
-'''
 def isNumeral(S):
-    for c in S:
-        if not (digit(c) or c=='.'): return False
-    return True
-    
+    '''isNumeral(S) iff S is a *numeral*    
+    string -> bool
+    A *numeral* is either an *integer numeral*, a *decimal fraction*, or an *integer numeral* followed by a decimal fraction. For example, the following are LED numerals: 
+    714   01   21.7   .3(145..)   0.(3..)   000  3.96(721..)
+    '''
+    return isIntegerNum(S) or isDecimalFraction(S) or isIntegerNumDotDecimalFraction(S)
+
+def isIntegerNum(S):
+    '''An *integer numeral* is a string of 1 or more  decimal digits (0-9) 
+    string -> bool
+    '''
+    if len(S)<1:
+        return False
+    return all(x.isdigit() for x in S)
+
+def isDecimalFraction(S):
+    '''A *decimal fraction* is either 
+        1) a decimal point  followed by one or more digits, or
+        2) a decimal point, followed by zero or more digits, followed by a repeating block 
+    string ->bool
+    '''
+    if len(S)<2: return False
+    # get the index where repeating block starts
+    index =S.find('(')
+    if S[0]=='.':
+        if index==-1:
+            return all(x.isdigit() for x in S[1:])
+        else:
+            return all(x.isdigit() for x in S[1:index]) and isRepeatingBlock(S[index:])
+            
+def isRepeatingBlock(S):
+    ''' A *repeating block* consists of a left parenthesis, followed by one or more decimal digits, followed by two periods, followed by a right  parenthesis. 
+    string -> bool
+    '''
+    if len(S)<5: return False
+    if S[0]=='(' and S[-1]==')' and isIntegerNum(S[1:-3]): return True
+    return False
+
+def isIntegerNumDotDecimalFraction(S):
+    '''
+    isIntegerNumDotDecimalFraction(S) iff S is an *integer numeral* followed by a decimal fraction.
+    sting -> bool
+    '''
+    index = S.find('.')
+    if index ==-1: return False
+    return isIntegerNum(S[0:index]) and isDecimalFraction(S[index:])
+
+def isDecimalNonRepeating(S):
+    '''isDecimalNonRepeating(S) iff S is a numeral with a decimal franction but does not contain a repeating block
+    sting->bool
+    '''
+    return isNumeral(S) and S.find('.')!=-1 and S.find('(')==-1
 '''
 # helper function
 #  AST -> bool
@@ -762,7 +804,6 @@ def hasIdentifier(T):
         if hasIdentifier(i):
             return True
     return False
-
 
 '''
 # helper function
@@ -861,7 +902,7 @@ def parseTermPipeStmt(S):
         return (None,False)
     # {term}
     if S[0]=='{' and S[len(S)-1]=='}':
-        # find the first index of '..' in S
+        # find the first index of '|' in S
         try:
             i = S.index('|')
         except ValueError:

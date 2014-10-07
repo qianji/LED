@@ -44,7 +44,7 @@ def munch(S):
     if validToken(state): return (''.join(chars),True)
     else: return (chars,False)
         
-def validToken(state): return state in ['id','num','spec1','lessgreat','equal','period','digitsAndPoint','colon','colonEqual','doublePeriod','backquote']
+def validToken(state): return state in ['id','num','spec1','lessgreat','equal','period','digitsAndPoint','colon','colonEqual','doublePeriod','backquote','repeatingBlockRP']
 
 # States are 'empty', 'id', 'num', 'lessgreat', or 'spec1'. Each state
 # corresponds to an assertion about the stack. 
@@ -75,11 +75,16 @@ def canPush(S,state):
     if state == 'colon': return c=='='
     if state == 'period' : return c=='.' or digit(c)
     if state == "equal": return c=='>'
-    if state == 'digitsAndPoint': return digit(c)  
+    if state == 'digitsAndPoint': return digit(c) or c=='('
     if state == 'doublePeriod': return False
     if state == 'colonEqual': return False
     if state == 'spec1' : return False
     if state == 'backquote': return alpha(c)
+    if state == 'repeatingBlockLP': return digit(c) or c=='.'
+    if state =='repeatingBlockP': return c=='.'
+    if state =='repeatingBlockPP': return c==')'
+    if state =='repeatingBlockRP': return False
+    # if state in ['repeatingBlockLP','repeatingBlockP','repeatingBlockPP''repeatingBlockRP']: return True
     
 # beginSpecial(c) iff c is the beginning of a special token that is not ":-"
 def beginsSpecial(c): return any([c==x[0] for x in specialTokens])
@@ -97,16 +102,21 @@ def newState(state,c):
                'equal' if c=='=' else\
                'backquote' if c=='`' else\
                'spec1'  
-    if state =='id':return 'id'
-    if state == 'num': return 'digitsAndPoint' if c=='.' else 'num'
+    if state =='id':return 'id' if alphaNum(c) else 'spec1'
+    if state == 'num': return 'digitsAndPoint' if c=='.' else 'num' if digit(c) else 'spec1'
     if state == 'lessgreat': return 'equal' if c=='=' else\
                 'spec1'
     if state == 'colon': return 'colonEqual' if c=='=' else 'spec1'
     if state == 'colonEqual': return 'spec1'
     if state =='equal': return 'spec1'
-    if state =='period': return 'digitsAndPoint' if digit(c) else 'doublePeriod' if c=='.' else 'spec1'
+    if state =='period': return 'digitsAndPoint' if digit(c) else 'spec1'
     if state =='backquote': return 'id' if alphaNum(c) else 'spec1'
-    if state =='digitsAndPoint': return 'digitsAndPoint' if digit(c) else 'spec1'
+    if state =='digitsAndPoint': return 'digitsAndPoint' if digit(c) else 'doublePeriod' if c=='.' else 'repeatingBlockLP' if c=='(' else 'spec1'
+    if state =='doublePeriod': return 'spec1'
+    if state =='repeatingBlockLP': return 'repeatingBlockLP' if digit(c) else 'repeatingBlockP' if c=='.' else 'spec1'
+    if state =='repeatingBlockP': return 'repeatingBlockPP' if c=='.' else 'spec1'
+    if state =='repeatingBlockPP': return 'repeatingBlockRP' if c ==')' else 'spec1'
+    if state =='repeatingBlockRP': return 'spec1'
 
 
 # alpha(c) means c is a letter. digit(c) means c is a digit. alphaNum(c) means
