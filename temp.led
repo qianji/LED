@@ -1,5 +1,5 @@
 /---
-def d(x,y) = x/y
-def f(x) = 1
-def m(x) = 1/(x-2)
+let d(x,y) = x/y
+let f(x) = 1
+let m(x) = 1/(x-2)
 ---/

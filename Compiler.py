@@ -129,23 +129,23 @@ def parseProgramColomnEqual(S):
 '''
 def parseProgram(S):
     allFunctions = []
-    separators = ['def']
+    separators = ['let']
     lpI = 0
     while len(S)>0:
-        # find the first 'def' in S
+        # find the first 'let' in S
         firstI = firstIndex(separators,S)
         if firstI ==None:
             allFunctions.append(S)
             S=[]
         else:
-            # find the second 'def' in S
+            # find the second 'let' in S
             secondI = firstIndex(separators,S[firstI+1:])
-            # if there is only one 'def'
+            # if there is only one 'let'
             if secondI==None:
                 allFunctions.append(S)
                 S=[]
             else:
-                # secondeI is the index-1 of the second 'def' in S
+                # secondeI is the index-1 of the second 'let' in S
                 secondI += firstI
                 # try to find the first 'If'  
                 ifIndex = firstIndexBack('If',secondI,S)
@@ -197,7 +197,7 @@ For example, the following program If x=2 & y=3 then h := x+y  would be represen
 def parseIfThenDef(S):
     try:
         i = S.index('If')
-        j = S.index('def')
+        j = S.index('let')
     except ValueError:
         return(None,False)
     t,f1 = parseSentence(S[i+1:j])
