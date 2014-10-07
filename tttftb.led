@@ -82,14 +82,14 @@ some row.
 
 /---------------------------------------------
  def threeInRow(p) iff 
-   some R in rows: all c in R: occupies(p,c)
+   some R in rows. all c in R. occupies(p,c)
 ---------------------------------------------/
 
 The *board is full* if all cells are occupied.
 
 /----------------------------------
  def boardFull iff
-   all c in cells: occupied(c)
+   all c in cells. occupied(c)
 -----------------------------------/
 
 The *game is over* if either the board is full, or one of the players 
@@ -137,7 +137,6 @@ If
 def
  gridDisplay = {L1,L2,L3,L4}
 -----------------------------/
-
 
 The default font size for displayed text in this program is 15.
 

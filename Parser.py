@@ -40,7 +40,7 @@ infpred →   =   |   <   |   >   |   <=   |   >=    |   in   |   subeq
 
 S0  →  prerel ( terms )   |  term   infpred   term 
 
-S1  → S0    |   some  var  in  term : S1    |   all   var  in  term : S1
+S1  → S0    |   some  var  in  term . S1    |   all   var  in  term . S1
 
 S2  →  S1   |  ~ S2
 
@@ -293,7 +293,7 @@ def parseS1(S):
         return (tree,True)    
     return (None,False)
 
-# rule: some  var  in  term : S2 | all   var  in  term : S2
+# rule: some  var  in  term . S2 | all   var  in  term . S2
 def parseSomeAll(S):
     separators = ['some','all']
     if len(S)<6:
@@ -301,7 +301,7 @@ def parseSomeAll(S):
     if S[0] in separators:
         try:
             i = S.index('in')
-            j = S.index(':')
+            j = S.index('.')
             t1,f1 = parseVar(S[1])
             t2,f2 = parseTerm(S[i+1:j])
             t3,f3 = parseS2(S[j+1:])

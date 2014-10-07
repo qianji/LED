@@ -206,9 +206,9 @@ class ParserTest(unittest.TestCase):
         expected = [1,('vector',[2,3,4,5])]
         self.assertEqual(expected,actural)
         
-        # test for quantifier some 
-        expressions = ['some x in {2,3,4} : x>2 ', 'some x in {0,1,2} : x<0','all x in {2,3,4} : x>2','all x in {2,3,4} : x>1' ,\
-                       'some R in {{2,3,4},{0,1},{5,6,7}}: all c in R: c>2','all R in {{2,3,4},{0,1},{5,6,7}}: all c in R: c>2']
+        # test for quantifier some and all
+        expressions = ['some x in {2,3,4}.x>2 ', 'some x in {0,1,2}.x<0','all x in {2,3,4}.x>2','all x in {2,3,4}.x>1' ,\
+                       'some R in {{2,3,4},{0,1},{5,6,7}}. all c in R.c>2','all R in {{2,3,4},{0,1},{5,6,7}}. all c in R. c>2']
         actural = self.expressionValues(expressions)
         expected = [True,False,False,True,True,False]
         self.assertEqual(expected,actural)
