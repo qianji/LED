@@ -151,11 +151,15 @@ def valSubtract(X): return X[0]-X[1]
 def valMult(X): return X[0]*X[1]
 def valDiv(X): 
     if X[1]==0:
-        print('Zero Division Error: the division cannot be zero')
+        print('error: division by zero')
         return
     else:
         return Fraction(X[0]) / Fraction(X[1])
-def valExp(X): return X[0]**X[1]
+def valExp(X):
+    if (X[0]==0 and X[1]==0):
+        print('error: zero raised to zero power')
+        return
+    return X[0]**X[1]
 def valUnaryPlus(X): return X[0]
 def valUnaryMinus(X): return -X[0]
 def valFloor(X): return int(math.floor(X[0]))
@@ -163,7 +167,7 @@ def valCeil(X): return int(math.ceil(X[0]))
 def valAbs(X):return abs(X[0])
 def valMod(X):
     if X[1]==0:
-        print('Zero Division Error: the division cannot be zero')
+        print('error: mod by zero')
         return
     else:
         return Fraction(X[0]) % Fraction(X[1])
