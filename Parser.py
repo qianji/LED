@@ -337,7 +337,9 @@ def parseS0(S):
         (tree,flag) = parseConsecutives(['<','<='],S)
         if flag: return (tree,True)   
         (tree,flag) = parseConsecutives(['>','>='],S)
-        if flag: return (tree,True)  
+        if flag: return (tree,True)
+        (tree,flag) = parseConsecutives(['='],S)
+        if flag: return (tree,True)
     return (None,False)      
 
 # operators = ['<','<=']

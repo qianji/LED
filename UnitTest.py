@@ -225,6 +225,12 @@ class ParserTest(unittest.TestCase):
         expected = [True,True,True,False,False]
         self.assertEqual(expected,actural) 
         
+        # test for consecutive equals
+        expressions = ['1=1=1','1=3=1','3/2=3/2=3/2']
+        actural = self.expressionValues(expressions)
+        expected = [True,False,True]
+        self.assertEqual(expected,actural) 
+
         # test for set comprehension 
         expressions = ['{x|x in {1..9} & 1<x<3}',  '{x | x in {-2..2} & nonnegative(x)}' , '{x | x in {-2..2} & nonnegative(x) & even(x)}']
         actural = self.expressionValues(expressions)
