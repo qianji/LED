@@ -22,8 +22,8 @@ Python 3.4
 #Mini Tutorial
 1. Download and install Python 3.4.
 2. Download the files in the repository.
-3. To start the LED interpreter, double-click the file IDE.py
-For "Syntax of expressions" and how to evaluate experssion using LED, please refer to the file LEDTutorial.pdf
+3. To start the LED interpreter, double-click the file IDE.py. After the console is shown, enter run(test) to compile if test.led is a LED program. Enter play(tttftb) to run a game if tttftb.led is a LED game program.
+4. For "Syntax of expressions" and how to evaluate experssion using LED, please refer to the file LEDTutorial.pdf
 
 #Contributors
 * Dr. Nelson Rushton, Texas Tech University
