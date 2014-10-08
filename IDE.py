@@ -47,7 +47,7 @@ def run(F=''):
                         value = val(tree.expression())
                         if not value ==None:
                             if isinstance(value,Fraction):
-                                value = float(value)
+                                value = numeralValue(value)
                             print(prettyString(value))
                         print()
                     except:
@@ -56,6 +56,7 @@ def run(F=''):
                     print('Failed to parse the expression. It is not a valid expressioin.')
             else:
                 print('Failed to tokenize the expression.The last 10 valid tokens are',expression[-10:])
+
 
 # play(F) executes the game defined in LED file F. 
 

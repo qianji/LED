@@ -48,6 +48,8 @@ class ParserTest(unittest.TestCase):
             #v = val(parseExpression(e)[0])
             tree = parseExpression(e)[0]
             v = val(tree.expression())
+            if isinstance(v,Fraction):
+                v = numeralValue(v)
             #v=tree.val()
             values.append(v)
         return values
@@ -190,7 +192,13 @@ class ParserTest(unittest.TestCase):
         # test for arithmatic operations  
         expressions = ['2','002','0.2','2+2.2']
         actural = self.expressionValues(expressions)
-        expected = [2,2,Fraction('0.2'),Fraction('4.2')]
+        expected = [2,2,'0.2','4.2']
+        self.assertEqual(expected,actural)
+
+        # test for numeral arithmatic operations  
+        expressions = ['1/2','1/3','1/7','1/9','1/17','3/7']
+        actural = self.expressionValues(expressions)
+        expected = ['0.5','0.(3..)','0.(142857..)','0.(1..)','0.(0588235294117647..)','0.(428571..)']
         self.assertEqual(expected,actural)
 
 

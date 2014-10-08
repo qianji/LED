@@ -101,4 +101,42 @@ def prettyArgs(elts):
             else:
                 Str += ',' + prettyString(e)
     return Str  
-    
+   
+def numeralValue(F):
+    '''If F is Fraction instance
+    '''
+    x = F.numerator    
+    y = F.denominator
+    if x%y==0:
+        return x//y
+    whole_part = x//y
+    x = x%y
+    processed = {}
+    result = []
+    idx = 0
+    x= x*10
+    numeral=''
+    while not x in processed:
+        processed[x] = idx 
+        while(x!= 0 and x<y):
+            x = x*10
+            result.append(0)
+            idx+=1
+            processed[x] = idx
+        result.append(x//y)
+        x = (x - (x//y)*y)*10
+        idx+=1
+
+    numeral += str(whole_part)
+    numeral +='.'
+
+    for c in range(processed[x]):
+        numeral +=str(result[c])
+    if(len(result) - processed[x]  ==1 and result[processed[x]] == 0):
+        return numeral
+    numeral+='('
+
+    for c in range(processed[x],len(result)):
+        numeral +=str(result[c])
+    numeral += "..)"
+    return numeral
