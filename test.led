@@ -69,7 +69,7 @@ k in the interval [L,U].
 A dummy test function for testing nested brackets
 /- let t(x) = {x,x+1}  -/
 
-If S is a set of numbers, write Sum(S) for the sum of the members
+for S is a set of numbers, write Sum(S) for the sum of the members
 of S.
 /---------------------------------------------------------------
 
@@ -98,16 +98,16 @@ the expression g-4 would evaluate to 8.
 A dummy test function for constant
 /--  
 
-If x=((1,2),(2,3)) & y=((3,4),(4,5))  let h = {x,y}
+for x=((1,2),(2,3)) & y=((3,4),(4,5))  let h = {x,y}
 
 let Z= 0   let T = {(0,2),(3,2),(2,4),(`x,2)}
 
-If even(2)  let e = 2
+for even(2)  let e = 2
 let F(x) = G(x,z) +2
-If ~x=0 & y=1 let G(x,z)=y/x+z
+for ~x=0 & y=1 let G(x,z)=y/x+z
 let positiveTen(x) = 0<x<11
-If A1 = ((400,475),(500,475)) & A2 = ((400,425),(500,425)) & A3 = ((400,475),(400,425)) & A4 = ((500,475),(500,425))   let L={A1,A2,A3,A4}
-If
+for A1 = ((400,475),(500,475)) & A2 = ((400,425),(500,425)) & A3 = ((400,475),(400,425)) & A4 = ((500,475),(500,425))   let L={A1,A2,A3,A4}
+for
  L1 = ((200,100),(200,400)) &
  L2 = ((300,100),(300,400)) &
  L3 = ((100,200),(400,200)) &
@@ -117,7 +117,7 @@ If
  
  let Gamma ={}
  let gameOver iff 1>2
- If ~gameOver  let currentPlayer=`x if even(|Gamma|); `o otherwise
+ for ~gameOver  let currentPlayer=`x if even(|Gamma|); `o otherwise
 
 --/
 

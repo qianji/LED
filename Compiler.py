@@ -106,9 +106,9 @@ def parseProgramColomnEqual(S):
                 else:
                     # search backward from secondI to find the first '('
                     lpI = firstIndexBack('(',secondI,S)
-                # try to find the first 'If' 
+                # try to find the first 'for' 
                 
-                ifIndex = firstIndexBack('If',lpI,S)
+                ifIndex = firstIndexBack('for',lpI,S)
                 # find the end of the first function definition
                 if ifIndex == None or ifIndex==0:
                     end = lpI -2 
@@ -147,8 +147,8 @@ def parseProgram(S):
             else:
                 # secondeI is the index-1 of the second 'let' in S
                 secondI += firstI
-                # try to find the first 'If'  
-                ifIndex = firstIndexBack('If',secondI,S)
+                # try to find the first 'for'  
+                ifIndex = firstIndexBack('for',secondI,S)
                 # find the end of the first function definition
                 if ifIndex == None or ifIndex==0:
                     end = secondI
@@ -196,7 +196,7 @@ For example, the following program If x=2 & y=3 then h := x+y  would be represen
 '''
 def parseIfThenDef(S):
     try:
-        i = S.index('If')
+        i = S.index('for')
         j = S.index('let')
     except ValueError:
         return(None,False)
