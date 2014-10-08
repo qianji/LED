@@ -652,6 +652,8 @@ def parseT0(S):
             if isNumeral(S[0]):
                 if isIntegerNum(S[0]):return (AST(int(Fraction(S[0]))),True)
                 if isDecimalNonRepeating(S[0]):return (AST(Fraction(S[0])),True)
+                return (AST(numeralRepeatingValue(S[0])),True)
+                # if S[0] is a numeral that has a decimal fraction with a repeating block
             # identifier
             if isIdentifier(S[0]): return (AST(S[0]),True)
         # parse vector   
@@ -791,6 +793,42 @@ def isDecimalNonRepeating(S):
     sting->bool
     '''
     return isNumeral(S) and S.find('.')!=-1 and S.find('(')==-1
+
+def repeatingBlockParameters(S):
+    ''' If S A decimal fraction consisting of a decimal point, followed by digit string S1
+    of length n, followed by a repeating block whose body S2 is of length p, then repeatingBlockParameters(S) is a list [S1,S2,p,n]
+    otherwise []
+    '''
+    indexParen = S.find('(')
+    indexPeriod = S[indexParen:].find('.') +indexParen
+    if len(S[1:indexParen])==0:
+        S1=0
+        n=0
+    else:
+        S1=int(S[1:indexParen])
+        n =len(str(S1))
+    S2=int(S[indexParen+1:indexPeriod])
+    p = len(str(S2))
+    return [S1,S2,p,n]
+
+def decimalFractionValue(S):
+    '''S is A decimal fraction consisting of a decimal point, followed by digit string S1
+    of length n, followed by a repeating block whose body S2 is of length p, then S is the decimal expansion of the following rational number:
+    S1/10**n + S2/(10**p-1)*10**n
+    '''
+    [S1,S2,p,n] = repeatingBlockParameters(S)
+    return Fraction(S1,10**n) + Fraction(S2,((10**p-1)*10**n))    
+
+def numeralRepeatingValue(S):
+    '''If S is a numeral with a decimal fraction that contains a repeating block, then numeralRepeatingValue(S) is the rational number of S
+    '''
+    # if isNumeral(S):
+        # if not (isIntegerNum(S) or isDecimalNonRepeating(S)):
+    if isDecimalFraction(S):
+        return decimalFractionValue(S)
+    else:
+        index = S.find('.')
+        return Fraction(int(S[0:index]))+decimalFractionValue(S[index:])
 '''
 # helper function
 #  AST -> bool

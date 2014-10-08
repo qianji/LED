@@ -73,7 +73,7 @@ def canPush(S,state):
         return digit(c) or c=='.'
     if state == 'lessgreat': return c == '='
     if state == 'colon': return c=='='
-    if state == 'period' : return c=='.' or digit(c)
+    if state == 'period' : return c=='.' or digit(c) or c=='('
     if state == "equal": return c=='>'
     if state == 'digitsAndPoint': return digit(c) or c=='('
     if state == 'doublePeriod': return False
@@ -84,7 +84,6 @@ def canPush(S,state):
     if state =='repeatingBlockP': return c=='.'
     if state =='repeatingBlockPP': return c==')'
     if state =='repeatingBlockRP': return False
-    # if state in ['repeatingBlockLP','repeatingBlockP','repeatingBlockPP''repeatingBlockRP']: return True
     
 # beginSpecial(c) iff c is the beginning of a special token that is not ":-"
 def beginsSpecial(c): return any([c==x[0] for x in specialTokens])
@@ -109,7 +108,7 @@ def newState(state,c):
     if state == 'colon': return 'colonEqual' if c=='=' else 'spec1'
     if state == 'colonEqual': return 'spec1'
     if state =='equal': return 'spec1'
-    if state =='period': return 'digitsAndPoint' if digit(c) else 'spec1'
+    if state =='period': return 'digitsAndPoint' if digit(c) else 'repeatingBlockLP' if c=='(' else 'spec1'
     if state =='backquote': return 'id' if alphaNum(c) else 'spec1'
     if state =='digitsAndPoint': return 'digitsAndPoint' if digit(c) else 'doublePeriod' if c=='.' else 'repeatingBlockLP' if c=='(' else 'spec1'
     if state =='doublePeriod': return 'spec1'
