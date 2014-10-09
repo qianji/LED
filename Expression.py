@@ -10,6 +10,7 @@ An *Expression* is one of the following
 '''
 import numbers, math
 from fractions import Fraction
+BuiltInTypes = ['Bool','Nat','Int','Rat','Seq','Set','Obj']
 class AST:
     # An AST or Abstract Expression is either a variable, a number, a quoted symbol, 
     # or a non-empty list, whose first element is an operator and whose remaining elements are AST's.
@@ -23,7 +24,7 @@ class AST:
             self.tree= AST(F[0],F[1]).tree
         if len(args)==0:
 			# deal with empty set, tuple or vector
-            if F in ['set','tuple','vector']:
+            if F in ['set','tuple','seq']:
                 self.tree = [F]
             else:
                 if isAtom(F):
@@ -67,14 +68,14 @@ class AST:
     
 def isNumber(E): return isinstance(E,numbers.Number) or isinstance(E,Fraction)
 def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E)
-def isVector(x): return isinstance(x,tuple) and x[0] == 'vector'
+def isVector(x): return isinstance(x,tuple) and x[0] == 'seq'
 def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
 def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
 def isSymbol(x): return False if x==None else isinstance(x,str) and len(x)>1 and x[0]=='`'  
 def isVar(x): return isinstance(x,str) and not isSymbol(x)
 def isBool(x): return isinstance(x,bool)
 def isAtom(x): return False if x==None else isScalar(x) or isVar(x)
-
+def isBuiltInType(E): return E in BuiltInTypes
 def prettyString(E):
     if isNumber(E) or isAtom(E): return(str(E))
     if isSet(E): return('{' + prettyStack(E[1]) + '}')
@@ -90,7 +91,7 @@ def prettyStack(elts):
     return Str  
 
 # if Args is a list of Expressions, then prettyArgs(Args) is the string concentated with each arg in Args, sepereated with comma
-# For example, if Args = [2,('tuple',[2,3]),3,('vector',[1,2])] then prettyArgs(Args) = '2, (2,3), 3, and [1,2]'
+# For example, if Args = [2,('tuple',[2,3]),3,('seq',[1,2])] then prettyArgs(Args) = '2, (2,3), 3, and [1,2]'
 def prettyArgs(elts):
     Str = ''
     if not elts==[]:

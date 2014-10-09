@@ -211,7 +211,7 @@ class ParserTest(unittest.TestCase):
         # test for operator of list  
         expressions = ['<1,2>[1]','<2,3>+<4,5>']
         actural = self.expressionValues(expressions)
-        expected = [1,('vector',[2,3,4,5])]
+        expected = [1,('seq',[2,3,4,5])]
         self.assertEqual(expected,actural)
         
         # test for quantifier some and all

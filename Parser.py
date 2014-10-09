@@ -255,7 +255,7 @@ def parseS4(S):
         return (tree,True)    
     return (None,False)
 
-# rule: S3  ->  S2     |   S3  &  S2
+# rule: S3  ->  S2     |   S3  &  S2 | S3 , S2
 def parseS3(S):
     for i in range(len(S)):
         if S[i]=='&':
@@ -340,13 +340,13 @@ def parseS0(S):
         if flag: return (tree,True)
         (tree,flag) = parseConsecutives(['='],S)
         if flag: return (tree,True)
-    # term : typeExpression
-    index = firstIndex([':'],S)
-    if index!=None:
-        t1,f1 = parseTerm(S[0:index])
-        t2,f2 = parseTypeExpression(S[index+1:])
-        if f1 and f2:
-            return (AST(':',[t1,t2]),True)
+    # Expression : typeExpression
+    # index = firstIndexBack(':',len(S)-1,S)
+    # if index!=None:
+        # t1,f1 = parseExpression(S[0:index])
+        # t2,f2 = parseTypeExpression(S[index+1:])
+        # if f1 and f2:
+            # return (AST(':',[t1,t2]),True)
     return (None,False)      
 
 # typeExpression -> buildIn | 
@@ -357,7 +357,6 @@ def parseTypeExpression(S):
         return (tree,True) 
     return (None,False)
 
-BuiltInTypes = ['Bool','Nat','Int','Num','List','Set','Obj']
 # buildIn -> Bool | Nat | Int | Num | List | Set | Obj
 def parseBuildIn(S):
     if isIdentifier(S[0]) and S[0] in BuiltInTypes:
@@ -892,15 +891,15 @@ def parseVector(S):
     # < >
     if len(S)==2:
         if (S[0]=='<' and S[1]=='>'):
-            return (AST('vector',[]),True)
+            return (AST('seq',[]),True)
     # <term>
     if S[0]=='<' and S[len(S)-1]=='>':
         (tree,flag)=parseTerms(S[1:len(S)-1])
         if flag: 
             if(isinstance(tree.tree,list) and tree.op()=='cstack'):
-                return (AST('vector',tree.args()),True)
+                return (AST('seq',tree.args()),True)
             else:
-                return(AST('vector',[tree]),True)
+                return(AST('seq',[tree]),True)
  
     return (None,False)
     

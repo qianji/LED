@@ -33,7 +33,7 @@ from _functools import reduce
 from fractions import Fraction
 def val(E):
     # if E is an expression 
-    if isScalar(E): return E
+    if isScalar(E) or isBuiltInType(E): return E
     if isinstance(E,str) and Program.defined(E,0) :  
         #return valDefined(E,[])
         value = valDefined(E,[])
@@ -46,7 +46,7 @@ def val(E):
         print("0-ary function",E,"is not defined") 
         return
     (Op,X) = E
-    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec',':'}: Args=X  
+    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec','lambda'}: Args=X  
     else: 
         #print(E)
         Args = [val(E) for E in X]
@@ -54,9 +54,11 @@ def val(E):
     if hasNone(Args): 
         #print('One of the arguments is not valid')
         return 
-    if Op=='vector': return ('vector',Args)
+    if Op=='seq': return ('seq',Args)
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
+    if Op=='lambda': 
+        return ('lambda',Args)
     #if Op=='some'  : return valSome(Args)
     #if Op=='all'   : return valAll(Args)
     if Op in builtIns : 
@@ -182,7 +184,7 @@ def respEqual(X):
     (t1,a),(t2,b) = X
     return len(a)==len(b) and all([valEq([a[i],b[i]]) for i in range(len(a))])
 # vector functions
-def valCat(X): return ('vector', X[0][1]+X[1][1])
+def valCat(X): return ('seq', X[0][1]+X[1][1])
 def valLen(X): return len(X[0][1])
 def valSub(X):
     L = X[0][1]
@@ -348,7 +350,35 @@ def valBigNrsec(Args):
 def valMember(Args):
     if Args[1]=='Nat':
         return isinstance(Args[0],int) and Args[0]>=0
+    if Args[1]=='Bool':
+        return isinstance(Args[0],bool)
+    if Args[1]=='Int':
+        return isinstance(Args[0],int)
+    if Args[1]=='Rat':
+        return isRationalNum(Args)
+    if Args[1]=='Seq':
+        return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='seq'
+    if Args[1]=='Set':
+        return isSet(Args)
+    if Args[1]=='Obj':
+        return isObject(Args)
+    return False
 
+def isObject(Args):
+    return isSet(Args) or isTuple(Args) or isRationalNum(Args) or isLambda(Args)
+
+def isSet(Args):
+    return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='set'
+
+def isTuple(Args):
+    return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='tuple'
+
+def isRationalNum(Args):
+    return isinstance(Args[0],int) or isinstance(Args[0],Fraction)
+
+def isLambda(Args):
+    return isinstance(Args[0],tuple) and Args[0][0]=='lambda'
+    
 # builtIns is a dictionary of the functions that evaluate each built-in
 builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             '+1':valUnaryPlus, '-1':valUnaryMinus,
@@ -396,7 +426,7 @@ def isGround(E):
             return True
         if E in builtIns:
             return True
-        if E in ['set','tuple','vector']:
+        if E in ['set','tuple','seq']:
             return True
         if Program.defined(E,0):
             return True
