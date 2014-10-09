@@ -104,7 +104,7 @@ If the game is not over, the *player to move* is `x if an even number of moves h
 and `o otherwise.
 
 /-----------------------
- for ~gameOver let
+ If ~gameOver let
    currentPlayer=
      `x if even(|Gamma|);
      `o otherwise
@@ -129,7 +129,7 @@ The  *grid* consists is a set of four line segments that make up the tic tac toe
 
 /----------------------------
 
-for
+If
  L1 = ((200,100),(200,400)) &
  L2 = ((300,100),(300,400)) &
  L3 = ((100,200),(400,200)) &
@@ -201,7 +201,7 @@ The *restart button* consists of a rectangle around a "restart" text, displayed 
 
 
 /--------------------------------------------------------
- for 
+ If 
    A1 = ((400,475),(500,475)) &
    A2 = ((400,425),(500,425)) &
    A3 = ((400,475),(400,425)) &
@@ -212,7 +212,7 @@ The *restart button* consists of a rectangle around a "restart" text, displayed 
 ---------------------------------------------------------/
 
 /--------------------------------------------------------
-for    restartText = 
+If    restartText = 
      ((450, 450), 15,<114,101,115,116,97,114,116>)
    let restartButton = restartGrid U {restartText}
      
@@ -229,7 +229,7 @@ If the game is over, *gameResultDisplay* is a display in the upper left region o
  let catStr= 
   <84,104,101,32,99,97,116,32,103,111,116,32,105,116,33>
 
- for gameOver let
+ If gameOver let
    gameResultDisplay = 
     {((100,450),15,xWonStr)} if threeInRow(`x);
     {((100,450),15,oWonStr)} if threeInRow(`o);

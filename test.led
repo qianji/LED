@@ -98,16 +98,16 @@ the expression g-4 would evaluate to 8.
 A dummy test function for constant
 /--  
 
-for x=((1,2),(2,3)) & y=((3,4),(4,5))  let h = {x,y}
+If x=((1,2),(2,3)) & y=((3,4),(4,5))  let h = {x,y}
 
 let Z= 0   let T = {(0,2),(3,2),(2,4),(`x,2)}
 
-for even(2)  let e = 2
+If even(2)  let e = 2
 let F(x) = G(x,z) +2
-for ~x=0 & y=1 let G(x,z)=y/x+z
+If ~x=0 & y=1 let G(x,z)=y/x+z
 let positiveTen(x) = 0<x<11
-for A1 = ((400,475),(500,475)) & A2 = ((400,425),(500,425)) & A3 = ((400,475),(400,425)) & A4 = ((500,475),(500,425))   let L={A1,A2,A3,A4}
-for
+If A1 = ((400,475),(500,475)) & A2 = ((400,425),(500,425)) & A3 = ((400,475),(400,425)) & A4 = ((500,475),(500,425))   let L={A1,A2,A3,A4}
+If
  L1 = ((200,100),(200,400)) &
  L2 = ((300,100),(300,400)) &
  L3 = ((100,200),(400,200)) &
@@ -117,7 +117,7 @@ for
  
  let Gamma ={}
  let gameOver iff 1>2
- for ~gameOver  let currentPlayer=`x if even(|Gamma|); `o otherwise
+ If ~gameOver  let currentPlayer=`x if even(|Gamma|); `o otherwise
 
 --/
 
