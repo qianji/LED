@@ -340,7 +340,29 @@ def parseS0(S):
         if flag: return (tree,True)
         (tree,flag) = parseConsecutives(['='],S)
         if flag: return (tree,True)
+    # term : typeExpression
+    index = firstIndex([':'],S)
+    if index!=None:
+        t1,f1 = parseTerm(S[0:index])
+        t2,f2 = parseTypeExpression(S[index+1:])
+        if f1 and f2:
+            return (AST(':',[t1,t2]),True)
     return (None,False)      
+
+# typeExpression -> buildIn | 
+def parseTypeExpression(S):
+    # bulidIn
+    (tree,flag) = parseBuildIn(S)
+    if flag: 
+        return (tree,True) 
+    return (None,False)
+
+BuiltInTypes = ['Bool','Nat','Int','Num','List','Set','Obj']
+# buildIn -> Bool | Nat | Int | Num | List | Set | Obj
+def parseBuildIn(S):
+    if isIdentifier(S[0]) and S[0] in BuiltInTypes:
+        return (AST(S[0]),True)
+    return (None,False)
 
 # operators = ['<','<=']
 # rule: consecutives -> consecutive | term op consecutive   op is one of the memeber in operators

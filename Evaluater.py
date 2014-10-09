@@ -46,7 +46,7 @@ def val(E):
         print("0-ary function",E,"is not defined") 
         return
     (Op,X) = E
-    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec'}: Args=X  
+    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec',':'}: Args=X  
     else: 
         #print(E)
         Args = [val(E) for E in X]
@@ -344,6 +344,11 @@ def valBigNrsec(Args):
     slonSet = solutionSet(p)
     d = [[x for x in val(dot(t,b))[1]] for b in solutionSet(p)]
     return ('set',list(set(d[0]).intersection(*d)))
+
+def valMember(Args):
+    if Args[1]=='Nat':
+        return isinstance(Args[0],int) and Args[0]>=0
+
 # builtIns is a dictionary of the functions that evaluate each built-in
 builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             '+1':valUnaryPlus, '-1':valUnaryMinus,
@@ -353,7 +358,8 @@ builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             'sub':valSub,
             'in':valIn,'subeq':valSubeq,'U':valUnion,'nrsec':valNrsec,'\\':valSetSubtr,
             'Pow':valPow,'choose':valChoose,'intRange':valIntRange,'some':valSome,'all':valAll,'setComp':valSetComp,
-            'Union':valBigUnion,'Sum':valBigSum,'Prod':valBigProd,'Nrsec':valBigNrsec}
+            'Union':valBigUnion,'Sum':valBigSum,'Prod':valBigProd,'Nrsec':valBigNrsec,
+            ':':valMember}
 
 # Added by Qianji
 """
