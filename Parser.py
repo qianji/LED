@@ -341,12 +341,18 @@ def parseS0(S):
         (tree,flag) = parseConsecutives(['='],S)
         if flag: return (tree,True)
     # Expression : typeExpression
-    index = firstIndexBack(':',len(S)-1,S)
-    if index!=None:
-        t1,f1 = parseExpression(S[0:index])
-        t2,f2 = parseTypeExpression(S[index+1:])
-        if f1 and f2:
-            return (AST(':',[t1,t2]),True)
+    # index = firstIndexBack(':',len(S)-1,S)
+    # if index!=None:
+        # t1,f1 = parseExpression(S[0:index])
+        # t2,f2 = parseTypeExpression(S[index+1:])
+        # if f1 and f2:
+            # return (AST(':',[t1,t2]),True)
+    for i in range(len(S)):
+        if S[i]==':':
+            (t1,f1)=parseExpression(S[0:i])
+            (t2,f2)= parseTypeExpression(S[i+1:])
+            if f1 and f2: 
+                return (AST(':',[t1,t2]),True) 
     return (None,False)      
 
 # typeExpression -> buildIn | typeExpression * buildIn
@@ -364,7 +370,7 @@ def parseTypeExpression(S):
 
 # buildIn -> Bool | Nat | Int | Num | List | Set | Obj
 def parseBuildIn(S):
-    if isIdentifier(S[0]) and S[0] in BuiltInTypes:
+    if len(S)==1 and isIdentifier(S[0]) and S[0] in BuiltInTypes:
         return (AST(S[0]),True)
     return (None,False)
 

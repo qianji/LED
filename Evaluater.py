@@ -57,6 +57,7 @@ def val(E):
     if Op=='seq': return ('seq',Args)
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
+    if Op=='star': return ('star',Args)
     #if Op=='some'  : return valSome(Args)
     #if Op=='all'   : return valAll(Args)
     if Op in builtIns : 
@@ -345,9 +346,6 @@ def valBigNrsec(Args):
     d = [[x for x in val(dot(t,b))[1]] for b in solutionSet(p)]
     return ('set',list(set(d[0]).intersection(*d)))
 
-def valMember(Args):
-    if Args[1]=='Nat':
-        return isinstance(Args[0],int) and Args[0]>=0
 
 def valMember(Args):
     if Args[1]=='Nat':
@@ -364,8 +362,17 @@ def valMember(Args):
         return isTypeSet(Args)
     if Args[1]=='Obj':
         return isObject(Args)
+    if isinstance(Args[1],tuple) and Args[1][0]=='star':
+        return isTypeMember(Args[0],Args[1])
     return False
 
+def isTypeMember(Var,Type):
+    '''tuple * tuple -> bool
+    ''' #('tuple',[1,2]) : ('star',['Int','Int'])
+    if isinstance(Var,tuple) and isinstance(Type,tuple):
+        if len(Var[1])==len(Type[1]):
+            return all([valMember([x,y]) for x in Var[1] for y in Type[1]])
+    return False
 def isObject(Args):
     return isTypeSet(Args) or isTypeTuple(Args) or isRationalNum(Args) or isTypeLambda(Args)
 
