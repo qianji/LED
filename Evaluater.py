@@ -1,7 +1,7 @@
 """
 LED evaluator
 Dr. Nelson Rushton, Texas Tech University
-July, 2014
+Oct, 2014
 
 ##########################################
 Definitions
