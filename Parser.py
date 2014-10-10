@@ -370,8 +370,8 @@ def parseTypeExpression(S):
         if S[0]=='(' and S[-1]==')':
             t,f = parseTypeExpression(S[1:-1])
             if f:
-                #if not isinstance(t.tree,tuple):
-                #    return (t,True)
+                # if not isinstance(t.tree,tuple):
+                   # return (t,True)
                 return (AST('comStar',[t]),True)
     (tree,flag) = parseBuildIn(S)
     if flag: 

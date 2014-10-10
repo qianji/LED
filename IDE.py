@@ -52,8 +52,13 @@ def run(F=''):
                         print()
                     except:
                         print('Failed to evaluate the expression. It is not a valid expression')
+                    continue
+                d,defFlag = parseDfn(expression)
+                if defFlag:
+                    #print('parsing #',i,"function successfully",' '.join(funcs[i]))
+                    Program.update(d)
                 else:
-                    print('Failed to parse the expression. It is not a valid expressioin.')
+                    print('Failed to parse the expression or definition.')
             else:
                 print('Failed to tokenize the expression.The last 10 valid tokens are',expression[-10:])
 
