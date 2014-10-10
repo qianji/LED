@@ -258,7 +258,7 @@ def parseS4(S):
 # rule: S3  ->  S2     |   S3  &  S2
 def parseS3(S):
     for i in range(len(S)):
-        if S[i]=='&':
+        if S[i]=='&' or S[i]==',':
             (t1,f1)=parseS3(S[0:i])
             (t2,f2)= parseS2(S[i+1:])
             if f1 and f2: 
@@ -349,9 +349,14 @@ def parseS0(S):
             return (AST(':',[t1,t2]),True)
     return (None,False)      
 
-# typeExpression -> buildIn | 
+# typeExpression -> buildIn | typeExpression * buildIn
 def parseTypeExpression(S):
-    # bulidIn
+    for i in range(len(S)):
+        if S[i]=='*':
+            (t1,f1)=parseTypeExpression(S[0:i])
+            (t2,f2)= parseBuildIn(S[i+1:])
+            if f1 and f2: 
+                return (AST('star',[t1,t2]),True) 
     (tree,flag) = parseBuildIn(S)
     if flag: 
         return (tree,True) 
