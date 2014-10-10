@@ -76,6 +76,7 @@ def isVar(x): return isinstance(x,str) and not isSymbol(x)
 def isBool(x): return isinstance(x,bool)
 def isAtom(x): return False if x==None else isScalar(x) or isVar(x)
 def isBuiltInType(E): return E in BuiltInTypes
+
 def prettyString(E):
     if isNumber(E) or isAtom(E): return(str(E))
     if isSet(E): return('{' + prettyStack(E[1]) + '}')

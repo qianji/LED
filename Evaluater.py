@@ -1,7 +1,7 @@
 """
 LED evaluator
 Dr. Nelson Rushton, Texas Tech University
-Oct, 2014
+July, 2014
 
 ##########################################
 Definitions
@@ -32,7 +32,7 @@ from LEDProgram import Program
 from _functools import reduce
 from fractions import Fraction
 def val(E):
-    # if E is an expression 
+    # if E is an expression
     if isScalar(E) or isBuiltInType(E): return E
     if isinstance(E,str) and Program.defined(E,0) :  
         #return valDefined(E,[])
@@ -46,7 +46,7 @@ def val(E):
         print("0-ary function",E,"is not defined") 
         return
     (Op,X) = E
-    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec','lambda'}: Args=X  
+    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec'}: Args=X  
     else: 
         #print(E)
         Args = [val(E) for E in X]
@@ -57,8 +57,6 @@ def val(E):
     if Op=='seq': return ('seq',Args)
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
-    if Op=='lambda': 
-        return ('lambda',Args)
     #if Op=='some'  : return valSome(Args)
     #if Op=='all'   : return valAll(Args)
     if Op in builtIns : 
@@ -172,7 +170,7 @@ def valMod(X):
         print('error: mod by zero')
         return
     else:
-        return Fraction(X[0]) % Fraction(X[1])
+        return int(Fraction(X[0]) % Fraction(X[1]))
 
 def valLess(X): return X[0]< X[1]
 def valGreater(X): return X[0] > X[1]
@@ -350,6 +348,10 @@ def valBigNrsec(Args):
 def valMember(Args):
     if Args[1]=='Nat':
         return isinstance(Args[0],int) and Args[0]>=0
+
+def valMember(Args):
+    if Args[1]=='Nat':
+        return isinstance(Args[0],int) and Args[0]>=0
     if Args[1]=='Bool':
         return isinstance(Args[0],bool)
     if Args[1]=='Int':
@@ -359,26 +361,26 @@ def valMember(Args):
     if Args[1]=='Seq':
         return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='seq'
     if Args[1]=='Set':
-        return isSet(Args)
+        return isTypeSet(Args)
     if Args[1]=='Obj':
         return isObject(Args)
     return False
 
 def isObject(Args):
-    return isSet(Args) or isTuple(Args) or isRationalNum(Args) or isLambda(Args)
+    return isTypeSet(Args) or isTypeTuple(Args) or isRationalNum(Args) or isTypeLambda(Args)
 
-def isSet(Args):
+def isTypeSet(Args):
     return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='set'
 
-def isTuple(Args):
+def isTypeTuple(Args):
     return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='tuple'
 
 def isRationalNum(Args):
     return isinstance(Args[0],int) or isinstance(Args[0],Fraction)
 
-def isLambda(Args):
+def isTypeLambda(Args):
     return isinstance(Args[0],tuple) and Args[0][0]=='lambda'
-    
+
 # builtIns is a dictionary of the functions that evaluate each built-in
 builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             '+1':valUnaryPlus, '-1':valUnaryMinus,
@@ -434,7 +436,7 @@ def isGround(E):
             return False
     (Op,Args) = E
     # special case for some/all var in term: sentence 
-    if Op in ['some','all']:
+    if Op in ['some','all',':']:
         return True
     if isGround(Op) or Program.defined(Op,len(Args)):
         return all(isGround(i) for i in Args)

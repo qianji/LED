@@ -9,7 +9,7 @@ fac(n)=
  
 
 /---------------------
-If x:Rat, y:Rat 
+If x:Rat & y:Rat 
 let f(x,y)=
   x+2*y if x<=1;
   x-2*y if x>1
@@ -19,7 +19,7 @@ let f(x,y)=
 
 
 /--------------------------
-If m:Nat,n:Nat,m>0, let
+If m:Nat & n:Nat & m>0, let
 gcd(m,n)=
   m if n=0;
   gcd(n,m mod n) otherwise
