@@ -355,14 +355,17 @@ def parseS0(S):
                 return (AST(':',[t1,t2]),True) 
     return (None,False)      
 
-# typeExpression -> buildIn | typeExpression * buildIn
+# typeExpression -> buildIn | buildIn * typeExpression |( typeExpression ) 
 def parseTypeExpression(S):
     for i in range(len(S)):
         if S[i]=='*':
-            (t1,f1)=parseTypeExpression(S[0:i])
-            (t2,f2)= parseBuildIn(S[i+1:])
+            (t1,f1)=parseBuildIn(S[0:i])
+            (t2,f2)= parseTypeExpression(S[i+1:])
             if f1 and f2: 
-                return (AST('star',[t1,t2]),True) 
+                if(isinstance(t2.tree,list) and t2.op()=='star'):
+                    return (AST('star',[t1]+t2.args()),True) 
+                else:
+                    return (AST('star',[t1,t2]),True)
     (tree,flag) = parseBuildIn(S)
     if flag: 
         return (tree,True) 
