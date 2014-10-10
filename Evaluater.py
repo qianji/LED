@@ -58,6 +58,7 @@ def val(E):
     if Op=='set'   : return ('set',Args)
     if Op=='tuple' : return ('tuple',Args)
     if Op=='star': return ('star',Args)
+    if Op=='comStar': return ('comStar',Args)
     #if Op=='some'  : return valSome(Args)
     #if Op=='all'   : return valAll(Args)
     if Op in builtIns : 
@@ -364,14 +365,15 @@ def valMember(Args):
         return isObject(Args)
     if isinstance(Args[1],tuple) and Args[1][0]=='star':
         return isTypeMember(Args[0],Args[1])
+    if isinstance(Args[1],tuple) and Args[1][0]=='comStar':
+        return isTypeMember(Args[0],Args[1][1][0])
     return False
 
 def isTypeMember(Var,Type):
     '''tuple * tuple -> bool
     ''' #('tuple',[1,2]) : ('star',['Int','Int'])
     if isinstance(Var,tuple) and isinstance(Type,tuple):
-        if len(Var[1])==len(Type[1]):
-            return all([valMember([x,y]) for x in Var[1] for y in Type[1]])
+        return all([valMember([Var[1][i],Type[1][i]]) for i in range(0,len(Var[1]))])
     return False
 def isObject(Args):
     return isTypeSet(Args) or isTypeTuple(Args) or isRationalNum(Args) or isTypeLambda(Args)
