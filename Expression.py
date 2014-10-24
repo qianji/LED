@@ -12,7 +12,7 @@ import numbers, math
 from fractions import Fraction
 BuiltInTypes = ['Bool','Nat','Int','Rat','Seq','Set','Obj']
 class AST:
-    # An AST or Abstract Expression is either a variable, a number, a quoted symbol, 
+    # An AST or Abstract Expression is either a variable, a number, a quoted symbol, an atom 
     # or a non-empty list, whose first element is an operator and whose remaining elements are AST's.
 	
 	# F can be either a varible, a number, a quoted symbol, an expression or an operator.

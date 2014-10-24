@@ -192,7 +192,7 @@ If S is a string of the function definitions of IfThenDef defined in LED, then p
 otherwise parseIfThenDef(S) = (None,False)
 For example, the following program If x=2 & y=3 then h := x+y  would be represented by the following dictionary: 
 {('h',0):([],('+',[2,3]))} 
-#rule: IfThenDef -> If sentence then funcDef
+#rule: Guard -> If sentence then funcDef
 '''
 def parseIfThenDef(S):
     try:
@@ -213,16 +213,17 @@ def parseIfThenDef(S):
     else:
             print('cannot parse if statement definition: ',' '.join(S[i+1:j])) 
     return (None,False)
-'''
-string -> dict * bool
-If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
-otherwise parseFuncDef(S) = (None,False)
-For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
-{('f',1):(['x'],('^',['x',2])) , 
-('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
-#rule: funcDef -> identifier ( vars )  :=   funcBody
-'''
+
 def parseFuncDef(S):
+    '''
+    string -> dict * bool
+    If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
+    otherwise parseFuncDef(S) = (None,False)
+    For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
+    {('f',1):(['x'],('^',['x',2])) , 
+    ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
+    #rule: funcDef -> identifier ( vars )  :=   funcBody
+    '''
     for i in range(len(S)):
         if S[i]=='=':
             t1,f1 = parseLHS(S[1:i])
