@@ -697,8 +697,8 @@ def parseT0(S):
                 if isDecimalNonRepeating(S[0]):return (AST(Fraction(S[0])),True)
                 return (AST(numeralRepeatingValue(S[0])),True)
                 # if S[0] is a numeral that has a decimal fraction with a repeating block
-            # identifier
-            if isIdentifier(S[0]): return (AST(S[0]),True)
+            # identifier or quoted string
+            if isIdentifier(S[0]) or isQuotedString(S[0]): return (AST(S[0]),True)
         # parse vector   
         (tree,flag) = parseVector(S)
         if flag: return (tree,True)
@@ -782,6 +782,16 @@ def isIdentifier(S):
     for c in S:
         if not (alphaNum(c)): return False
     return True
+
+# def isQuotedString(S):
+    # '''isQuotedString(S) iff S is a *quoted string*
+    # string ->bool
+    # A quoted string consists of zero or more string characters enclosed in double quotes (").  For example, the following are quoted strings:
+
+         # "hi mom"   
+         # "Go tell the Spartans\rThou who passest by"  
+         # "John said \"hello\""
+    # '''
 
 def isNumeral(S):
     '''isNumeral(S) iff S is a *numeral*    

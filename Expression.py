@@ -27,7 +27,7 @@ class AST:
             if F in ['set','tuple','seq']:
                 self.tree = [F]
             else:
-                if isAtom(F):
+                if isAtom(F) or isQuotedString(F):
                     self.tree = F
         else:
             astArgs = [AST(arg) if not isinstance(arg,AST) else arg for arg in args ]
@@ -41,6 +41,8 @@ class AST:
         return isTuple(self.tree)
     def isVector(self):
         return isVector(self.tree)
+    def isQuotedString(self):
+        return isQuotedString(self.tree)
     #get the oparator of T, if T is not an atomic expression
     def op(self):
         if not isAtom(self.tree):
@@ -67,7 +69,7 @@ class AST:
             else: return (F.expression(),eArgs)
     
 def isNumber(E): return isinstance(E,numbers.Number) or isinstance(E,Fraction)
-def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E)
+def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E) or isQuotedString(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'seq'
 def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
 def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
@@ -77,6 +79,7 @@ def isBool(x): return isinstance(x,bool)
 def isAtom(x): return False if x==None else isScalar(x) or isVar(x) or isLambda(x)
 def isLambda(x): return isinstance(x,tuple) and x[0]=='lambda'
 def isBuiltInType(E): return E in BuiltInTypes
+def isQuotedString(x): return isinstance(x,str) and len(x)>1 and x[0]=='"' and x[-1]=='"'
 
 def prettyString(E):
     if isNumber(E) or isAtom(E): return(str(E))
