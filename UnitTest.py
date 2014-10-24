@@ -170,8 +170,10 @@ class ParserTest(unittest.TestCase):
     '''
     
     def test_tokens(self):
-        L = ['1.2', '1.', '1..3', '1.2..2','.3(145..)','0.(3..)','3.96(721..)','.(4..)']
-        expected = [ ['1.2'] , ['1.'], ['1','..', '3'], ['1.2', '..', '2'],['.3(145..)'],['0.(3..)'],['3.96(721..)'],['.(4..)']]
+        L = ['1.2', '1.', '1..3', '1.2..2','.3(145..)','0.(3..)','3.96(721..)','.(4..)',\
+                '"hi mom"','"Go tell the Spartans\\rThou who passest by"','"John said \\"hello\\""']
+        expected = [ ['1.2'] , ['1.'], ['1','..', '3'], ['1.2', '..', '2'],['.3(145..)'],['0.(3..)'],['3.96(721..)'],['.(4..)'],\
+                ['"hi mom"'],['"Go tell the Spartans\\rThou who passest by"'],['"John said \\"hello\\""']]
         for i in range(len(L)):
             actural = tokens(L[i])[0]
             self.assertEqual(expected[i],actural)   

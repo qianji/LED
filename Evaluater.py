@@ -46,7 +46,7 @@ def val(E):
         print("0-ary function",E,"is not defined") 
         return
     (Op,X) = E
-    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec'}: Args=X  
+    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec','lambda'}: Args=X  
     else: 
         #print(E)
         Args = [val(E) for E in X]
@@ -59,8 +59,7 @@ def val(E):
     if Op=='tuple' : return ('tuple',Args)
     if Op=='star': return ('star',Args)
     if Op=='comStar': return ('comStar',Args)
-    #if Op=='some'  : return valSome(Args)
-    #if Op=='all'   : return valAll(Args)
+    if Op=='lambda': return('lambda',Args)
     if Op in builtIns : 
         # check if Op is one of the Big Operations
         #if Op in ['setComp','Union','Sum','Prod','Nrsec']:
@@ -308,6 +307,9 @@ def valAll(Args):
             return False
     return True
 
+# lambda 
+def valLambda(Args):
+    return 1
 # Big Operations
 
 #The value of {t|p} is ('set',[val(dot(t,b)) for b in SolutionSet(p)]).
@@ -400,7 +402,8 @@ builtIns = {'+':valPlus, '-':valSubtract, '*':valStar, '/':valDiv, '^':valExp,
             'in':valIn,'subeq':valSubeq,'U':valUnion,'nrsec':valNrsec,'\\':valSetSubtr,
             'Pow':valPow,'choose':valChoose,'intRange':valIntRange,'some':valSome,'all':valAll,'setComp':valSetComp,
             'Union':valBigUnion,'Sum':valBigSum,'Prod':valBigProd,'Nrsec':valBigNrsec,
-            ':':valMember}
+            ':':valMember,
+            'lambda':valLambda}
 
 # Added by Qianji
 """

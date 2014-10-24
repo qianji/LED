@@ -74,7 +74,8 @@ def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
 def isSymbol(x): return False if x==None else isinstance(x,str) and len(x)>1 and x[0]=='`'  
 def isVar(x): return isinstance(x,str) and not isSymbol(x)
 def isBool(x): return isinstance(x,bool)
-def isAtom(x): return False if x==None else isScalar(x) or isVar(x)
+def isAtom(x): return False if x==None else isScalar(x) or isVar(x) or isLambda(x)
+def isLambda(x): return isinstance(x,tuple) and x[0]=='lambda'
 def isBuiltInType(E): return E in BuiltInTypes
 
 def prettyString(E):
@@ -83,6 +84,7 @@ def prettyString(E):
     if isVector(E): return( '<' + prettyStack(E[1]) + '>')
     if isTuple(E): return( '(' + prettyStack(E[1]) + ')')
 
+    
 def prettyStack(elts):
     Str = ''
     if not elts==[]:

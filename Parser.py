@@ -461,9 +461,10 @@ def parseLambda(S):
         (t2,f2)= parseTerm(S[i+1:])
         if f1 and f2: 
             if isinstance(t1.tree,list) and t1.op()=='cstack':
-                return (AST('lambda',[t1.args(),t2]))
+                return (AST('lambda',[t1.args(),t2]),True)
             else:
-                return (AST('lambda',[[t1],t2]),True) 
+                #return (AST('lambda',[[t1],t2]),True) 
+                return (AST('lambda',[('vars',[t1]),t2]),True) 
     return (None,False)
 # rule: vars -> var | var vars        
 def parseVars(S):
