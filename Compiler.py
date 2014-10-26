@@ -171,19 +171,32 @@ For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represe
 ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
 '''
 '''
-# rule: Dfn -> funcDef | relDef | ifThenDef
+# rule: Dfn -> funcDef | relDef | ifThenDef | whereDef | guardWhereDef
 '''
 def parseDfn(S):
-    def3,flag3 = parseIfThenDef(S)
-    if flag3:
-        return (def3,True)
-
-    def1,flag1 = parseRelDef(S)
-    if flag1:
-        return (def1,True)
-    def2,flag2 = parseFuncDef(S)
-    if flag2:
-        return (def2,True)
+    whereIndex = firstIndex(['where'],S)
+    thenIndex = firstIndex(['then'],S)
+    if not whereIndex==None:
+        if not thenIndex==None:
+            def5,flag5 = parseGuardWhereDef(S)
+            if flag5:
+                return(def5,True)
+        else:
+            def4,flag4 = parseWhereDef(S)
+            if flag4:
+                return(def4,True)
+    else:
+        if not thenIndex==None:
+            def3,flag3 = parseIfThenDef(S)
+            if flag3:
+                return (def3,True)
+        else:
+            def1,flag1 = parseRelDef(S)
+            if flag1:
+                return (def1,True)
+            def2,flag2 = parseFuncDef(S)
+            if flag2:
+                return (def2,True)
     return (None,False) 
 
 '''
@@ -220,7 +233,7 @@ If S is a string of the function definitions of IfThenDef defined in LED, then p
 otherwise parseIfThenDef(S) = (None,False)
 For example, the following program If x=2 & y=3 then h := x+y  would be represented by the following dictionary: 
 {('h',0):([],('+',[2,3]))} 
-#rule: Guard -> If sentence then funcDef
+#rule: guard -> If sentence then funcDef
 '''
 def parseIfThenDefLet(S):
     try:
@@ -252,21 +265,44 @@ def parseWhereDef(S):
     {('h',0):([],('+',[2,3]))} 
     #rule: whereDef -> funcDef whereClause
     '''
-    i = S.find('where')
-    if not i==-1:
-        t1,f1 = parseWhereClause(S[i:])
-        if f1:
-            p2,f2 = parseFuncDef(S[0:i])
-            if f2:
-                key,value = p.head,p.body
-                d=Definition(key[0],value[0],p.body[1],t)
-                return(d,True)
+    for i in range(len(S)):
+        if S[i]=='where':
+            t,f1 = parseWhereClause(S[i:])
+            if f1:
+                p,f2 = parseFuncDef(S[0:i])
+                if f2:
+                    key,value = p.head,p.body
+                    d=Definition(key[0],value[0],p.body[1],t)
+                    return(d,True)
+                else:
+                    print('cannot parse definition: ',' '.join(S[0:i])) 
             else:
-                print('cannot parse definition: ',' '.join(S[0:i])) 
-        else:
-            print('cannot parse where statement definition: ',' '.join(S[i:])) 
+                print('cannot parse where statement definition: ',' '.join(S[i:])) 
     return(None,False)
                 
+def parseGuardWhereDef(S):
+    '''
+    string -> dict * bool
+    If S is a string of the function definitions of whereDef defined in LED, then parseGuardWhereDef(S) = (dict,True), where dict is a dictionary 
+    otherwise parseGuardWhereDef(S) = (None,False)
+    For example, the following program If x=2 then h := x+y where y=3 would be represented by the following dictionary: 
+    {('h',0):([],('+',[2,3]))} 
+    #rule: guardWhereDef -> ifThenDef whereClause
+    '''
+    for i in range(len(S)):
+        if S[i]=='where':
+            t,f1 = parseWhereClause(S[i:])
+            if f1:
+                p,f2 = parseIfThenDef(S[0:i])
+                if f2:
+                    key,value= p.head,p.body
+                    d=Definition(key[0],value[0],p.body[1],AST('and',[t,p.body[2]]))
+                    return(d,True)
+                else:
+                    print('cannot parse definition: ',' '.join(S[0:i])) 
+            else:
+                print('cannot parse where statement definition: ',' '.join(S[i:])) 
+    return(None,False)
 
                 
 def parseFuncDef(S):

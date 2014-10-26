@@ -20,8 +20,6 @@ def remInitialWhite(S):
 
 specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','..',',',';','[',']','{','}','\\',':','`','"']
 
-
-
 # An *identifier* is a nonempty string of letters and digits
 # beginning with a letter.
 

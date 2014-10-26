@@ -81,9 +81,11 @@ def convertCircle(C):
 def convertText(x):
     (tup,[center,height,string]) = x
     (tup,[x,y]) = center
-    (lis, chars) = string
+    #(lis, chars) = string
+    chars=string
     (W,H) = displaySize()
-    T = Text(Point(x,H-y),''.join([chr(x) for x in chars]))
+    # T = Text(Point(x,H-y),''.join([chr(x) for x in chars]))
+    T = Text(Point(x,H-y),string[1:-1])
     T.setSize(height)
     return T
 

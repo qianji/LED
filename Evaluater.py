@@ -171,7 +171,7 @@ def valMod(X):
         print('error: mod by zero')
         return
     else:
-        return int(Fraction(X[0]) % Fraction(X[1]))
+        return Fraction(X[0]) % Fraction(X[1])
 
 def valLess(X): return X[0]< X[1]
 def valGreater(X): return X[0] > X[1]

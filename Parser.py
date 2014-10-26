@@ -200,11 +200,10 @@ def parseIfClause(S):
 def parseWhereClause(S):
     '''rule: whereClause -> where Stmt
     '''
-    for i in range(len(S)):
-        if S[i]=='where':
-            (t,f)=parseSentence(S[i+1:])
-            if f:
-                return (AST('where',[t]),True)
+    if len(S)>1 and S[0]=='where':
+        (t,f)=parseSentence(S[1:])
+        if f:
+            return (t,True)
     return(None,False)
 '''
 # helper function
@@ -284,7 +283,8 @@ def parseS4(S):
 # rule: S3  ->  S2     |   S3  &  S2
 def parseS3(S):
     for i in range(len(S)):
-        if S[i]=='&' or S[i]==',':
+        # if S[i]=='&' or S[i]==',':
+        if S[i]=='&':
             (t1,f1)=parseS3(S[0:i])
             (t2,f2)= parseS2(S[i+1:])
             if f1 and f2: 
