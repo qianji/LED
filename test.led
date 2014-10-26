@@ -1,32 +1,30 @@
-
-
 LED sample program
 Nelson Rushton, Texas Tech University
 July 2014
 
 A few simple test functions to start off:
 /---------------------------------------------------------------
-  let f(x,y) =
+  f(x,y) :=
     33      if g2(x) < 1; 
     x*y     if x >=1 & y > 0;
     x+2*y   otherwise             
 
-  let g2(x) = x^2+4
+  g2(x) := x^2+4
 
-  let g3(x) = g2(x+2)
+  g3(x) := g2(x+2)
 ---------------------------------------------------------------/
 
 Integer m is a *divisor* of n if there exists an integer k such 
-that k*m=n. An effective letinition is as follows:
+that k*m=n. An effective definition is as follows:
 /---------------------------------------------------------------
-  let divisor(m,n) iff 
+  divisor(m,n) iff 
     m=0 & n=0 or 
     ~m=0 & n mod m = 0   
 ---------------------------------------------------------------/
 
 An integer is *even* 2 is a divisor of it.
 /---------------------------------------------------------------
-  let even(n) iff divisor(2,n) 
+  even(n) iff divisor(2,n) 
 ---------------------------------------------------------------/
 
 A number is *negative* if it is less than 0, and otherwise
@@ -34,17 +32,17 @@ it is *nonnegative*.
 /---------------------------------------------------------------
 
  
-  let negative(x)    iff  x < 0 
-  let nonnegative(x) iff  ~negative(x)
+  negative(x)    iff  x < 0 
+  nonnegative(x) iff  ~negative(x)
 
 ---------------------------------------------------------------/
 
 Integer n is *prime* if n>1 and n has no divisors in {2..n-1}
 /---------------------------------------------------------------
 
-  let prime(n) iff n>1 & noDivisors(n,2,n-1)
+  prime(n) iff n>1 & noDivisors(n,2,n-1)
 
-  let noDivisors(k,lowr,uppr) iff
+  noDivisors(k,lowr,uppr) iff
     lowr > uppr or
     ~divisor(lowr,k) & noDivisors(k,lowr+1,uppr)   
 ---------------------------------------------------------------/
@@ -58,22 +56,22 @@ k in the interval [L,U].
 
 /---------------------------------------------------------------
 
-  let perfect(k) iff k = sumDivisors(k,1,k-1)
+  perfect(k) iff k = sumDivisors(k,1,k-1)
 
-  let sumDivisors(k,L,U) =
+  sumDivisors(k,L,U) :=
     0                       if L>U;
     L+sumDivisors(k,L+1,U)  if L<=U & divisor(L,k);
     sumDivisors(k,L+1,U)    otherwise
 
 ---------------------------------------------------------------/
 A dummy test function for testing nested brackets
-/- let t(x) = {x,x+1}  -/
+/- t(x) := {x,x+1}  -/
 
-for S is a set of numbers, write Sum(S) for the sum of the members
+If S is a set of numbers, write Sum(S) for the sum of the members
 of S.
 /---------------------------------------------------------------
 
-  let Sum(S)=
+  Sum(S):=
     0                              if S={};
     choose(S) + Sum(S\{choose(S)}) otherwise   
 
@@ -81,14 +79,14 @@ of S.
 
 
 
- /- let g() = 12 -/
+ /- g() := 12 -/
 
-A nullary function. Currently it must be letined with parens but 
-called without them. So, given the following letinition, e.g.,
+A nullary function. Currently it must be defined with parens but 
+called without them. So, given the following definition, e.g.,
 the expression g-4 would evaluate to 8.
 /---------------------------------------------------------------
 
-  let range(m,n) =
+  range(m,n) :=
     {}                     if m>n;
     {m} U range(m+1,n) otherwise
 
@@ -98,29 +96,26 @@ the expression g-4 would evaluate to 8.
 A dummy test function for constant
 /--  
 
-If x=((1,2),(2,3)) & y=((3,4),(4,5))  let h = {x,y}
+If x=((1,2),(2,3)) & y=((3,4),(4,5)) then h := {x,y}
 
-let Z= 0   let T = {(0,2),(3,2),(2,4),(`x,2)}
+Z:= 0   T := {(0,2),(3,2),(2,4),(`x,2)}
 
-If even(2)  let e = 2
-let F(x) = G(x,z) +2
-If ~x=0 & y=1 let G(x,z)=y/x+z
-let positiveTen(x) = 0<x<11
-If A1 = ((400,475),(500,475)) & A2 = ((400,425),(500,425)) & A3 = ((400,475),(400,425)) & A4 = ((500,475),(500,425))   let L={A1,A2,A3,A4}
+If even(2) then e := 2
+positiveTen(x) := 0<x<11
+If A1 = ((400,475),(500,475)) & A2 = ((400,425),(500,425)) & A3 = ((400,475),(400,425)) & A4 = ((500,475),(500,425))  then L:={A1,A2,A3,A4}
 If
  L1 = ((200,100),(200,400)) &
  L2 = ((300,100),(300,400)) &
  L3 = ((100,200),(400,200)) &
  L4 = ((100,300),(400,300))
-
- let gridDisplay = {L1,L2,L3,L4}
+then
+ gridDisplay := {L1,L2,L3,L4}
  
- let Gamma ={}
- let gameOver iff 1>2
- If ~gameOver  let currentPlayer=`x if even(|Gamma|); `o otherwise
+ Gamma :={}
+ gameOver iff 1>2
+ If ~gameOver then currentPlayer:=`x if even(|Gamma|); `o otherwise
 
 --/
-
 
 
 

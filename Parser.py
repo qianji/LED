@@ -12,33 +12,37 @@ This simple parser program parses the following grammar:
 ######################################################################
 Grammar of LED terms
 
-T0    →  var  |   numeral   |    definedConstant   |   ( term )   |   pipe term pipe   |
-  { term .. term }  |  prefun (  terms  )  |   {  }   |  { terms }   |  
-  { term pipe Stmt } 
+T0    →  variable  |   numeral   |    definedConstant   |   ( term )   |   pipe term pipe   |
+ { term .. term }  |  prefun (  terms  )  |   {  }   |  { terms }   |
+ { term pipe Stmt }
 
-T1   →  T0     |    T1  [ term  ]  |    T0  ^  T2
+T1   →  T0     |    T1  [ term  ]
+
+T2   →   T1     |   T1  ^  T2
 
 Bigop  →   Sum  |  Prod  |  Union  |  Nrsec
 
-Prefix2 →   -  |  +  |   Bigop [  Stmt  ]  
+Prefix →   -  |  +  |   Bigop [  Stmt  ]  |  definedFunctionSymbol | floor | ceil
 
-T2   →  T1   |  Prefix2  T2
+T3   →  T2   |  Prefix  T3
 
-Infix3 →    *    |   /    |   mod  |   Nrsec 
+Infix4 →    *    |   /    |   mod  |   nrsec
 
-T3   →  T2   |   T3 Infix3 T2  
+T4   →  T3   |   T4  Infix4 T3
 
-Infix4 →   +    |   -   |   Unn   |   \
+Infix5 →   +    |   -   |   U   |   \
 
-T4   →  T3   |    T4 Infix4 T3 
+T5   →  T4   |    T5 Infix5 T4
 
-term  →   T4   |   lambda  vars . term
+term  →   T5   |   lambda  vars . term  |  type var
 
 terms   →   term    |   term  , terms
 
-infpred →   =   |   <   |   >   |   <=   |   >=    |   in   |   subeq   
+infpred →   =   |   <   |   >   |   <=   |   >=    |   in   |   subeq
 
-S0  →  prerel ( terms )   |  term   infpred   term 
+infpredString → term  infpred  term  infpred  term | term  infpred  infpredString
+
+S0  →  definedRelationSym term  |  term   infpred   term | term : type
 
 S1  → S0    |   some  var  in  term . S1    |   all   var  in  term . S1
 
@@ -52,39 +56,52 @@ S5  →   S4    |   S4 =>  S5
 
 S6  →  S5    |   S5 <=>  S6
 
+Stmt  →  S6
+
 vars → var | var vars
 
-T0    → numeral  | ( term )  |   pipe term pipe | floor ( term ) | ceil ( term )
+guard → If  Stmt  then
 
-T1   →  T0     |    T0  ^  T1
+constDef → constSym  := body  |  guard constSym  := body
 
-Prefix2 →   -  |  +  
+ifBranch → term if Stmt
 
-T2   →  T1   |  Prefix2  T2
+ifBranches → ifBranch | ifBranch  ifBranches
 
-Infix3 →    *    |   /     |   mod 
+branches → ifBranches | ifBranches ; term  otherwise
 
-T3   →  T2   |   T3 Infix3 T2  
+whereClause → where Stmt
 
-Infix4 →   +    |   -  
+funDefBod →  term | branches
 
-T4   →  T3   |    T4 Infix4 T3 
+funRHS →  funDefBod | funDefBod whereClause
 
-term  →   T4  
+funcDef →  ?guard funcSym params := funDefBod  ?whereClause
 
-infpred →   =   |   <   |   >   |   <=   |   >=  
+relDef → ?guard  relSym params iff Stmt
 
-S0  →   term   infpred   term 
+varList → var | var , varlist
 
-S2  →  S0   |  ~ S2
+params → ( varList )
 
-S3  →  S2     |   S3  &  S2
+varDecl →  var var : type  | vars decls
 
-S4  → S3     |   S4  or  S3
+decls  → varList : type  |  varList : type , decls
 
-S5  →   S4    |   S4 =>  S5
+type → typeSymbol | type Product |  Set ( type ) | List ( type )
+    |type -> type  | type ~> type |
 
-S6  →  S5    |   S5 <=>  S6
+typeProduct → type * type | type * typeProduct
+
+indefiniteTerm → term | < type > | var where Stmt | ( varlist ) where Stmt
+
+typeDef → typeSym ::= typeDefBody
+
+typeDefBody →   indefiniteTerm | indefiniteTerm  pipe  typeDefBody
+
+programElement var → varDecl |  constDef funcDef | relDef | typeDef
+
+program → programElement | programElement program
 
 ######################################################################
 '''
@@ -180,6 +197,15 @@ def parseIfClause(S):
                 return (AST('if',[t2,t1]),True) 
     return (None,False)    
 
+def parseWhereClause(S):
+    '''rule: whereClause -> where Stmt
+    '''
+    for i in range(len(S)):
+        if S[i]=='where':
+            (t,f)=parseSentence(S[i+1:])
+            if f:
+                return (AST('where',[t]),True)
+    return(None,False)
 '''
 # helper function
 # str * list<str> -> int
@@ -341,18 +367,13 @@ def parseS0(S):
         (tree,flag) = parseConsecutives(['='],S)
         if flag: return (tree,True)
     # Expression : typeExpression
-    # index = firstIndexBack(':',len(S)-1,S)
-    # if index!=None:
-        # t1,f1 = parseExpression(S[0:index])
-        # t2,f2 = parseTypeExpression(S[index+1:])
-        # if f1 and f2:
-            # return (AST(':',[t1,t2]),True)
-    for i in range(len(S)):
-        if S[i]==':':
-            (t1,f1)=parseExpression(S[0:i])
-            (t2,f2)= parseTypeExpression(S[i+1:])
-            if f1 and f2: 
-                return (AST(':',[t1,t2]),True) 
+
+    # for i in range(len(S)):
+        # if S[i]==':':
+            # (t1,f1)=parseExpression(S[0:i])
+            # (t2,f2)= parseTypeExpression(S[i+1:])
+            # if f1 and f2: 
+                # return (AST(':',[t1,t2]),True) 
     return (None,False)      
 
 # typeExpression -> buildIn | typeExpression * buildIn|( typeExpression ) 

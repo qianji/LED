@@ -80,7 +80,7 @@ This is an function for parsing an alternative way of definition using := in a p
 # if S is a string of the program that has f1, f2, ... fn functions, then parseProgram(S)=([L1, L2, ... Ln],True), where L1... Ln 
 # are lists of corresponding function to f1, f2,... fn.
 '''
-def parseProgramColomnEqual(S):
+def parseProgram(S):
     allFunctions = []
     separators = ['iff',':=']
     lpI = 0
@@ -127,7 +127,7 @@ def parseProgramColomnEqual(S):
 # if S is a string of the program that has f1, f2, ... fn functions, then parseProgram(S)=([L1, L2, ... Ln],True), where L1... Ln 
 # are lists of corresponding function to f1, f2,... fn.
 '''
-def parseProgram(S):
+def parseProgramLet(S):
     allFunctions = []
     separators = ['let']
     lpI = 0
@@ -197,7 +197,36 @@ For example, the following program If x=2 & y=3 then h := x+y  would be represen
 def parseIfThenDef(S):
     try:
         i = S.index('If')
+        j= S.index('then')
+    except ValueError:
+        return(None,False)
+    t,f1 = parseSentence(S[i+1:j])
+    if f1:
+        (p,f2)= parseFuncDef(S[j+1:])
+        if f2: 
+            #put the content in the dictionary
+            key,value = p.head,p.body
+            d = Definition(key[0], value[0], p.body[1],t)
+            return(d,True)    
+        else:
+            print('cannot parse then statement definition: ',' '.join(S[j+1:])) 
+    else:
+            print('cannot parse if statement definition: ',' '.join(S[i+1:j])) 
+    return (None,False)
+
+'''
+string -> dict * bool
+If S is a string of the function definitions of IfThenDef defined in LED, then parseIfThenDef(S) = (dict,True), where dict is a dictionary 
+otherwise parseIfThenDef(S) = (None,False)
+For example, the following program If x=2 & y=3 then h := x+y  would be represented by the following dictionary: 
+{('h',0):([],('+',[2,3]))} 
+#rule: Guard -> If sentence then funcDef
+'''
+def parseIfThenDefLet(S):
+    try:
+        i = S.index('If')
         j = S.index('let')
+        #j= S.index('then')
     except ValueError:
         return(None,False)
     t,f1 = parseSentence(S[i+1:j])
@@ -214,7 +243,60 @@ def parseIfThenDef(S):
             print('cannot parse if statement definition: ',' '.join(S[i+1:j])) 
     return (None,False)
 
+def parseWhereDef(S):
+    '''
+    string -> dict * bool
+    If S is a string of the function definitions of whereDef defined in LED, then parseWhereDef(S) = (dict,True), where dict is a dictionary 
+    otherwise parseWhereDef(S) = (None,False)
+    For example, the following program h := x+y where x=2 & y=3 would be represented by the following dictionary: 
+    {('h',0):([],('+',[2,3]))} 
+    #rule: whereDef -> funcDef whereClause
+    '''
+    i = S.find('where')
+    if not i==-1:
+        t1,f1 = parseWhereClause(S[i:])
+        if f1:
+            p2,f2 = parseFuncDef(S[0:i])
+            if f2:
+                key,value = p.head,p.body
+                d=Definition(key[0],value[0],p.body[1],t)
+                return(d,True)
+            else:
+                print('cannot parse definition: ',' '.join(S[0:i])) 
+        else:
+            print('cannot parse where statement definition: ',' '.join(S[i:])) 
+    return(None,False)
+                
+
+                
 def parseFuncDef(S):
+    '''
+    string -> dict * bool
+    If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
+    otherwise parseFuncDef(S) = (None,False)
+    For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
+    {('f',1):(['x'],('^',['x',2])) , 
+    ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
+    #rule: funcDef -> identifier ( vars )  :=   funcBody
+    '''
+    for i in range(len(S)):
+        if S[i]==':=':
+            t1,f1 = parseLHS(S[0:i])
+            if f1:
+                (fName,fParams)=parseLHS(S[0:i])[0]
+                paramNumber = len(fParams)
+                (t2,f2)= parseFuncBody(S[i+1:])
+                if f2: 
+                    #put the content in the dictionary
+                    d = Definition(fName, fParams, t2, AST(True))
+                    return(d,True)    
+                else:
+                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                    print('cannot parse function definition left side: ',' '.join(S[0:i])) 
+    return (None,False)     
+
+def parseFuncDeflet(S):
     '''
     string -> dict * bool
     If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
@@ -239,11 +321,31 @@ def parseFuncDef(S):
                     print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
             else:
                     print('cannot parse function definition left side: ',' '.join(S[0:i])) 
-    return (None,False)     
+    return (None,False)  
 
 # relDef -> identifier ( vars ) iff   sentence
 # duplicate with parseFuncDef. To be refactored soon
 def parseRelDef(S):
+    for i in range(len(S)):
+        if S[i]=='iff':
+            t1,f1 = parseLHS(S[0:i])
+            if f1:
+                (fName,fParams)=parseLHS(S[0:i])[0]
+                paramNumber = len(fParams)
+                (t2,f2)= parseSentence(S[i+1:])
+                if f2: 
+                    #put the content in the dictionary
+                    d = Definition(fName, fParams, t2, AST(True))
+                    return(d,True)    
+                else:
+                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                    print('cannot parse function definition left side: ',' '.join(S[0:i]))    
+    return (None,False) 
+
+# relDef -> identifier ( vars ) iff   sentence
+# duplicate with parseFuncDef. To be refactored soon
+def parseRelDefLet(S):
     for i in range(len(S)):
         if S[i]=='iff':
             t1,f1 = parseLHS(S[1:i])
