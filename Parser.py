@@ -791,7 +791,19 @@ def parseTerms(S):
     if flag: 
         return (tree,True)    
     return (None,False)     
+
+def parseGuard(S):
+    '''rule: gurad -> If Stmt then
+    '''
+    if hasKeywords(S,['If','then']) and S[0]=='If' and S[-1]=='then':
+        return parseSentence(S[1:-1])
+    return (None,False)
      
+def hasKeywords(L,Ws):
+    '''list<str> * list<str> -> bool
+    hasKeywords(L,Ws) iff all words in Ws is in L
+    '''
+    return all(word in L for word in Ws)
 '''
 # helper function
 # str -> bool

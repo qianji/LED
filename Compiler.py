@@ -90,6 +90,10 @@ def parseProgram(S):
         if firstI ==None:
             allFunctions.append(S)
             S=[]
+        # # if there is 'iff' but no '()' before it
+        # if S[firstI]=='iff' and S[firstI-1]!=')':
+        #     allFunctions.append(S)
+        #     S=[]
         else:
             # find the second iff or := in S
             secondI = firstIndex(separators,S[firstI+1:])
@@ -171,32 +175,22 @@ For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represe
 ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
 '''
 '''
-# rule: Dfn -> funcDef | relDef | ifThenDef | whereDef | guardWhereDef
+# rule: Dfn -> funcDef | relDef | ifThenDef | whereDef | guardWhereDef | relIfThenDef
 '''
 def parseDfn(S):
-    whereIndex = firstIndex(['where'],S)
-    thenIndex = firstIndex(['then'],S)
-    if not whereIndex==None:
-        if not thenIndex==None:
-            def5,flag5 = parseGuardWhereDef(S)
-            if flag5:
-                return(def5,True)
-        else:
-            def4,flag4 = parseWhereDef(S)
-            if flag4:
-                return(def4,True)
-    else:
-        if not thenIndex==None:
-            def3,flag3 = parseIfThenDef(S)
-            if flag3:
-                return (def3,True)
-        else:
-            def1,flag1 = parseRelDef(S)
-            if flag1:
-                return (def1,True)
-            def2,flag2 = parseFuncDef(S)
-            if flag2:
-                return (def2,True)
+    if hasKeywords(S,['iff','If','then']):
+        return parseRelIfThenDef(S)
+    if hasKeywords(S,['iff']):
+        return parseRelDef(S)
+    if hasKeywords(S,['If','then','where']):
+        return parseGuardWhereDef(S)
+    if hasKeywords(S,['where']):
+        return parseWhereDef(S)
+    if hasKeywords(S,['If','then']):
+        return parseIfThenDef(S)
+    def2,flag2 = parseFuncDef(S)
+    if flag2:
+        return (def2,True)
     return (None,False) 
 
 '''
@@ -377,6 +371,33 @@ def parseRelDef(S):
                     print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
             else:
                     print('cannot parse function definition left side: ',' '.join(S[0:i]))    
+    return (None,False) 
+
+# relIfThenDef -> If sentence then identifier ( vars ) iff   sentence
+# duplicate with parseFuncDef. To be refactored soon
+def parseRelIfThenDef(S):
+    # check to see if 'If','then' and 'iff' are all in S or not
+    if hasKeywords(S,['If','then','iff']):
+        if S[0]=='If':
+            i=S.index('iff')
+            j=S.index('then')
+            t1,f1 = parseLHS(S[j+1:i])
+            if f1:
+                (fName,fParams)=t1
+                paramNumber = len(fParams)
+                (t2,f2)= parseSentence(S[i+1:])
+                if f2: 
+                    t3,f3 = parseGuard(S[0:j+1])
+                    if t3:
+                        #put the content in the dictionary
+                        d = Definition(fName, fParams, t2, t3)
+                        return(d,True)    
+                    else:
+                        print('cannot parse If-then statment: ',' '.join(S[0:j+1])) 
+                else:
+                    print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                        print('cannot parse function definition left side: ',' '.join(S[j+1:i]))    
     return (None,False) 
 
 # relDef -> identifier ( vars ) iff   sentence
