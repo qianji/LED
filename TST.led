@@ -1,32 +1,32 @@
 Test cases
 
 /---------------------
-If n:Nat let 
-fac(n)=
+If n:Nat then
+ fac(n):=
   1          if n=0;
   n*fac(n-1) otherwise
 ----------------------/
  
 
 /---------------------
-If x:Rat, y:Rat 
-let f(x,y)=
+If x:Rat & y:Rat then
+ f(x,y):=
   x+2*y if x<=1;
   x-2*y if x>1
 ----------------------/ 
 
 /-------------------
-If p:Int*Int 
-let X(p)=p[1]
+If p:Int*Int then
+X(p):=p[1]
 
-If p:Int*Int
-let Y(p) = p[2]
+If p:Int*Int then
+Y(p) := p[2]
 -------------------/
 
 
 /--------------------------
-If m:Nat , n:Nat , m>0 let
-gcd(m,n)=
+If m:Nat & n:Nat & m>0 then
+gcd(m,n):=
   m if n=0;
   gcd(n,m mod n) otherwise
 ---------------------------/

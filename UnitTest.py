@@ -266,7 +266,23 @@ class ParserTest(unittest.TestCase):
         actural = self.expressionValues(expressions)
         expected = [('set',[1, 1, 2, 1, 2, 3])]
         self.assertEqual(expected,actural) 
+
+        ########################################
+        # test for type expression
+        ########################################
         
+        # Nat, Bool,Int,Rat
+        expressions = ['1:Nat','-1:Nat','1=1:Bool','2:Bool','-2:Int','2.2:Int','3.3(2..):Rat','{1..9}:Rat']
+        actural = self.expressionValues(expressions)
+        expected = [True,False,True,False,True,False,True,False]
+        self.assertEqual(expected,actural)        
+        
+        # (T) where T is a type
+        expressions = ['1:(Nat)','(1,2):(Int*Int)','(1,2,3):(Int*Int*Rat)','((1,2),3):((Int*Int)*Int)',
+                '((1,2),3>3):(Int*Int)*Bool','((1,2),(3,4)): (Int*Int)*(Int*Int)']
+        actural = self.expressionValues(expressions)
+        expected = [True,True,True,True,True,True]
+        self.assertEqual(expected,actural)  
     def test_solutionSet(self):
         S = 'x in {1,2} U {3,4}'
         expected = [[('x', 1)], [('x', 2)], [('x', 3)], [('x', 4)]]

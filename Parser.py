@@ -1,13 +1,13 @@
+# -*- coding: utf-8 -*-
 ######################################################################
 # Parser
 # Qianji Zheng, Texas Tech University
 # July 2014
 ######################################################################
-
 from Tokenizer import *
 from Expression import *
 from fractions import Fraction
-'''
+''':
 This simple parser program parses the following grammar:
 ######################################################################
 Grammar of LED terms
@@ -117,6 +117,9 @@ Please refer Evaluater.py for the definition of AST
 # If S is a list of string then parse**(S) = (tree,True), where tree is the abstract syntax tree of S, if S complies to the corresponding rule of the grammar
 # otherwise parse**(S) = (None,False).
 # Each rule is given right before the function definition
+'''
+'''
+######################################################################
 '''
 '''
 list<str> -> (str * list<str>) * bool
@@ -336,7 +339,7 @@ def parseSomeAll(S):
         except ValueError:
             return (None,False)
     return (None,False)
-#rule S0  ->   term   infpred   term | identifier | consecutives
+#rule S0  ->   term   infpred   term | identifier | consecutives | expression typeExpression
 InfpredS0 = ['=','<','>','<=','>=','in','subeq']
 def parseS0(S):
     if len(S)==0: return(None,False)
@@ -367,42 +370,77 @@ def parseS0(S):
         (tree,flag) = parseConsecutives(['='],S)
         if flag: return (tree,True)
     # Expression : typeExpression
-
-    # for i in range(len(S)):
-        # if S[i]==':':
-            # (t1,f1)=parseExpression(S[0:i])
-            # (t2,f2)= parseTypeExpression(S[i+1:])
-            # if f1 and f2: 
-                # return (AST(':',[t1,t2]),True) 
+    for i in range(len(S)):
+         if S[i]==':':
+             (t1,f1)=parseExpression(S[0:i])
+             (t2,f2)= parseTypeExpression(S[i+1:])
+             if f1 and f2: 
+                 return (AST(':',[t1,t2]),True) 
     return (None,False)      
 
-# typeExpression -> buildIn | typeExpression * buildIn|( typeExpression ) 
-def parseTypeExpression(S):
+def universalParse(S,F):
+    '''helper function to remove duplicate functions
+    list<list<str>> * list<str> -> tuple
+    If S is a list of parsing list of string, and F is a list of parsing functions
+    then universalParse(S,F) = (trees,True), where trees is a list of the abstract syntax trees,
+    if each memeber of S complies to its corresponding rule in F
+    otherwise universalParse(S,F) = (None,False). 
+    For example, if S = [['Int'],['Int']], F=['TExp0','TExp0'] then universalParse(S,F)= (trees,True), 
+    where trees=[t1,t2] and t1 is AST of parseTExp0(S[0]) and t2 is the AST of parseTExp0(S[1])
+    '''
+    trees = []
+    flags = []
+    if len(F)>0 and len(F) ==len(S):
+        for i in range(len(F)):
+            func = functionNames(F[i])
+            t,f = func(S[i])
+            trees.append(t)
+            flags.append(f)
+        if all(flags):
+            return (tress,True)
+    return (None,False)
+
+# typeProduct -> tExp0 * tExp0 | tExp0 * typeProduct
+def parseTypeProduct(S):
     for i in range(len(S)):
         if S[i]=='*':
-            (t1,f1)=parseBuildIn(S[i+1:])
-            (t2,f2)= parseTypeExpression(S[0:i])
+            (t1,f1)=parseTExp0(S[0:i])
+            (t2,f2)= parseTypeProduct(S[i+1:])
+            (t3,f3) = parseTExp0(S[i+1:])
+            # tExp0 * typeProduct
             if f1 and f2: 
                 if(isinstance(t2.tree,list) and t2.op()=='star'):
                     return (AST('star',t2.args()+[t1]),True) 
                 else:
                     return (AST('star',[t2,t1]),True)
-    if len(S)>2:
-        if S[0]=='(' and S[-1]==')':
-            t,f = parseTypeExpression(S[1:-1])
-            if f:
-                # if not isinstance(t.tree,tuple):
-                   # return (t,True)
-                return (AST('comStar',[t]),True)
-    (tree,flag) = parseBuildIn(S)
-    if flag: 
-        return (tree,True) 
+            # tExp0 * tExp0
+            if f1 and f3:
+                return (AST('star',[t1,t3]),True)
     return (None,False)
 
-# buildIn -> Bool | Nat | Int | Num | List | Set | Obj
-def parseBuildIn(S):
+def parseTypeExpression(S):
+    '''rule: typeExpression -> tExp0 |typeProduct
+    '''
+    # tExp0
+    t,f = parseTExp0(S)
+    if f:
+        return (t,f)
+    # typeProduct
+    if S.count('*')>0:
+        t,f = parseTypeProduct(S)
+        if f:
+            return(t,f)
+
+    return(None,False)
+
+# TExp0 -> Bool | Nat | Int | Rat |  | (typeExpression) 
+def parseTExp0(S):
+    # built-in types: Bool, Nat, Int, Rat
     if len(S)==1 and isIdentifier(S[0]) and S[0] in BuiltInTypes:
         return (AST(S[0]),True)
+    # (typeExpression)
+    if len(S)>2 and S[0]=='(' and S[-1]==')':
+        return parseTypeExpression(S[1:-1])
     return (None,False)
 
 # operators = ['<','<=']
@@ -1109,3 +1147,5 @@ def closeParentesis(L,S):
         index+=1 
     return None    
 
+functionNames = {'TExp0':parseTExp0,
+        'typeProduct':parseTypeProduct}
