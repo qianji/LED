@@ -410,23 +410,39 @@ def parseTypeProduct(S):
             # tExp0 * typeProduct
             if f1 and f2: 
                 if(isinstance(t2.tree,list) and t2.op()=='star'):
-                    return (AST('star',t2.args()+[t1]),True) 
+                    return (AST('star',[t1]+t2.args()),True) 
                 else:
-                    return (AST('star',[t2,t1]),True)
+                    return (AST('star',[t1,t2]),True)
             # tExp0 * tExp0
             if f1 and f3:
                 return (AST('star',[t1,t3]),True)
     return (None,False)
 
 def parseTypeExpression(S):
-    '''rule: typeExpression -> tExp0 |typeProduct
+    '''rule: typeExpression -> tExp0 |typeProduct | typeExpression U tExp0 | typeExpression U typeProduct
     '''
     # tExp0
     t,f = parseTExp0(S)
     if f:
         return (t,f)
+    # typeExpression U tExp0 | typeExpression U typeProduct
+    for i in range(len(S)):
+        if S[i]=='U':
+            t2,f2 = parseTypeExpression(S[0:i])
+            t1,f1 = parseTExp0(S[i+1:])
+            t3,f3 = parseTypeProduct(S[i+1:])
+            if f1 and f2: 
+                if(isinstance(t2.tree,list) and t2.op()=='typeU'):
+                    return (AST('typeU',t2.args()+[t1]),True) 
+                else:
+                    return (AST('typeU',[t2,t1]),True)
+            if f3 and f2: 
+                if(isinstance(t2.tree,list) and t2.op()=='typeU'):
+                    return (AST('typeU',t2.args()+[t3]),True) 
+                else:
+                    return (AST('typeU',[t2,t3]),True)
     # typeProduct
-    if S.count('*')>0:
+    if S.count('U')==0 and S.count('*')>0:
         t,f = parseTypeProduct(S)
         if f:
             return(t,f)
@@ -444,10 +460,13 @@ def parseTExp0(S):
     # Seq(tExp) or fSet(tExp)
     if len(S)>3 and S[1]=='(' and S[-1]==')':
         t,f = parseTypeExpression(S[2:-1])
-        if S[0]=='fSeq':
+        if S[0]=='fSeq' and f:
             return(AST('fSeq',[t]),True)
-        if S[0]=='fSet':
+        if S[0]=='fSet' and f:
             return (AST('fSet',[t]),True)
+    # a set 
+    if len(S)>2 and S[0]=='{' and S[-1]=='}':
+        return parseTerm(S)
     return (None,False)
 
 # operators = ['<','<=']

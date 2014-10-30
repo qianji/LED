@@ -289,6 +289,21 @@ class ParserTest(unittest.TestCase):
         actural = self.expressionValues(expressions)
         expected = [True,True,True]
 
+        # expression of a set 
+        expressions = ['1:{1,2}','(1,2):{(1,2),(3,2),2}','(1,2):{(1,3),(2,2)}']
+        actural = self.expressionValues(expressions)
+        expected = [True,True,False]
+
+        # S U T, where S and T are types 
+        expressions = ['(1,2): (Int*Int) U Int','1:{1}U(Int*Int)','1>1:Bool U Int','{1..9}:Int U fSet(Int)','{1..9}:Int U fSet(Int) U (Int*Int)']
+        actural = self.expressionValues(expressions)
+        expected = [True,True,True,True,True]
+
+        # x: T1*...*Tn if x is a tuple (x1,...,xn) and xi:Ti for all i
+        expressions = ['{1..9}:(Int*Int)','(1,2):Int*Int','(1,2):(Int*Int)','(1,2.3,3,(2,3),{1..9}):Int*Rat*Nat*(Int*Int)*fSet(Int)','(1,{1..9}):Int*fSet(Int)','(1,2.3,3,(2,3)):Int*Rat*Nat*(Int*Int)','(1,2.3,3):Int*Rat*Nat']
+        actural = self.expressionValues(expressions)
+        expected = [False,True,True,True,True,True,True]
+
     def test_solutionSet(self):
         S = 'x in {1,2} U {3,4}'
         expected = [[('x', 1)], [('x', 2)], [('x', 3)], [('x', 4)]]
