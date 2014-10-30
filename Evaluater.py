@@ -54,12 +54,13 @@ def val(E):
     if hasNone(Args): 
         #print('One of the arguments is not valid')
         return 
-    if Op=='seq': return ('seq',Args)
-    if Op=='set'   : return ('set',Args)
-    if Op=='tuple' : return ('tuple',Args)
-    if Op=='star': return ('star',Args)
-    if Op=='comStar': return ('comStar',Args)
-    if Op=='lambda': return('lambda',Args)
+#     if Op=='seq': return ('seq',Args)
+    # if Op=='set'   : return ('set',Args)
+    # if Op=='tuple' : return ('tuple',Args)
+    # if Op=='star': return ('star',Args)
+    # if Op=='comStar': return ('comStar',Args)
+    # if Op=='lambda': return('lambda',Args)
+    if Op in ['seq','set','tuple','star','comStar','lambda','fSet','fSeq']: return (Op,Args)
     if Op in builtIns : 
         # check if Op is one of the Big Operations
         #if Op in ['setComp','Union','Sum','Prod','Nrsec']:
@@ -364,7 +365,7 @@ def valMember(Args):
         return isRationalNum(Args)
     if Args[1]=='Seq':
         return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='seq'
-    if Args[1]=='Set':
+    if Args[1]=='fSet':
         return isTypeSet(Args)
     if Args[1]=='Obj':
         return isObject(Args)
@@ -372,6 +373,12 @@ def valMember(Args):
         return isTypeMember(Args[0],Args[1])
     if isinstance(Args[1],tuple) and Args[1][0]=='comStar':
         return isTypeMember(Args[0],Args[1][1][0])
+    # fSet(type)
+    if Args[1][0]=='fSet' and Args[0][0]=='set':
+        return all([valMember([x,Args[1][1][0]]) for x in Args[0][1]])
+    # Seq(type)
+    if Args[1][0]=='fSeq' and Args[0][0]=='seq':
+        return all([valMember([x,Args[1][1][0]]) for x in Args[0][1]])
     return False
 
 def isTypeMember(Var,Type):

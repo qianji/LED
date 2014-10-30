@@ -279,10 +279,16 @@ class ParserTest(unittest.TestCase):
         
         # (T) where T is a type
         expressions = ['1:(Nat)','(1,2):(Int*Int)','(1,2,3):(Int*Int*Rat)','((1,2),3):((Int*Int)*Int)',
-                '((1,2),3>3):(Int*Int)*Bool','((1,2),(3,4)): (Int*Int)*(Int*Int)']
+                '((1,2),3.3):(Int*Int)*Rat','((1,2),(3,4)): (Int*Int)*(Int*Int)','<1,2>:Seq','{1..9}:fSet']
         actural = self.expressionValues(expressions)
-        expected = [True,True,True,True,True,True]
+        expected = [True,True,True,True,True,True,True,True]
         self.assertEqual(expected,actural)  
+
+        # fSeq(T) and fSet(T), where T is a type
+        expressions = ['{1..9}:fSet(Int)', '<1,2,3>:fSeq(Int)','<(1,2),(2,3),(4,5)>:fSeq(Int*Int*Int)','{((1,2),3.3), ((3,2),3.2),((3,4),1)}:fSet((Int*Int)*Rat)']
+        actural = self.expressionValues(expressions)
+        expected = [True,True,True]
+
     def test_solutionSet(self):
         S = 'x in {1,2} U {3,4}'
         expected = [[('x', 1)], [('x', 2)], [('x', 3)], [('x', 4)]]

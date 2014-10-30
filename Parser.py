@@ -397,7 +397,7 @@ def universalParse(S,F):
             trees.append(t)
             flags.append(f)
         if all(flags):
-            return (tress,True)
+            return (trees,True)
     return (None,False)
 
 # typeProduct -> tExp0 * tExp0 | tExp0 * typeProduct
@@ -433,14 +433,21 @@ def parseTypeExpression(S):
 
     return(None,False)
 
-# TExp0 -> Bool | Nat | Int | Rat |  | (typeExpression) 
+# TExp0 -> Bool | Nat | Int | Rat | (typeExpression)|Seq(tExp)|fSet(tExp) 
 def parseTExp0(S):
-    # built-in types: Bool, Nat, Int, Rat
+    # built-in types: Bool, Nat, Int, Rat, fSet, Seq
     if len(S)==1 and isIdentifier(S[0]) and S[0] in BuiltInTypes:
         return (AST(S[0]),True)
     # (typeExpression)
     if len(S)>2 and S[0]=='(' and S[-1]==')':
         return parseTypeExpression(S[1:-1])
+    # Seq(tExp) or fSet(tExp)
+    if len(S)>3 and S[1]=='(' and S[-1]==')':
+        t,f = parseTypeExpression(S[2:-1])
+        if S[0]=='fSeq':
+            return(AST('fSeq',[t]),True)
+        if S[0]=='fSet':
+            return (AST('fSet',[t]),True)
     return (None,False)
 
 # operators = ['<','<=']
