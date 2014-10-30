@@ -367,6 +367,8 @@ def valMember(Args):
         return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='seq'
     if Args[1]=='fSet':
         return isTypeSet(Args)
+    if Args[1]=='Lambda':
+        return isTypeLambda(Args)
     if Args[1]=='Obj':
         return isObject(Args)
     if Args[1][0]=='set':

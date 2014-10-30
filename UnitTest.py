@@ -304,6 +304,11 @@ class ParserTest(unittest.TestCase):
         actural = self.expressionValues(expressions)
         expected = [False,True,True,True,True,True,True]
 
+        # lambda
+        expressions = ['lam x.x:Lambda','lam x y. x+y:Lambda']
+        actural = self.expressionValues(expressions)
+        expected = [True,True]
+
     def test_solutionSet(self):
         S = 'x in {1,2} U {3,4}'
         expected = [[('x', 1)], [('x', 2)], [('x', 3)], [('x', 4)]]

@@ -451,7 +451,7 @@ def parseTypeExpression(S):
 
 # TExp0 -> Bool | Nat | Int | Rat | (typeExpression)|Seq(tExp)|fSet(tExp) 
 def parseTExp0(S):
-    # built-in types: Bool, Nat, Int, Rat, fSet, Seq
+    # built-in types: Bool, Nat, Int, Rat, fSet, Seq, Lambda
     if len(S)==1 and isIdentifier(S[0]) and S[0] in BuiltInTypes:
         return (AST(S[0]),True)
     # (typeExpression)
@@ -532,11 +532,11 @@ def parseTerm(S):
         return parseLambda(S)
     return (None,False)
 
-# rule: term -> lambda  vars . term
+# rule: term -> lam  vars . term
 def parseLambda(S):
     if len(S)<4:
         return (None,False)
-    if S[0]=='lambda':
+    if S[0]=='lam':
         try:
             # find '.' in S
             i = S.index('.')
@@ -546,7 +546,7 @@ def parseLambda(S):
         (t2,f2)= parseTerm(S[i+1:])
         if f1 and f2: 
             if isinstance(t1.tree,list) and t1.op()=='cstack':
-                return (AST('lambda',[t1.args(),t2]),True)
+                return (AST('lambda',[('vars',t1.args()),t2]),True)
             else:
                 #return (AST('lambda',[[t1],t2]),True) 
                 return (AST('lambda',[('vars',[t1]),t2]),True) 
