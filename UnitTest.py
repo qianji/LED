@@ -53,8 +53,8 @@ class ParserTest(unittest.TestCase):
             #v=tree.val()
             values.append(v)
         return values
-    def setUp(self):
-        compile('test.led')
+#     def setUp(self):
+        # compile('test.led')
     def test_file(self):
         '''
         # copy and fill in the values for the parameters to test the functions in the program
@@ -285,29 +285,40 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(expected,actural)  
 
         # fSeq(T) and fSet(T), where T is a type
-        expressions = ['{1..9}:fSet(Int)', '<1,2,3>:fSeq(Int)','<(1,2),(2,3),(4,5)>:fSeq(Int*Int*Int)','{((1,2),3.3), ((3,2),3.2),((3,4),1)}:fSet((Int*Int)*Rat)']
+        expressions = ['{1..9}:fSet(Int)', '<1,2,3>:fSeq(Int)','<(1,2),(2,3),(4,5)>:fSeq(Int*Int*Int)','{((1,2),3.3), ((3,2),3.2),((3,4),1)}:fSet((Int*Int)*Rat)','{{1..9},{2,3}}:fSeq(fSeq(Int))']
         actural = self.expressionValues(expressions)
-        expected = [True,True,True]
+        expected = [True,True,True,True,True]
+        self.assertEqual(expected,actural)  
 
         # expression of a set 
         expressions = ['1:{1,2}','(1,2):{(1,2),(3,2),2}','(1,2):{(1,3),(2,2)}']
         actural = self.expressionValues(expressions)
         expected = [True,True,False]
+        self.assertEqual(expected,actural)  
 
         # S U T, where S and T are types 
         expressions = ['(1,2): (Int*Int) U Int','1:{1}U(Int*Int)','1>1:Bool U Int','{1..9}:Int U fSet(Int)','{1..9}:Int U fSet(Int) U (Int*Int)']
         actural = self.expressionValues(expressions)
         expected = [True,True,True,True,True]
+        self.assertEqual(expected,actural)  
 
         # x: T1*...*Tn if x is a tuple (x1,...,xn) and xi:Ti for all i
         expressions = ['{1..9}:(Int*Int)','(1,2):Int*Int','(1,2):(Int*Int)','(1,2.3,3,(2,3),{1..9}):Int*Rat*Nat*(Int*Int)*fSet(Int)','(1,{1..9}):Int*fSet(Int)','(1,2.3,3,(2,3)):Int*Rat*Nat*(Int*Int)','(1,2.3,3):Int*Rat*Nat']
         actural = self.expressionValues(expressions)
         expected = [False,True,True,True,True,True,True]
+        self.assertEqual(expected,actural)  
 
         # lambda
         expressions = ['lam x.x:Lambda','lam x y. x+y:Lambda']
         actural = self.expressionValues(expressions)
         expected = [True,True]
+        self.assertEqual(expected,actural)  
+
+        # user defined type symbols(T1-T8) is defined in test.lde
+        expressions = ['1:T1','(2,3):T2','4:T3','{1..9}:T4','lam x y.x+y:T4','{(1,2),(3,4),(2,4)}:T5','{{1..9},{2,3}U{1,4}}:T8','((1,1.2),(1,2.3)):T6']
+        actural = self.expressionValues(expressions)
+        expected = [True,True,False,True,True,True,True,True]
+        self.assertEqual(expected,actural)
 
     def test_solutionSet(self):
         S = 'x in {1,2} U {3,4}'
@@ -367,4 +378,5 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(expected,actural) 
             
 if __name__ == '__main__':
+    compile('test.led')
     unittest.main()   

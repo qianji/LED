@@ -377,15 +377,16 @@ def valMember(Args):
         return isTypeMember(Args[0],Args[1])
     if isinstance(Args[1],tuple) and Args[1][0]=='comStar':
         return isTypeMember(Args[0],Args[1][1][0])
-    # fSet(type)
-    if Args[1][0]=='fSet' and Args[0][0]=='set':
-        return all([valMember([x,Args[1][1][0]]) for x in Args[0][1]])
-    # Seq(type)
-    if Args[1][0]=='fSeq' and Args[0][0]=='seq':
+    # fSet(type) or fSeq(type)
+    if Args[1][0]=='fSet' or Args[1][0]=='fSeq':
         return all([valMember([x,Args[1][1][0]]) for x in Args[0][1]])
     # S U T where S and T are types
     if Args[1][0]=='typeU':
         return any([valMember([Args[0],t]) for t in Args[1][1]] )
+    if isinstance(Args[1],str) and not Args[1] in BuiltInTypes:
+        if Program.defined(Args[1],0):
+            t =  Program.body(Args[1],0)
+            valMember([Args[0],t])
     return False
 
 def isTypeMember(Var,Type):

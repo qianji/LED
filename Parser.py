@@ -449,10 +449,10 @@ def parseTypeExpression(S):
 
     return(None,False)
 
-# TExp0 -> Bool | Nat | Int | Rat | (typeExpression)|Seq(tExp)|fSet(tExp) 
+# TExp0 -> Bool | Nat | Int | Rat | (typeExpression)|Seq(tExp)|fSet(tExp)|typeSymbol 
 def parseTExp0(S):
     # built-in types: Bool, Nat, Int, Rat, fSet, Seq, Lambda
-    if len(S)==1 and isIdentifier(S[0]) and S[0] in BuiltInTypes:
+    if len(S)==1 and isIdentifier(S[0]):
         return (AST(S[0]),True)
     # (typeExpression)
     if len(S)>2 and S[0]=='(' and S[-1]==')':
@@ -522,7 +522,7 @@ def parseConsecutive(operators,S):
     except ValueError:
         return (None,False)  
     return (None,False)  
-# rule: term  ->   T4  | lambda  vars . term
+# rule: term  ->   T4  | lambda  vars . term | typeExpression
 def parseTerm(S):
     t,f = parseT4(S)
     if f:
@@ -530,6 +530,9 @@ def parseTerm(S):
     t1,f1 = parseLambda(S)
     if f1:
         return parseLambda(S)
+#     t,f = parseTypeExpression(S)
+    # if f:
+        # return(t,f)
     return (None,False)
 
 # rule: term -> lam  vars . term

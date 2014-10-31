@@ -188,6 +188,9 @@ def parseDfn(S):
         return parseWhereDef(S)
     if hasKeywords(S,['If','then']):
         return parseIfThenDef(S)
+    def3,flag3 = parseTypeDef(S)
+    if flag3:
+        return(def3,flag3)
     def2,flag2 = parseFuncDef(S)
     if flag2:
         return (def2,True)
@@ -325,6 +328,25 @@ def parseFuncDef(S):
             else:
                     print('cannot parse function definition left side: ',' '.join(S[0:i])) 
     return (None,False)     
+
+def parseTypeDef(S):
+    for i in range(len(S)):
+        if S[i]==':=' and i==1:
+            t1,f1 = parseLHS(S[0:i])
+            if f1:
+                (fName,fParams)=parseLHS(S[0:i])[0]
+                paramNumber = len(fParams)
+                # type defintion
+                (t2,f2) = parseTypeExpression(S[i+1:])
+                if f2: 
+                    #put the content in the dictionary
+                    d = Definition(fName, fParams, t2, AST(True))
+                    return(d,True)    
+#                 else:
+                    # print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
+            else:
+                    print('cannot parse function definition left side: ',' '.join(S[0:i])) 
+    return (None,False) 
 
 def parseFuncDeflet(S):
     '''
