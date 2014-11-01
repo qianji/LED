@@ -46,7 +46,7 @@ def val(E):
         print("0-ary function",E,"is not defined") 
         return
     (Op,X) = E
-    if Op in {'and','=>','some','all','setComp','Union','Sum','Prod','Nrsec','lambda'}: Args=X  
+    if Op in {'and','<=>','=>','some','all','setComp','Union','Sum','Prod','Nrsec','lambda'}: Args=X
     else: 
         #print(E)
         Args = [val(E) for E in X]
@@ -258,11 +258,12 @@ def valAnd(X):
     return val(X[1])
 def valOr(X): return X[0] or X[1]
 def valNot(X): return not(X[0])
-def valImplies(X):
-    p = val(X[0])
-    if p==False: return True
-    return val(X[1])
-def valIff(X): return X[0]==X[1]
+def valImplies(Args):
+    t= Args[1]
+    p= Args[0]
+    return all([val(dot(t,b)) for b in solutionSet(p)])
+
+def valIff(X): return valImplies(X) and valImplies([X[1],X[0]])
 
 # dynamic overloading resolution
 def valPlus(X):

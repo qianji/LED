@@ -468,7 +468,6 @@ def parseTExp0(S):
     if len(S)>2 and S[0]=='{' and S[-1]=='}':
         return parseTerm(S)
     return (None,False)
-
 # operators = ['<','<=']
 # rule: consecutives -> consecutive | term op consecutive   op is one of the memeber in operators
 def parseConsecutives(operators,S):
