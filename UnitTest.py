@@ -284,8 +284,8 @@ class ParserTest(unittest.TestCase):
         expected = [True,True,True,True,True,True,True,True]
         self.assertEqual(expected,actural)  
 
-        # fSeq(T) and fSet(T), where T is a type
-        expressions = ['{1..9}:fSet(Int)', '<1,2,3>:fSeq(Int)','<(1,2),(2,3),(4,5)>:fSeq(Int*Int*Int)','{((1,2),3.3), ((3,2),3.2),((3,4),1)}:fSet((Int*Int)*Rat)','{{1..9},{2,3}}:fSeq(fSeq(Int))']
+        # Seq(T) and fSet(T), where T is a type
+        expressions = ['{1..9}:fSet(Int)', '<1,2,3>:Seq(Int)','<(1,2),(2,3),(4,5)>:Seq(Int*Int*Int)','{((1,2),3.3), ((3,2),3.2),((3,4),1)}:fSet((Int*Int)*Rat)','{{1..9},{2,3}}:fSet(fSet(Int))']
         actural = self.expressionValues(expressions)
         expected = [True,True,True,True,True]
         self.assertEqual(expected,actural)  

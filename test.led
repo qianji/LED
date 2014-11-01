@@ -122,11 +122,11 @@ test for type system
 T1:=Int
 T2:=Int*Int
 T3:={1,2,3}
-T4:=Int U fSeq(Int) U Lambda
+T4:=Int U Seq(Int) U Lambda
 T5:=fSet((Int*Int))
 T6:=(Int*Rat)*(Int*Rat)
-T7:=Seq(fSeq(Int))
-T8:=fSeq(fSeq(Int))
+T7:=fSet(fSet(Int))
+T8:=fSet(fSet(Int))
 --/
 
 

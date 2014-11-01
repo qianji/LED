@@ -460,8 +460,8 @@ def parseTExp0(S):
     # Seq(tExp) or fSet(tExp)
     if len(S)>3 and S[1]=='(' and S[-1]==')':
         t,f = parseTypeExpression(S[2:-1])
-        if S[0]=='fSeq' and f:
-            return(AST('fSeq',[t]),True)
+        if S[0]=='Seq' and f:
+            return(AST('Seq',[t]),True)
         if S[0]=='fSet' and f:
             return (AST('fSet',[t]),True)
     # a set 
