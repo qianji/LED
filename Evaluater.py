@@ -60,7 +60,7 @@ def val(E):
     # if Op=='star': return ('star',Args)
     # if Op=='comStar': return ('comStar',Args)
     # if Op=='lambda': return('lambda',Args)
-    if Op in ['seq','set','tuple','star','comStar','lambda','fSet','fSeq','typeU']: return (Op,Args)
+    if Op in ['seq','set','tuple','star','comStar','lambda','fSet','Seq','typeU']: return (Op,Args)
     if Op in builtIns : 
         # check if Op is one of the Big Operations
         #if Op in ['setComp','Union','Sum','Prod','Nrsec']:
@@ -378,8 +378,8 @@ def valMember(Args):
         return isTypeMember(Args[0],Args[1])
     if isinstance(Args[1],tuple) and Args[1][0]=='comStar':
         return isTypeMember(Args[0],Args[1][1][0])
-    # fSet(type) or fSeq(type)
-    if Args[1][0]=='fSet' or Args[1][0]=='fSeq':
+    # fSet(type) or Seq(type)
+    if Args[1][0]=='fSet' or Args[1][0]=='Seq':
         return all([valMember([x,Args[1][1][0]]) for x in Args[0][1]])
     # S U T where S and T are types
     if Args[1][0]=='typeU':
