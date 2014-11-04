@@ -37,13 +37,14 @@ class Definition:
     # s is a string representing the name of defined function, p is a list of variables representing the parameters of the definition and b is an AST representing the body the definition. 
     # example: if d is the definition of f(x) := x^2, tree is the AST of x^2
     # then symbol = 'f', parms =['x'], head = ('f',1), body = (['x'],tree,True)
-    def __init__(self,s,p,b,g=AST(True)):
+    def __init__(self,s,p,b,g=AST(True),sign=None):
         self.symbol = s 
         self.parms = p 
         self.head = (s,len(p))
         #a body of a defintion is not a just expression but a 3 tuples,which includes params, AST of the expression and the gaurd condition
         self.body = (p,b,g)
         self.expression=b
+        self.signature = sign
 
     # convert defintion class to a string    
     def __str__(self):

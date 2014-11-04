@@ -107,17 +107,26 @@ def parseProgram(S):
                 # if there are no '(' or ')'  in the function head
                 if not S[secondI] ==')':
                     lpI =secondI+1
+                    funcName = secondI
                 else:
                     # search backward from secondI to find the first '('
                     lpI = firstIndexBack('(',secondI,S)
+                    funcName = lpI-1
                 # try to find the first 'If' 
                 
                 ifIndex = firstIndexBack('If',lpI,S)
                 # find the end of the first function definition
                 if ifIndex == None or ifIndex==0:
                     end = lpI -2 
+                    
                 else:
                     end = ifIndex-1
+                # find the first function signature name that is same to the function name
+                arrow = firstIndexBack('->',end,S)
+                if arrow!=None:    
+                    secondFuncName = firstIndexBack(S[funcName],arrow,S)
+                    if secondFuncName !=None:
+                        end = secondFuncName-1
                 eachFunc = S[:end+1]
                 allFunctions.append(eachFunc)
                 if end+1==0:
@@ -178,6 +187,15 @@ For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represe
 # rule: Dfn -> funcDef | relDef | ifThenDef | whereDef | guardWhereDef | relIfThenDef
 '''
 def parseDfn(S):
+    # parse to seperate function signature and function definition
+    if '->' in S:
+        funcSymbol = S[0]
+        arrowI = S.index('->')
+        if funcSymbol in S[arrowI:]:
+            funcSymbolI = S[arrowI:].index(funcSymbol)+arrowI
+            S = S[funcSymbolI:]
+        else:
+            return (None,False)
     if hasKeywords(S,['iff','If','then']):
         return parseRelIfThenDef(S)
     if hasKeywords(S,['iff']):

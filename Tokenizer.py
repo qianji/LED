@@ -18,7 +18,7 @@ def remInitialWhite(S):
 
 # A *special token* is a string that is a member of the following list.
 
-specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','..',',',';','[',']','{','}','\\',':','`','"']
+specialTokens = ['+','*','-','/','^','<','=','>','>=','<=',')','(',':=','|','&','~','=>','<=>','..',',',';','[',']','{','}','\\',':','`','"','->']
 
 # An *identifier* is a nonempty string of letters and digits
 # beginning with a letter.
@@ -43,7 +43,7 @@ def munch(S):
     if validToken(state): return (''.join(chars),True)
     else: return (chars,False)
         
-def validToken(state): return state in ['id','num','spec1','lessgreat','equal','period','digitsAndPoint','colon','colonEqual','doublePeriod','backquote','repeatingBlockRP','quoteClose']
+def validToken(state): return state in ['id','num','spec1','lessgreat','equal','period','digitsAndPoint','colon','colonEqual','doublePeriod','backquote','repeatingBlockRP','quoteClose','dash','arrow']
 
 # States are 'empty', 'id', 'num', 'lessgreat', or 'spec1'. Each state
 # corresponds to an assertion about the stack. 
@@ -85,7 +85,9 @@ def canPush(S,state):
     if state =='repeatingBlockRP': return False
     if state =='quoteClose': return False
     if state =='quoteSepcial': return c in ['\\','t','r','"']
-    if state =='quoteOpen' or 'quoteContent': return True
+    if state =='quoteOpen' or state=='quoteContent': return True
+    if state == 'dash': return c=='>'
+    if state == 'arrow': return False
     
 # beginSpecial(c) iff c is the beginning of a special token that is not ":-"
 def beginsSpecial(c): return any([c==x[0] for x in specialTokens])
@@ -102,6 +104,7 @@ def newState(state,c):
                'period' if c=='.' else\
                'equal' if c=='=' else\
                'backquote' if c=='`' else\
+               'dash' if c=='-' else\
                'quoteOpen' if c=='"' else\
                'spec1'  
     if state =='id':return 'id' if alphaNum(c) else 'spec1'
@@ -124,6 +127,8 @@ def newState(state,c):
     if state =='quoteClose': return 'spec1'
     if state == 'quoteSepcial': return 'quoteContent' if c in ['\\','t','r','"'] else 'spec1'
     if state =='quoteContent': return 'quoteSepcial' if c=='\\' else 'quoteClose' if c=='"' else 'quoteContent'
+    if state =='dash': return 'arrow' if c=='>' else 'spec1'
+    if state =='arrow': return 'spec1'
 
 
 # alpha(c) means c is a letter. digit(c) means c is a digit. alphaNum(c) means

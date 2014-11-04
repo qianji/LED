@@ -1,11 +1,11 @@
 '''
 This module is used for test individual modules in LED. Please use UnitTest.py if you would like to do the unit testing 
 '''
-from Compiler import compile
+#from Compiler import compile
 from Tokenizer import tokens
-from Evaluater import val
-from Parser import *
-from IDE import *
+#from Evaluater import val
+#from Parser import *
+#from IDE import *
 from EaselLED import *
 
 '''

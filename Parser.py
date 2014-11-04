@@ -225,6 +225,8 @@ def lastIndex(C, S):
             
 # Expression -> Sentence | Term
 def parseExpression(S):
+    if S==None or len(S)==0:
+        return(None,False)
     tree2,flag2 = parseSentence(S)
     if flag2:
         return (tree2,True)
@@ -235,6 +237,8 @@ def parseExpression(S):
 
 # rule: Sentence -> S6 | ( S6 )
 def parseSentence(S):
+    if S==None or len(S)==0:
+        return(None,False)
     tree2,flag2 = parseS6(S)
     if flag2:
         return (tree2,True)
