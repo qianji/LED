@@ -431,7 +431,7 @@ def parseTypeExpression(S):
         return (t,f)
     # typeExpression U tExp0 | typeExpression U typeProduct
     for i in range(len(S)):
-        if S[i]=='U':
+        if S[i]=='u':
             t2,f2 = parseTypeExpression(S[0:i])
             t1,f1 = parseTExp0(S[i+1:])
             t3,f3 = parseTypeProduct(S[i+1:])

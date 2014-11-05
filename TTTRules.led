@@ -1,0 +1,170 @@
+Program: Tic Tac Toe
+Author : J. Nelson Rushton
+Date   : October, 2014
+
+
+This program defines a simple tic tac toe game in the functional
+language LED. Formal LED definitions appear between code and end-
+code delimiters, written respectively as as a slash followed
+by one or more dashes, and one or more dashes followed by a slash.
+All other text is informal, documentary text.
+
+
+======================================================================
+Data Model
+======================================================================
+
+This section defines the data types used to define the
+game of tic tac toe.
+
+
+A *cell* is a natural number in the interval {1..9}. Cells
+represent squares on the tic tac toe board as pictured below.
+
+  1|2|3
+  -----
+  4|5|6
+  -----
+  7|8|9
+
+
+/-----------------
+ Cell :=  {1..9}
+------------------/
+ 
+A *player* is the string "x" or the string "o".
+
+/---------------------
+ Player :=  {"x","o"}
+----------------------/
+
+A *move* is a pair (p,c) where p is a player and c is a cell.
+
+/--------------------------
+ Move :=  Player * Cell
+---------------------------/
+ 
+
+
+
+
+A *state* is a finite set of moves. A state is interpreted as
+the set of moves made so far in a given game. For example, the
+state {("x",1),("o",5)} represents the game condition where there
+is there is an "x" in cell 1 and an "o" in cell 5.
+
+/------------------------
+ State :=  fSet(Move)
+-------------------------/
+
+
+In this document, we will use the variables c, p, m, and S to vary
+over cells, players, moves, and states, respectively.
+
+
+======================================================================
+Game Rules
+======================================================================
+
+
+This section defines the rules of tic tac toe, in terms of
+
+  *) the initial state of the game,
+  *) whether or not a given move is legal in a given state,
+  *) the result of making a given move in a given state, and
+  *) conditions under which the game is over.
+
+
+Since no moves have been made when the game begins, the initial state
+is the empty set.
+
+/-------------------
+ initialState := {}
+--------------------/
+
+Write *gameOver(S)* to mean the game is over in state S.
+This is true in case either player has three in a line,
+or nine moves have been made.
+
+/-----------------------------------------------------
+ gameOver: State -> Bool
+
+ gameOver(S) iff
+  threeInLine("x",S) or threeInLine("o",S) or |S|=9
+------------------------------------------------------/
+
+
+
+
+
+
+
+
+Write *threeInLine(p,S)* to mean that in state S, player p occupies
+every cell in some line.
+
+
+/----------------------------------------------
+ threeInLine: Player*State -> Bool
+
+ threeInLine(p,S) iff
+   some L in lines. all c in L. (p,c) in S
+-----------------------------------------------/
+
+
+A *line* is a set of three cells in a row. We will write *lines*
+for the set of lines.
+
+/-----------------------------
+ lines :=
+  {{1,2,3},{4,5,6},{7,8,9},
+   {1,4,7},2,5,8},{3,6,9},
+   {1,5,9},{3,5,7}}
+-------------------------------/
+
+
+We write *legalMove(m,S)*, we mean that move m is legal in state S.
+This is the case if, in state S, the game is not over, it is player
+m[1]"s turn, and neither player occupies cell m[2].
+
+
+/-------------------------------
+ legalMove: Move*State -> Bool
+
+ legalMove(m,S) iff
+   ~gameOver(S)     	&
+   whoseTurn(S) = m[1]  &
+   ~("x",m[2]) in S 	&
+   ~("o",m[2]) in S
+---------------------------------/
+
+
+
+
+
+
+*whoseTurn(S)* is "x" if an even number of moves have been made in
+state S, and "o" otherwise. In case the game is not over in state S,
+this is the player whose turn it is.
+
+
+/----------------------------
+ whoseTurn: State -> Player
+
+ whoseTurn(S) :=
+	"x"   if |S| mod 2 = 0;
+	"o"   otherwise
+-----------------------------/
+
+result(S,m) is the state resulting from making move
+m in state S. Since a state is simply the set of moves
+made so far in a game, this is simply S U {m}.
+
+/----------------------------------
+ transition: State * Move -> State
+
+ transition(S,m) := S U {m}
+------------------------------------/
+
+
+
