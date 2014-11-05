@@ -90,6 +90,9 @@ def hasNone(Args):
             return True
     return False
 def valBuiltIn(Op,Args):
+    # deal with type Union
+    if Op=='U' and not all([x[0]=='set' for x in Args]):
+        return (Op,Args)
     F = builtIns[Op]
     return F(Args)
 
@@ -398,7 +401,7 @@ def valMember(Args):
     if Args[1][0]=='fSet' or Args[1][0]=='Seq':
         return all([valMember([x,Args[1][1][0]]) for x in Args[0][1]])
     # S U T where S and T are types
-    if Args[1][0]=='typeU':
+    if Args[1][0]=='U':
         return any([valMember([Args[0],t]) for t in Args[1][1]] )
     if isinstance(Args[1],str) and not Args[1] in BuiltInTypes:
         if Program.defined(Args[1],0):
