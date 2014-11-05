@@ -187,6 +187,7 @@ For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represe
 # rule: Dfn -> funcDef | relDef | ifThenDef | whereDef | guardWhereDef | relIfThenDef
 '''
 def parseDfn(S):
+    signature = None
     # parse to seperate function signature and function definition
     if '->' in S:
         funcSymbol = S[0]
@@ -194,26 +195,48 @@ def parseDfn(S):
         if funcSymbol in S[arrowI:]:
             funcSymbolI = S[arrowI:].index(funcSymbol)+arrowI
             S = S[funcSymbolI:]
+            sign,f= parseSignature(S)
+            if f:
+                signature = sign
+            else:
+                return (None,False)
         else:
             return (None,False)
     if hasKeywords(S,['iff','If','then']):
-        return parseRelIfThenDef(S)
+        return parseRelIfThenDef(S,signature)
     if hasKeywords(S,['iff']):
-        return parseRelDef(S)
+        return parseRelDef(S,signature)
     if hasKeywords(S,['If','then','where']):
-        return parseGuardWhereDef(S)
+        return parseGuardWhereDef(S,signature)
     if hasKeywords(S,['where']):
-        return parseWhereDef(S)
+        return parseWhereDef(S,signature)
     if hasKeywords(S,['If','then']):
-        return parseIfThenDef(S)
+        return parseIfThenDef(S,signature)
     def3,flag3 = parseTypeDef(S)
     if flag3:
         return(def3,flag3)
-    def2,flag2 = parseFuncDef(S)
+    def2,flag2 = parseFuncDef(S,signature)
     if flag2:
         return (def2,True)
     return (None,False) 
 
+def parseSignature(S):
+    '''list<str> -> tuple * Bool
+    if S is a list of tokens of the form Symbol : typeExpression -> typeExpression, then parseSignature(S)
+    is ((I,O),True), where I is an AST representing the type of input of the function, O is an AST representing 
+    the type of output of the function
+    otherwise parseSignature=(None,False)
+    For example, if S = ['divisor', ':' ,'(', 'Int', '*', 'Int', ')', '->', 'Bool'], then parseSignature(S)=((I,O),True),where
+    I = ('*',['Int','Int']) and O = 'Bool'
+    '''
+    if len(S)>4 and ':' in S and '->' in S:
+        colonI = S.index(':')
+        arrowI = S.index('->')
+        t1,f1 = parseTypeExpression(S[colonI+1:arrowI])
+        t2,f2 = parseTypeExpression(S[arrowI+1:])
+        if f1 and f2:
+            return ((t1,t2),True)
+    return(None,False)
 '''
 string -> dict * bool
 If S is a string of the function definitions of IfThenDef defined in LED, then parseIfThenDef(S) = (dict,True), where dict is a dictionary 
@@ -222,7 +245,7 @@ For example, the following program If x=2 & y=3 then h := x+y  would be represen
 {('h',0):([],('+',[2,3]))} 
 #rule: Guard -> If sentence then funcDef
 '''
-def parseIfThenDef(S):
+def parseIfThenDef(S,FS):
     try:
         i = S.index('If')
         j= S.index('then')
@@ -230,11 +253,11 @@ def parseIfThenDef(S):
         return(None,False)
     t,f1 = parseSentence(S[i+1:j])
     if f1:
-        (p,f2)= parseFuncDef(S[j+1:])
+        (p,f2)= parseFuncDef(S[j+1:],FS)
         if f2: 
             #put the content in the dictionary
             key,value = p.head,p.body
-            d = Definition(key[0], value[0], p.body[1],t)
+            d = Definition(key[0], value[0], p.body[1],t,FS)
             return(d,True)    
         else:
             print('cannot parse then statement definition: ',' '.join(S[j+1:])) 
@@ -271,7 +294,7 @@ def parseIfThenDefLet(S):
             print('cannot parse if statement definition: ',' '.join(S[i+1:j])) 
     return (None,False)
 
-def parseWhereDef(S):
+def parseWhereDef(S,FS):
     '''
     string -> dict * bool
     If S is a string of the function definitions of whereDef defined in LED, then parseWhereDef(S) = (dict,True), where dict is a dictionary 
@@ -287,7 +310,7 @@ def parseWhereDef(S):
                 p,f2 = parseFuncDef(S[0:i])
                 if f2:
                     key,value = p.head,p.body
-                    d=Definition(key[0],value[0],p.body[1],t)
+                    d=Definition(key[0],value[0],p.body[1],t,FS)
                     return(d,True)
                 else:
                     print('cannot parse definition: ',' '.join(S[0:i])) 
@@ -295,7 +318,7 @@ def parseWhereDef(S):
                 print('cannot parse where statement definition: ',' '.join(S[i:])) 
     return(None,False)
                 
-def parseGuardWhereDef(S):
+def parseGuardWhereDef(S,FS):
     '''
     string -> dict * bool
     If S is a string of the function definitions of whereDef defined in LED, then parseGuardWhereDef(S) = (dict,True), where dict is a dictionary 
@@ -308,10 +331,10 @@ def parseGuardWhereDef(S):
         if S[i]=='where':
             t,f1 = parseWhereClause(S[i:])
             if f1:
-                p,f2 = parseIfThenDef(S[0:i])
+                p,f2 = parseIfThenDef(S[0:i],FS)
                 if f2:
                     key,value= p.head,p.body
-                    d=Definition(key[0],value[0],p.body[1],AST('and',[t,p.body[2]]))
+                    d=Definition(key[0],value[0],p.body[1],AST('and',[t,p.body[2]]),FS)
                     return(d,True)
                 else:
                     print('cannot parse definition: ',' '.join(S[0:i])) 
@@ -320,7 +343,7 @@ def parseGuardWhereDef(S):
     return(None,False)
 
                 
-def parseFuncDef(S):
+def parseFuncDef(S,FS):
     '''
     string -> dict * bool
     If S is a string of the function definitions of funcDef defined in LED, then parseFuncDef(S) = (dict,True), where dict is a dictionary 
@@ -339,7 +362,7 @@ def parseFuncDef(S):
                 (t2,f2)= parseFuncBody(S[i+1:])
                 if f2: 
                     #put the content in the dictionary
-                    d = Definition(fName, fParams, t2, AST(True))
+                    d = Definition(fName, fParams, t2, AST(True),FS)
                     return(d,True)    
                 else:
                     print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
@@ -395,7 +418,7 @@ def parseFuncDeflet(S):
 
 # relDef -> identifier ( vars ) iff   sentence
 # duplicate with parseFuncDef. To be refactored soon
-def parseRelDef(S):
+def parseRelDef(S,FS):
     for i in range(len(S)):
         if S[i]=='iff':
             t1,f1 = parseLHS(S[0:i])
@@ -405,7 +428,7 @@ def parseRelDef(S):
                 (t2,f2)= parseSentence(S[i+1:])
                 if f2: 
                     #put the content in the dictionary
-                    d = Definition(fName, fParams, t2, AST(True))
+                    d = Definition(fName, fParams, t2, AST(True),FS)
                     return(d,True)    
                 else:
                     print('cannot parse function definition right side: ',' '.join(S[i+1:])) 
@@ -415,7 +438,7 @@ def parseRelDef(S):
 
 # relIfThenDef -> If sentence then identifier ( vars ) iff   sentence
 # duplicate with parseFuncDef. To be refactored soon
-def parseRelIfThenDef(S):
+def parseRelIfThenDef(S,FS):
     # check to see if 'If','then' and 'iff' are all in S or not
     if hasKeywords(S,['If','then','iff']):
         if S[0]=='If':
@@ -430,7 +453,7 @@ def parseRelIfThenDef(S):
                     t3,f3 = parseGuard(S[0:j+1])
                     if t3:
                         #put the content in the dictionary
-                        d = Definition(fName, fParams, t2, t3)
+                        d = Definition(fName, fParams, t2, t3,FS)
                         return(d,True)    
                     else:
                         print('cannot parse If-then statment: ',' '.join(S[0:j+1])) 
