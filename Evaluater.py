@@ -90,24 +90,40 @@ def hasNone(Args):
             return True
     return False
 def valBuiltIn(Op,Args):
-        F = builtIns[Op]
-        return F(Args)
+    F = builtIns[Op]
+    return F(Args)
 
 def valDefined(Op,Args): 
-        # Op is the name of user defined function
-        (params,funBody,guardCon) = Program.body(Op,len(Args))
-        funBodyExpression = funBody.expression()
-        # substitute for all the instances of paramters in the function definition
-        guardConExpr = guardCon.expression()
-        subGuardConExpr = subAll(Args,params,guardConExpr)     # find the solution set of the guard condition
-        binding = solutionSet(subGuardConExpr)
-        if binding==None or len(binding)==0:
-            print('Erroneous call',Op,'.Guard condition of function',Op,'is not meet.')
+    # Op is the name of user defined function
+    (params,funBody,guardCon,signature) = Program.body(Op,len(Args))
+    funBodyExpression = funBody.expression()
+    # substitute for all the instances of paramters in the function definition
+    guardConExpr = guardCon.expression()
+    subGuardConExpr = subAll(Args,params,guardConExpr)     # find the solution set of the guard condition
+    binding = solutionSet(subGuardConExpr)
+    if binding==None or len(binding)==0:
+        print('Erroneous call',Op,'.Guard condition of function',Op,'is not meet.')
+        return
+    else:
+        expr=subExpression(funBodyExpression,binding[0])
+    # check to see if the expr belows to input of the function signature
+    groundBody = subAll(Args,params,expr)
+    if isinstance(Args,list):
+        if len(Args)>1:
+            Args = ('tuple',Args)
+        if len(Args)==1:
+            Args = Args[0]
+
+    if signature!=None:
+        if not valMember([Args,signature[0].expression()]):
+            print('The input of the function:',Args,'does not comply with type',signature[0],'in the function signature')
             return
-        else:
-            expr=subExpression(funBodyExpression,binding[0])
-        groundBody = subAll(Args,params,expr)
-        return DefVal( groundBody)
+        value=DefVal(groundBody)
+        if not valMember([value,signature[1].expression()]):
+            print('The output of the function:', value,'does not comply with the type',signature[1],' in the function signature')
+            return
+    value=DefVal(groundBody)
+    return value
 
 def DefVal(fbody):
     #print(fbody)
@@ -361,7 +377,7 @@ def valMember(Args):
     if Args[1]=='Bool':
         return isinstance(Args[0],bool)
     if Args[1]=='Int':
-        return isinstance(Args[0],int)
+        return isinstance(Args[0],int) and not isinstance(Args[0],bool)
     if Args[1]=='Rat':
         return isRationalNum(Args)
     if Args[1]=='Seq':
@@ -394,6 +410,9 @@ def isTypeMember(Var,Type):
     '''tuple * tuple -> bool
     ''' #('tuple',[1,2]) : ('star',['Int','Int'])
     if isinstance(Var,tuple) and isinstance(Type,tuple) and Var[0]=='tuple':
+        return all([valMember([Var[1][i],Type[1][i]]) for i in range(0,len(Var[1]))])
+    # add param 
+    if isinstance(Var,list) and isinstance(Type,tuple):
         return all([valMember([Var[1][i],Type[1][i]]) for i in range(0,len(Var[1]))])
     # 1:{1,2}
     #return valMember([Var,Type])

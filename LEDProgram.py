@@ -42,7 +42,7 @@ class Definition:
         self.parms = p 
         self.head = (s,len(p))
         #a body of a defintion is not a just expression but a 3 tuples,which includes params, AST of the expression and the gaurd condition
-        self.body = (p,b,g)
+        self.body = (p,b,g,sign)
         self.expression=b
         self.signature = sign
 

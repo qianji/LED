@@ -194,8 +194,9 @@ def parseDfn(S):
         arrowI = S.index('->')
         if funcSymbol in S[arrowI:]:
             funcSymbolI = S[arrowI:].index(funcSymbol)+arrowI
+            FS = S[:funcSymbolI]
             S = S[funcSymbolI:]
-            sign,f= parseSignature(S)
+            sign,f= parseSignature(FS)
             if f:
                 signature = sign
             else:
@@ -307,7 +308,7 @@ def parseWhereDef(S,FS):
         if S[i]=='where':
             t,f1 = parseWhereClause(S[i:])
             if f1:
-                p,f2 = parseFuncDef(S[0:i])
+                p,f2 = parseFuncDef(S[0:i],FS)
                 if f2:
                     key,value = p.head,p.body
                     d=Definition(key[0],value[0],p.body[1],t,FS)
@@ -450,7 +451,7 @@ def parseRelIfThenDef(S,FS):
                 paramNumber = len(fParams)
                 (t2,f2)= parseSentence(S[i+1:])
                 if f2: 
-                    t3,f3 = parseGuard(S[0:j+1])
+                    t3,f3 = parseGuard(S[0:j+1],FS)
                     if t3:
                         #put the content in the dictionary
                         d = Definition(fName, fParams, t2, t3,FS)
