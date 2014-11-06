@@ -114,15 +114,17 @@ def valDefined(Op,Args):
     if isinstance(Args,list):
         if len(Args)>1:
             Args = ('tuple',Args)
+        #if len(Args)==1 and len(Args[0])>1:
+        #    Args = ('tuple',Args[0])
         if len(Args)==1:
             Args = Args[0]
 
     if signature!=None:
-        if not valMember([Args,signature[0].expression()]):
+        if not valMember([Args,val(signature[0].expression())]):
             print('The input of the function:',Args,'does not comply with type',signature[0],'in the function signature')
             return
         value=DefVal(groundBody)
-        if not valMember([value,signature[1].expression()]):
+        if not valMember([value,val(signature[1].expression())]):
             print('The output of the function:', value,'does not comply with the type',signature[1],' in the function signature')
             return
     value=DefVal(groundBody)
