@@ -60,7 +60,7 @@ def val(E):
     # if Op=='star': return ('star',Args)
     # if Op=='comStar': return ('comStar',Args)
     # if Op=='lambda': return('lambda',Args)
-    if Op in ['seq','set','tuple','star','comStar','lambda','fSet','Seq','typeU']: return (Op,Args)
+    if Op in ['seq','set','tuple','star','comStar','lambda','fSet','Seq']: return (Op,Args)
     if Op in builtIns : 
         # check if Op is one of the Big Operations
         #if Op in ['setComp','Union','Sum','Prod','Nrsec']:

@@ -436,15 +436,9 @@ def parseTypeExpression(S):
             t1,f1 = parseTExp0(S[i+1:])
             t3,f3 = parseTypeProduct(S[i+1:])
             if f1 and f2: 
-                if(isinstance(t2.tree,list) and t2.op()=='U'):
-                    return (AST('U',t2.args()+[t1]),True) 
-                else:
-                    return (AST('U',[t2,t1]),True)
+                return (AST('U',[t2,t1]),True)
             if f3 and f2: 
-                if(isinstance(t2.tree,list) and t2.op()=='U'):
-                    return (AST('U',t2.args()+[t3]),True) 
-                else:
-                    return (AST('U',[t2,t3]),True)
+                return (AST('U',[t2,t3]),True)
     # typeProduct
     if S.count('U')==0 and S.count('*')>0:
         t,f = parseTypeProduct(S)
