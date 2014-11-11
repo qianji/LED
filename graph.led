@@ -15,7 +15,7 @@ Vertices x and y are adjacent in G if some edge of G as one of the two as a sour
 
 /------
 adjacent: Node*Node*Graph -> Bool
-adjacent(x,y,G) iff (x,y) in edges(G) or (y,x) in edges(G) or x=y
+adjacent(x,y,G) iff (x,y) in edges(G) or (y,x) in edges(G)
 -------/
 
 
@@ -26,7 +26,7 @@ If S is a set of vertices of graph G, frontier(S,G) is the set of all nodes in G
 frontier: fSet(Node)*Graph->fSet(Node)
 
 frontier(S,G):=
-  {x | x in vertices(G) & some y in S.adjacent(x,y,G)} 
+  {x | x in vertices(G) & ( x in S or some y in S.adjacent(x,y,G))} 
 -------------------------------------------------------/
 
 
