@@ -1028,19 +1028,21 @@ def parseVector(S):
     
 def parseContainer(S):
     ### list<str> * str -> tuple
-    ### S is a list of string and C is the containter type such as '(', '{' or '<'
+    ### parse term starting with open containers such '(', '<', or '{' and ends with close container such as
+    ### ')', '>', or '}'
     if len(S)<2:
         return (None,False)
+    # C is the container symbol
     C='tuple'
     if S[0]=='<':
         C='seq'
     if S[0]=='{':
         C='set'
-    # {}
+    # {} or () or <>
     if len(S)==2:
         if (S[0]=='(' and S[1]==')' or S[0]=='<' and S[1]=='>' or S[0]=='{' and S[1]=='}'):
             return (AST(C,[]),True)
-    # {term}
+    # {terms} or (terms) or <terms>
     if (S[0]=='(' and S[len(S)-1]==')' or S[0]=='<' and S[len(S)-1]=='>' or S[0]=='{' and S[len(S)-1]=='}' ):
         (tree,flag)=parseContainerTerms(S[1:len(S)-1])
         if flag: 
@@ -1051,48 +1053,52 @@ def parseContainer(S):
  
     return (None,False)
 
-def firstElement(S):
 
+def firstElement(S):
+    # list<str> -> int
+    # returns the first ',' the sepeartes the first element and the rest, if there is no ',' then returns None
+    # for example, if S is a list of string tokenized from the string '(1,2), (3,4)' then firstElement(S) is 5
+    # if S is a list of string tokenized from '1,2,3,4' then firstElement(S) is 1
+    # if S is a list of string tokenized from F(1,G(1,2)),G(2,3) then firstElement(S) is 11
+
+    # check whether it is the only element or not
     m=firstIndex(',',S)
     if m==None:
         return None
+
     k = firstIndex('(',S)
     if k==None:
         return firstIndex(',',S)
+    # if ',' appears before the first '(' then return the index of ','
     if m<k:
         return m
+    # find the first ')' of the first '('
     j=closeParentesis('(',S[k+1:])
     if j==None:
         return None
     return j+k+2
 
+# term, terms
 def parseContainerTerms(S):
     # find the first ',' seperated the elements in the term
-    #print(S)
     if len(S)==0:
         return (AST('cstack',[]),True)
     if len(S)==1:
         (t1,f1)= parseTerm(S)
         if f1:
             return (t1,f1)
+    # check whether the first element is the open container or not
     if not S[0] in ['(','<','{']:
         # check for the user defined function
         if len(S)>2 and S[1]=='(' and S[-1]==')':
             t,f = parseUserDefinedFun(S)
             if f:
                 return (t,f)
-
-        #i=firstIndex(',',S)
         i=firstElement(S)
-        #print(S)
-        #print(i)
         if i==None or i>=len(S):
             i=len(S)
         (t1,f1)=parseTerm(S[0:i])
-        #print(S[0:i])
-        #print(S[i+1:])
         (t2,f2)= parseContainerTerms(S[i+1:])
-        
         if f1 and f2:
             if(isinstance(t2.tree,list) and t2.op()=='cstack'):
                 return (AST('cstack',[t1]+t2.args()),True)
