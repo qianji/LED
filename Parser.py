@@ -784,14 +784,7 @@ def parseT0(S):
                 # if S[0] is a numeral that has a decimal fraction with a repeating block
             # identifier or quoted string
             if isIdentifier(S[0]) or isQuotedString(S[0]): return (AST(S[0]),True)
-        # parse vector   
-        (tree,flag) = parseVector(S)
-        if flag: return (tree,True)
-        # parse set   
-        (tree,flag) = parseSet(S)
-        if flag: return (tree,True)
-        # parse tuple
-        (tree,flag) = parseTuple(S)
+        (tree,flag) = parseContainer(S)
         if flag: return (tree,True)
         # parse range { term .. term }
         (tree,flag) = parseRange(S)
@@ -823,7 +816,8 @@ def parseUserDefinedFun(S):
             # find the first index of '(' in S. It throws ValueError if '(' is not in S
             i = S.index('(') 
             (t1,f1)=parsePrefun(S[0:i])
-            (t2,f2)= parseTerms(S[i+1:len(S)-1])
+            #(t2,f2)= parseTerms(S[i+1:len(S)-1])
+            (t2,f2)= parseContainerTerms(S[i+1:len(S)-1])
             if f1 and f2: 
                 if(isinstance(t2.tree,list) and t2.op()=='cstack'):
                     return (AST(t1,t2.args()),True) 
@@ -854,7 +848,7 @@ def parseTerms(S):
     (tree,flag) = parseTerm(S)
     if flag: 
         return (tree,True)    
-    return (None,False)     
+    return (None,False)
 
 def parseGuard(S):
     '''rule: gurad -> If Stmt then
@@ -1032,6 +1026,97 @@ def parseVector(S):
  
     return (None,False)
     
+def parseContainer(S):
+    ### list<str> * str -> tuple
+    ### S is a list of string and C is the containter type such as '(', '{' or '<'
+    if len(S)<2:
+        return (None,False)
+    C='tuple'
+    if S[0]=='<':
+        C='seq'
+    if S[0]=='{':
+        C='set'
+    # {}
+    if len(S)==2:
+        if (S[0]=='(' and S[1]==')' or S[0]=='<' and S[1]=='>' or S[0]=='{' and S[1]=='}'):
+            return (AST(C,[]),True)
+    # {term}
+    if (S[0]=='(' and S[len(S)-1]==')' or S[0]=='<' and S[len(S)-1]=='>' or S[0]=='{' and S[len(S)-1]=='}' ):
+        (tree,flag)=parseContainerTerms(S[1:len(S)-1])
+        if flag: 
+            if(isinstance(tree.tree,list) and tree.op()=='cstack'):
+                return (AST(C,tree.args()),True)
+            else:
+                return(AST(C,[tree]),True)
+ 
+    return (None,False)
+
+def firstElement(S):
+
+    m=firstIndex(',',S)
+    if m==None:
+        return None
+    k = firstIndex('(',S)
+    if k==None:
+        return firstIndex(',',S)
+    if m<k:
+        return m
+    j=closeParentesis('(',S[k+1:])
+    if j==None:
+        return None
+    return j+k+2
+
+def parseContainerTerms(S):
+    # find the first ',' seperated the elements in the term
+    #print(S)
+    if len(S)==0:
+        return (AST('cstack',[]),True)
+    if len(S)==1:
+        (t1,f1)= parseTerm(S)
+        if f1:
+            return (t1,f1)
+    if not S[0] in ['(','<','{']:
+        # check for the user defined function
+        if len(S)>2 and S[1]=='(' and S[-1]==')':
+            t,f = parseUserDefinedFun(S)
+            if f:
+                return (t,f)
+
+        #i=firstIndex(',',S)
+        i=firstElement(S)
+        #print(S)
+        #print(i)
+        if i==None or i>=len(S):
+            i=len(S)
+        (t1,f1)=parseTerm(S[0:i])
+        #print(S[0:i])
+        #print(S[i+1:])
+        (t2,f2)= parseContainerTerms(S[i+1:])
+        
+        if f1 and f2:
+            if(isinstance(t2.tree,list) and t2.op()=='cstack'):
+                return (AST('cstack',[t1]+t2.args()),True)
+            else:
+                return (AST('cstack',[t1,t2]),True)
+    else:
+        i= closeParentesis('(',S[1:])
+        if i==None:
+            i=closeParentesis('{',S[1:])
+        if i==None:
+            i=closeParentesis('<',S[1:])
+        if i==None:
+            return (None,False)
+        i=i+2
+        (t1,f1)=parseTerm(S[0:i])
+        (t2,f2)= parseContainerTerms(S[i+1:])
+
+        if f1 and f2:
+            if(isinstance(t2.tree,list) and t2.op()=='cstack'):
+                return (AST('cstack',[t1]+t2.args()),True)
+            else:
+                return (AST('cstack',[t1,t2]),True)
+
+    return (None,False)
 # rule: set -> {  }  | { terms }
 def parseSet(S):
     if len(S)<2:

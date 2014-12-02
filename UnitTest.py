@@ -165,6 +165,16 @@ class ParserTest(unittest.TestCase):
         actural = self.functionValues(F,Fname,ParamsL)
         expected = ['`x']
         self.assertEqual(expected,actural)      
+
+        # performance test for function capture
+        Fname = 'capture'
+        ParamsL = [['(B,(10,10))','(0,1)','({(W,(10,12)),(W,(10,11)),(B,(10,13))},B,0,0)'],\
+                ['(B,(10,10))','(1,0)','({(W,(10,11)),(W,(11,10)),(W,(12,10)),(B,(13,10))},B,0,0)']]
+        actural = self.functionValues(F,Fname,ParamsL)
+        expected = [True,True]
+        self.assertEqual(expected,actural) 
+
+
     '''
     This function test the function tokens in Tokenizer.py
     '''
@@ -267,6 +277,17 @@ class ParserTest(unittest.TestCase):
         expected = [('set',[1, 1, 2, 1, 2, 3])]
         self.assertEqual(expected,actural) 
 
+        # test for mutiple commas, performance test
+        expressions = ['{(0,1), (1,1), (1,0), (1,1), (0,1), (1,1), (1, 0), (1,1)}']
+        actural = self.expressionValues(expressions)
+        expected = [('set', [('tuple', [0, 1]), ('tuple', [1, 1]), ('tuple', [1, 0]), ('tuple', [1, 1]), ('tuple', [0, 1]), ('tuple', [1, 1]), ('tuple', [1, 0]), ('tuple', [1, 1])])]
+        self.assertEqual(expected,actural) 
+
+        expressions = ['((1,(10,10)),(1,0),({(2,(11,10)),(2,(12,10)),(1,(13,10))},1,0,0))']
+        actural = self.expressionValues(expressions)
+        expected = [('tuple', [('tuple', [1, ('tuple', [10, 10])]), ('tuple', [1, 0]), ('tuple', [('set', [('tuple', [2, ('tuple', [11, 10])]), ('tuple', [2, ('tuple', [12, 10])]), ('tuple', [1, ('tuple', [13, 10])])]), 1, 0, 0])])]
+        self.assertEqual(expected,actural) 
+ 
         ########################################
         # test for type expression
         ########################################

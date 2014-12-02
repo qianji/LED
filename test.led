@@ -129,4 +129,76 @@ T7:=fSet(fSet(Int))
 T8:=fSet(fSet(Int))
 --/
 
+###########################################################################
+The following functions are written by one of the students in Dr. Rushton's class.
+They are used to test the performance of the interpreter.
+#############################################################################
 
+/---------------------------------------------------------------------------
+player:= {1, 2}
+cell:= {1..19}*{1..19}
+move:= player*cell
+Layout:= fSet(move)
+State:= Layout*player*Nat*Nat
+
+B:= 1
+W:= 2
+dirs:= {(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1, 0), (-1,1)}
+---------------------------------------------------------------------------/
+
+other(p) is the player that is not player p.
+/------------------------------
+other: player -> player
+other(p):= B    if p=W;
+           W    if p=B
+-------------------------------/
+
+layout(S) is the layout of the game in state S.
+
+/-----
+layout: State -> Layout
+layout(S):= S[1]
+-----/
+
+If u is a cell and v is a pair of integers, then vecAdd(u,v) is the pair equal to (u[1]+v[1], u[2]+v[2]).
+
+/---------------------------------------------------------------------------
+vecAdd: cell*(Int*Int) -> Int*Int
+vecAdd(u,v):= (u[1]+v[1], u[2]+v[2])
+---------------------------------------------------------------------------/
+
+If n is an integer and v is a pair of integers, then vecMult(n,v) is the pair equal to (n*v[1],n*v[2]).
+
+/---------------------------------------------------------------------------
+vecMult: Nat*(Int*Int) -> Int*Int
+vecMult(n,v):= (n*v[1],n*v[2])
+---------------------------------------------------------------------------/
+
+If m is a move, p is a player, and S is a state, captureSet(m,p,S) is the set of stones that, if they are in the layout of S, will be captured by executing move m in state S.
+
+/---------------------------------------------------------------------------
+captureSet: move*player*State->Layout
+captureSet(m,p,S):= captureHelp(m,dirSet(m,S))  if p=other(m[1]);
+		    {} otherwise
+---------------------------------------------------------------------------/
+
+If dSet is a set of directions, captureHelp(m,dSet) is the set of moves representing the stones in the directions of dSet that m could capture, provided the moves are in the layout of the current state.
+
+/----------------------------
+captureHelp: move*fSet(Int*Int) -> Layout
+captureHelp(m,dSet):= { (other(m[1]),vecAdd(m[2],d)) | d in dSet } U {(other(m[1]),vecAdd(m[2],vecMult(2,d))) | d in dSet }
+-----------------------------/
+
+dirSet(m,S) is the set of directions in which move m makes captures in state S.
+
+/---------------------------
+dirSet: move*State -> fSet(Int*Int)
+dirSet(m,S):= {d | d in dirs & capture(m,d,S)}
+----------------------------/
+
+If d is a pair of integers, capture(m,d,S) means that move m made a capture in the direction of cell vecAdd(m[2],d) in state S.
+
+/---------------------------------------------------------------------------
+capture: move*(Int*Int)*State -> Bool
+capture(m,d,S) iff {(other(m[1]),vecAdd(m[2],d)), (other(m[1]),vecAdd(m[2],vecMult(2,d))), (m[1],vecAdd(m[2],vecMult(3,d)))} subeq layout(S)
+---------------------------------------------------------------------------/

@@ -24,7 +24,7 @@ class AST:
             self.tree= AST(F[0],F[1]).tree
         if len(args)==0:
 			# deal with empty set, tuple or vector
-            if F in ['set','tuple','seq']:
+            if F in ['set','tuple','seq','cstack']:
                 self.tree = [F]
             else:
                 if isAtom(F) or isQuotedString(F):
