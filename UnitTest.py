@@ -53,6 +53,20 @@ class ParserTest(unittest.TestCase):
             #v=tree.val()
             values.append(v)
         return values
+
+    def expressionPrettyValues(self,L):
+        #compile('test.led')
+        values = []
+        for e in L:
+            e=tokens(e)[0]
+            #v = val(parseExpression(e)[0])
+            tree = parseExpression(e)[0]
+            v = val(tree.expression())
+            if isinstance(v,Fraction):
+                v = numeralValue(v)
+            #v=tree.val()
+            values.append(prettyString(v))
+        return values
 #     def setUp(self):
         # compile('test.led')
     def test_file(self):
@@ -275,6 +289,18 @@ class ParserTest(unittest.TestCase):
         expressions = ['Union[x in {1..3}]{y|y in {1..x} & y<4}']
         actural = self.expressionValues(expressions)
         expected = [('set',[1, 1, 2, 1, 2, 3])]
+        self.assertEqual(expected,actural) 
+
+        # test for set union and tuple elements
+        expressions = ['{1,2,3} U {4}','( {1,2,3} U {4}, {6} )','( ({1,2,3} U {4}), {6} )']
+        actural = self.expressionValues(expressions)
+        expected = [('set',[1,2,3,4]),('tuple',[('set',[1,2,3,4]),('set',[6])]),('tuple',[('set',[1,2,3,4]),('set',[6])])]
+        self.assertEqual(expected,actural) 
+
+        expressions = ['<1,2,3> + <4>','( {<1,2,3> + <4>,2,3} U {4}, {6} )','{(1,2),{1..9},|<1,2>+<3,4>|}',\
+                '({1,2}U{3,4}U{5},((1,2),(3,4),<2,4>))','(2,g2(1),g2(1)+g2(2),3,g2(g2(1)))']
+        actural = self.expressionPrettyValues(expressions)
+        expected = ['<1,2,3,4>','({<1,2,3,4>,2,3,4},{6})','{(1,2),{1,2,3,4,5,6,7,8,9},4}','({1,2,3,4,5},((1,2),(3,4),<2,4>))','(2,5,13,3,29)']
         self.assertEqual(expected,actural) 
 
         # test for mutiple commas, performance test

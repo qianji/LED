@@ -1055,7 +1055,7 @@ def parseContainer(S):
 
 
 def firstElement(S):
-    # list<str> -> int
+    # list<str>-> int
     # returns the first ',' the sepeartes the first element and the rest, if there is no ',' then returns None
     # for example, if S is a list of string tokenized from the string '(1,2), (3,4)' then firstElement(S) is 5
     # if S is a list of string tokenized from '1,2,3,4' then firstElement(S) is 1
@@ -1065,54 +1065,49 @@ def firstElement(S):
     m=firstIndex(',',S)
     if m==None:
         return None
-
-    k = firstIndex('(',S)
+    k = firstIndex(['(','<','{'],S)
     if k==None:
-        return firstIndex(',',S)
+        return m
+    C=S[k]
     # if ',' appears before the first '(' then return the index of ','
     if m<k:
         return m
     # find the first ')' of the first '('
-    j=closeParentesis('(',S[k+1:])
+    j=closeParentesis(C,S[k+1:])
     if j==None:
         return None
-    return j+k+2
+    v=j+k+2
+    if v==len(S): return v
+    if v<len(S) and S[v]==',':
+        return v
+    if v<len(S) and not S[v]==',':
+        ne = firstElement(S[v:])
+        if ne==None:
+            return None
+        return v+ne
+    #return firstElement(
 
 # term, terms
 def parseContainerTerms(S):
     # find the first ',' seperated the elements in the term
     if len(S)==0:
-        return (AST('cstack',[]),True)
+        return (None,False)
     if len(S)==1:
         (t1,f1)= parseTerm(S)
         if f1:
             return (t1,f1)
+    if len(S)>2 and not S[0] in ['(','<','{'] and S[1]=='(' and S[-1]==')':
+        t,f = parseUserDefinedFun(S)
+        if f:
+            return (t,f)
     # check whether the first element is the open container or not
-    if not S[0] in ['(','<','{']:
-        # check for the user defined function
-        if len(S)>2 and S[1]=='(' and S[-1]==')':
-            t,f = parseUserDefinedFun(S)
-            if f:
-                return (t,f)
-        i=firstElement(S)
-        if i==None or i>=len(S):
-            i=len(S)
-        (t1,f1)=parseTerm(S[0:i])
-        (t2,f2)= parseContainerTerms(S[i+1:])
-        if f1 and f2:
-            if(isinstance(t2.tree,list) and t2.op()=='cstack'):
-                return (AST('cstack',[t1]+t2.args()),True)
-            else:
-                return (AST('cstack',[t1,t2]),True)
+    i=firstElement(S)
+    # check to see if it is the only element or not based on ','
+    if i==None or i>=len(S):
+        t,f=parseTerm(S)
+        if f:
+            return(AST('cstack',[t]),True)
     else:
-        i= closeParentesis('(',S[1:])
-        if i==None:
-            i=closeParentesis('{',S[1:])
-        if i==None:
-            i=closeParentesis('<',S[1:])
-        if i==None:
-            return (None,False)
-        i=i+2
         (t1,f1)=parseTerm(S[0:i])
         (t2,f2)= parseContainerTerms(S[i+1:])
 
@@ -1233,7 +1228,9 @@ def closeParentesis(L,S):
     if L =='(':
         R = ')'
     if L =='/':
-        R == '/'
+        R = '/'
+    if L=='<':
+        R='>'
     S = list(S)
     #create an empty stack S
     index = 0
