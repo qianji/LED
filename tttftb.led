@@ -128,6 +128,10 @@ VIDEO OUTPUT
 The default color used in this game is BLACK
 /----------------------------
 BLACK := (0,0,0)
+WHITE := (255, 255, 255)
+BLUE := (0,0,255)
+GREEN := (  0, 255,   0)
+RED := (255,   0,   0)
 -----------------------------/
 This section defines the *display* function, specifying the images to display on the screen in each game state. The data model for this section can be found in EaselLED.py.
 The  *grid* consists is a set of four line segments that make up the tic tac toe playing area.  
@@ -141,10 +145,10 @@ where
  L4 = (`seg,(100,300),(400,300),BLACK)
 -----------------------------/
 
-The default font size for displayed text in this program is 15.
+The default font size for displayed text in this program is 36.
 
 /--------------
- fontSize := 15
+ fontSize := 36
 ---------------/
 
 *centerX(c)* and *centerO(c)* are the x and y coordinates of the center of cell c, respectively.
@@ -158,10 +162,10 @@ The default font size for displayed text in this program is 15.
 
 /-----------------------------------------------
 xImage(c):=
-  (`txt,"x",(centerX(c), centerO(c)),fontSize,BLACK)
+  (`txt,"x",(centerX(c), centerO(c)),fontSize,BLUE)
   
  oImage(c) :=
-  (`txt,"o",(centerX(c), centerO(c)),fontSize,BLACK)
+  (`txt,"o",(centerX(c), centerO(c)),fontSize,GREEN)
 
  cellDisplay(c) :=
     {xImage(c)} if (`x,c) in Gamma;  
@@ -194,7 +198,7 @@ The *restart button* consists of a rectangle around a "restart" text, displayed 
    A2 = (`seg,(400,75),(500,75),BLACK) &
    A3 = (`seg,(400,25),(400,75),BLACK) &
    A4 = (`seg,(500,25),(500,75),BLACK) &
-   txt = (`txt,"restart",(450, 50), 15,BLACK)
+   txt = (`txt,"restart",(450, 50), fontSize,BLACK)
 -------------------------------------/
  
 If the game is over, *gameResultDisplay* is a display in the upper left region of the screen telling the outcome of the game, either 'x won!', "o won!", or "The cat got it!"
@@ -203,9 +207,9 @@ If the game is over, *gameResultDisplay* is a display in the upper left region o
 
  If gameOver then
  gameResultDisplay := 
-    {(`txt,"x won",(100,50),15,BLACK)} if threeInRow(`x);
-    {(`txt,"o won",(100,50),15,BLACK)} if threeInRow(`o);
-    {(`txt,"cat got it",(100,50),15,BLACK)}  otherwise
+    {(`txt,"x won",(100,50),fontSize,BLUE)} if threeInRow(`x);
+    {(`txt,"o won",(100,50),fontSize,GREEN)} if threeInRow(`o);
+    {(`txt,"cat got it",(100,50),fontSize,RED)}  otherwise
 ---------------------------------------------------------/
 
 The *display* is the screen display for the current game state. The grid, cell displays, and restart button are always displayed. Additionally, the display includes the game results if the game is over, and the player to move if the game is not over.  
@@ -220,11 +224,9 @@ The *display* is the screen display for the current game state. The grid, cell d
  gameOverDisplay := 
    alwaysDisplay U gameResultDisplay
 
- display := 
-   gameOverDisplay   if gameOver;
-   gameInPlayDisplay otherwise
- images :=
-   display
+ images(S) := 
+   gameOverDisplay(S)   if gameOver(S);
+   gameInPlayDisplay(S) otherwise
 ------------------------------------------/
 
 

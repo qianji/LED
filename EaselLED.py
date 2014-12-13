@@ -125,7 +125,7 @@ def drawCircle(screen,C):
     pygame.draw.circle(screen, tuple(color), center, radius)
 
 def drawText(screen,Text):
-    (tup,[t,string,center,height,(tup,color)]) = Text
+    (tup,[t,string,center,fontSize,(tup,color)]) = Text
     (tup,[x,y]) = center
     x=int(x)
     y=int(y)
@@ -133,8 +133,8 @@ def drawText(screen,Text):
     (W,H) = displaySize()
     T = string[1:-1]
     if pygame.font:
-        font = pygame.font.Font(None, 36)
-        text = font.render(T, 1, (10, 10, 10))
+        font = pygame.font.Font(None, fontSize)
+        text = font.render(T, 1, color)
         textpos = text.get_rect(centerx=x,centery=y)
         #screen.blit(text, [x,y])
         screen.blit(text, textpos)
