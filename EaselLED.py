@@ -94,7 +94,7 @@ def isCircle(I):
     if isinstance(I,tuple):
         tup,circle = I
         if isinstance(circle,list) and len(circle)==4:
-            t,p,q,c=circle
+            t,p,r,c=circle
             return t=="`circ" and isPoint(p) and isinstance(r,int) and r>0 and isColor(c)
     return False
 

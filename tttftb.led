@@ -253,25 +253,25 @@ The x and y coordinates of a point are its 1st and 2nd coordinates, respectively
 clicked(c) means that cell c has been clicked. 
 
 /------------------------------------------------------------
- clicked(c) iff 
-   (xCoord(click)>xMin(c)) & (xCoord(click)< xMax(c)) &
-   (yCoord(click)>yMin(c)) & (yCoord(click)< yMax(c))
+ clicked(c,I) iff 
+   (xCoord(I[1])>xMin(c)) & (xCoord(I[1])< xMax(c)) &
+   (yCoord(I[1])>yMin(c)) & (yCoord(I[1])< yMax(c))
 -------------------------------------------------------------/
 
 *restartClicked* means that the most recent mouse click is inside the region of the play again button.
 
 /-------------------------------------------
- restartClicked iff 
-   xCoord(click)>400 & xCoord(click)<500 & 
-   yCoord(click)>0 & yCoord(click)<100
+ restartClicked(I) iff 
+   xCoord(I[1])>400 & xCoord(I[1])<500 & 
+   yCoord(I[1])>0 & yCoord(I[1])<100
 ---------------------------------------------/
 
 *moveMade(c)* means that cell c has been clicked and the player to move may legally move there. *movesMade* is the set of all moves made by the most recent mouse click, which will either be a singleton or empty.
 
 /-------------------------------------------------------------
- moveMadeIn(c) iff clicked(c) & legalToMoveIn(c)
+ moveMadeIn(c,I) iff clicked(c,I) & legalToMoveIn(c)
 
- movesMade := {(currentPlayer,c) | c in cells & moveMadeIn(c)}
+ movesMade(I) := {(currentPlayer,c) | c in cells & moveMadeIn(c,I)}
 --------------------------------------------------------------/
 
 
@@ -282,8 +282,9 @@ clicked(c) means that cell c has been clicked.
 ----------------------------------------/
 
 /----------------------------------------
-  transition(I,S) :=
-    newState
+  transition(I) :=
+    initialState  if restartClicked(I);
+    Gamma U movesMade(I)  otherwise
 -----------------------------------------/
 
 

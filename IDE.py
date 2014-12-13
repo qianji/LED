@@ -12,7 +12,7 @@ from Parser import *
 from Compiler import *
 from EaselLED import *
 
-import os, pygame
+import sys, os, pygame
 from pygame.locals import *
 from pygame.compat import geterror
 '''
@@ -44,8 +44,6 @@ def run(F=''):
                         return run(expression[2])
                     if expression[0]=='play' and expression[1]=='(' and expression[-1]==')':
                         return play(expression[2])
-                    if expression[0]=='playPygame' and expression[1]=='(' and expression[-1]==')':
-                        return playPygame(expression[2])
                 tree, tFlag = parseExpression(expression)
                 if tFlag:
                     try:
@@ -67,43 +65,7 @@ def run(F=''):
             else:
                 print('Failed to tokenize the expression.The last 10 valid tokens are',expression[-10:])
 
-
-# play(F) executes the game defined in LED file F. 
-
 def play(F):
-    global images, Gamma, click
-    displayWindow = GraphWin("My game", displaySize()[0], displaySize()[1])
-    clickDef = Definition('click',[],AST('tuple',[0,0]))
-    gammaDef = Definition('Gamma',[],AST('set',[]))
-    Program.update(clickDef)
-    Program.update(gammaDef)
-    compile(F+'.led')
-    DefinedFuns = Program.definedSymbols()
-    print('defined funs:', DefinedFuns)
-    # initialize the state in LED program memory
-    initBody = Program.body('initialState',0)
-    gammaDef = Definition('Gamma',[],initBody[1])
-    # update Gamma in the program
-    Program.update(gammaDef)
-    images = [convert(x) for x in val(AST('display').expression())[1]]
-    # Create a window to play in
-    while(True):
-        for x in images: x.draw(displayWindow)
-        c = displayWindow.getMouse()
-        click = (c.getX(),displaySize()[1] - c.getY())
-        # update click in Program
-        clickAST = AST('tuple',[click[0],click[1] ])
-        clickDef = Definition('click',[],clickAST)
-        Program.update(clickDef)
-        # update newState in Program
-        newStateBody = Program.body('newState',0)
-        # convert the value of newState into a AST and put it as the body of Gamma
-        gammaDef = Definition('Gamma',[],AST(val(AST('newState').expression())))
-        Program.update(gammaDef)
-        for I in images: I.undraw()
-        images = [convert(x) for x in val(AST('display').expression())[1]]  
-
-def playPygame(F):
     # Initialize the game engine
     pygame.init()
      
@@ -123,10 +85,8 @@ def playPygame(F):
     #Loop until the user clicks the close button.
     done = False
     clock = pygame.time.Clock()
-    global images, Gamma, click
-    clickDef = Definition('click',[],AST('tuple',[0,0]))
+    global images, Gamma
     gammaDef = Definition('Gamma',[],AST('set',[]))
-    Program.update(clickDef)
     Program.update(gammaDef)
     compile(F+'.led')
     DefinedFuns = Program.definedSymbols()
@@ -142,21 +102,29 @@ def playPygame(F):
     while not done:
         # This limits the while loop to a max of 10 times per second.
         # Leave this out and we will use all CPU we can.
-        clock.tick(10)
-         
+        #clock.tick(10)
+        #clickAST = AST('tuple',[0,1])
+        #keyboardAST = AST('set',[1,2])
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
+            #elif event.type == KEYDOWN:
+                #if event.key == pygame.K_ESCAPE:
+                    #done=True
+                    #sys.exit()
+                #elif event.key ==pygame.K_LEFT:
+                    #keyboardAST = AST('set',[AST("L")])
+                #elif event.key ==pygame.K_RIGHT:
+                    #keyboardAST = AST('set',[AST("R")])
             elif event.type == MOUSEBUTTONDOWN:
                 click = pygame.mouse.get_pos()
                 # update click in Program
-                clickAST = AST('tuple',[click[0],click[1] ])
-                clickDef = Definition('click',[],clickAST)
-                Program.update(clickDef)
-                # update newState in Program
-                newStateBody = Program.body('newState',0)
-                # convert the value of newState into a AST and put it as the body of Gamma
-                gammaDef = Definition('Gamma',[],AST(val(AST('newState').expression())))
+                clickAST = AST('tuple',[click[0],click[1]])
+                keyboardAST = AST('set',[1,2])                
+                # update input in Program
+                inputAST = AST('tuple',[clickAST,keyboardAST])
+                # convert the value of transition into a AST and put it as the body of Gamma
+                gammaDef = Definition('Gamma',[],AST(val(AST('transition',[inputAST]).expression())))
                 Program.update(gammaDef)
                 # undraw the screen
                 screen.blit(screen, (0, 0))
