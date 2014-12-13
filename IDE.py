@@ -68,41 +68,34 @@ def run(F=''):
 def play(F):
     # Initialize the game engine
     pygame.init()
-     
-    # Define the colors we will use in RGB format
-    BLACK = (  0,   0,   0)
-    WHITE = (255, 255, 255)
-    BLUE =  (  0,   0, 255)
-    GREEN = (  0, 255,   0)
-    RED =   (255,   0,   0)
-     
+
     # Set the height and width of the screen
     size = [1000, 800]
     screen = pygame.display.set_mode(size)
-     
     pygame.display.set_caption("My Game")
-     
-    #Loop until the user clicks the close button.
-    done = False
-    clock = pygame.time.Clock()
-    global images, Gamma
-    gammaDef = Definition('Gamma',[],AST('set',[]))
-    Program.update(gammaDef)
+
+    # compile LED program
     compile(F+'.led')
     DefinedFuns = Program.definedSymbols()
     print('defined funs:', DefinedFuns)
-    # initialize the state in LED program memory
+    # initialize the initial state in LED program memory
     initBody = Program.body('initialState',0)
-    gammaDef = Definition('Gamma',[],initBody[1])
-    # update Gamma in the program
+    initStateAST = initBody[1]
+
+    # set the global variable state named "GAMMA" in LED memory
+    gammaDef = Definition('GAMMA',[],initStateAST)
     Program.update(gammaDef)
-    #images = [convert(x) for x in val(AST('display').expression())[1]]
-    #print(val(AST('images').expression()))
-    draw(screen,val(AST('display').expression())[1])
+
+    # draw the initial images before play
+    draw(screen,val(AST('images',[initStateAST]).expression())[1])
+
+    done = False
+    clock = pygame.time.Clock()
     while not done:
         # This limits the while loop to a max of 10 times per second.
         # Leave this out and we will use all CPU we can.
         #clock.tick(10)
+
         #clickAST = AST('tuple',[0,1])
         #keyboardAST = AST('set',[1,2])
         for event in pygame.event.get(): # User did something
@@ -123,13 +116,18 @@ def play(F):
                 keyboardAST = AST('set',[1,2])                
                 # update input in Program
                 inputAST = AST('tuple',[clickAST,keyboardAST])
-                # convert the value of transition into a AST and put it as the body of Gamma
-                gammaDef = Definition('Gamma',[],AST(val(AST('transition',[inputAST]).expression())))
+                # get the current state in the program
+                currentStateAST = Program.body('GAMMA',0)[1]
+
+                # update the state 
+                gammaDef = Definition('GAMMA',[],AST(val(AST('transition',[inputAST,currentStateAST],).expression())))
                 Program.update(gammaDef)
+
                 # undraw the screen
                 screen.blit(screen, (0, 0))
-                # draw the screen
-                draw(screen,val(AST('display').expression())[1])
+                currentStateAST = Program.body('GAMMA',0)[1]
+                # draw the screen with current state
+                draw(screen,val(AST('images',[currentStateAST]).expression())[1])
         
         # Go ahead and update the screen with what we've drawn.
         # This MUST happen after all the other drawing commands.

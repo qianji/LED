@@ -63,8 +63,8 @@ Since the state of the game is the set of moves that have been made, the beginni
 Player p *occupies* cell c if the move (p,c) is a member of Gamma; and cell c is *occupied* if it is occupied by `x or by `o.
 
 /--------------------------------------------------
- occupies(p,c) iff (p,c) in Gamma
- occupied(c)   iff occupies(`x,c) or occupies(`o,c)
+ occupies(p,c,S) iff (p,c) in S
+ occupied(c,S)   iff occupies(`x,c,S) or occupies(`o,c,S)
 ---------------------------------------------------/
 
 A *row* is a set of cells that form three in a row either horizontally, vertically, or diagonally. Techincally, they could be called 'lines', but "three in a row" is an Anglo-American cultural idiom, while "three in a line" is not.
@@ -83,32 +83,32 @@ Player p has *three in a row* if he occupies all of the cells in
 some row.
 
 /---------------------------------------------
- threeInRow(p) iff 
-   some R in rows. all c in R. occupies(p,c)
+ threeInRow(p,S) iff 
+   some R in rows. all c in R. occupies(p,c,S)
 ---------------------------------------------/
 
 The *board is full* if all cells are occupied.
 
 /----------------------------------
- boardFull iff 
-   all c in cells. occupied(c)
+ boardFull(S) iff 
+   all c in cells. occupied(c,S)
 -----------------------------------/
 
 The *game is over* if either the board is full, or one of the players 
 has three in a row. 
 
 /------------------------------------------------- 
-gameOver iff
-    boardFull or threeInRow(`x) or threeInRow(`o)
+gameOver(S) iff
+    boardFull(S) or threeInRow(`x,S) or threeInRow(`o,S)
 -------------------------------------------------/
 
 If the game is not over, the *player to move* is `x if an even number of moves have been made, 
 and `o otherwise.
 
 /-----------------------
- If ~gameOver then
-   currentPlayer :=
-     `x if even(|Gamma|);
+ If ~gameOver(S) then
+   currentPlayer(S) :=
+     `x if even(|S|);
      `o otherwise
  
  even(n) iff n mod 2=0
@@ -117,7 +117,7 @@ and `o otherwise.
 *legalToMoveIn(c)* means that it is legal for the player whose turn it is to move in cell c in the current state of the game -- that is, if the game is not over and the cell is not occupied.
 
 /----------------------------------------------- 
- legalToMoveIn(c) iff  ~occupied(c) &  ~gameOver   
+ legalToMoveIn(c,S) iff  ~occupied(c,S) &  ~gameOver(S)   
 ------------------------------------------------/
 
 
@@ -167,26 +167,26 @@ xImage(c):=
  oImage(c) :=
   (`txt,"o",(centerX(c), centerO(c)),fontSize,GREEN)
 
- cellDisplay(c) :=
-    {xImage(c)} if (`x,c) in Gamma;  
-    {oImage(c)} if (`o,c) in Gamma; 
+ cellDisplay(c,S) :=
+    {xImage(c)} if (`x,c) in S;  
+    {oImage(c)} if (`o,c) in S; 
     {}          otherwise
 ------------------------------------------------/
 
 *playerImages* is the set of all images of x's and o's on the board in the current state.
 
 /--------------------------------------
- cellDisplays :=
-    Union[c in gameBoard] cellDisplay(c)
+ cellDisplays(S) :=
+    Union[c in gameBoard] cellDisplay(c,S)
 ---------------------------------------/
 
 If the game is not over, *currentPlayerDisplay* is a text in the upper left hand region of the game window indicating the player to move, either "play x's turn" or "play o's turn", 
 
 /-----------------------------------------------------
 
- currentPlayerDisplay := 
-   {(`txt,"x's turn",(100,50),fontSize,BLACK)} if currentPlayer=`x;
-   {(`txt,"o's turn",(100,50),fontSize,BLACK)} if currentPlayer=`o
+ currentPlayerDisplay(S) := 
+   {(`txt,"x's turn",(100,50),fontSize,BLACK)} if currentPlayer(S)=`x;
+   {(`txt,"o's turn",(100,50),fontSize,BLACK)} if currentPlayer(S)=`o
 --------------------------------------------------------/
 
 
@@ -200,29 +200,36 @@ The *restart button* consists of a rectangle around a "restart" text, displayed 
    A4 = (`seg,(500,25),(500,75),BLACK) &
    txt = (`txt,"restart",(450, 50), fontSize,BLACK)
 -------------------------------------/
+
+An alternative *restart button* consists of a circle around a "restart" text
+/-------------------------------------
+ restartButtonCircle :={C,txt}
+ where C = (`circ,(450,50),25,RED) &
+ txt = (`txt,"restart",(450, 50), fontSize,BLACK)
+--------------------------------------/
  
 If the game is over, *gameResultDisplay* is a display in the upper left region of the screen telling the outcome of the game, either 'x won!', "o won!", or "The cat got it!"
 
 /-------------------------------------------------------
 
- If gameOver then
- gameResultDisplay := 
-    {(`txt,"x won",(100,50),fontSize,BLUE)} if threeInRow(`x);
-    {(`txt,"o won",(100,50),fontSize,GREEN)} if threeInRow(`o);
+ If gameOver(S) then
+ gameResultDisplay(S) := 
+    {(`txt,"x won",(100,50),fontSize,BLUE)} if threeInRow(`x,S);
+    {(`txt,"o won",(100,50),fontSize,GREEN)} if threeInRow(`o,S);
     {(`txt,"cat got it",(100,50),fontSize,RED)}  otherwise
 ---------------------------------------------------------/
 
 The *display* is the screen display for the current game state. The grid, cell displays, and restart button are always displayed. Additionally, the display includes the game results if the game is over, and the player to move if the game is not over.  
 
 /------------------------------------------
- alwaysDisplay :=
-   gridDisplay  U cellDisplays  U restartButton 
+ alwaysDisplay(S) :=
+   gridDisplay  U cellDisplays(S)  U restartButton 
 
- gameInPlayDisplay := 
-   alwaysDisplay U currentPlayerDisplay
+ gameInPlayDisplay(S) := 
+   alwaysDisplay(S) U currentPlayerDisplay(S)
 
- gameOverDisplay := 
-   alwaysDisplay U gameResultDisplay
+ gameOverDisplay(S) := 
+   alwaysDisplay(S) U gameResultDisplay(S)
 
  images(S) := 
    gameOverDisplay(S)   if gameOver(S);
@@ -265,15 +272,15 @@ clicked(c) means that cell c has been clicked.
 /-------------------------------------------
  restartClicked(I) iff 
    xCoord(I[1])>400 & xCoord(I[1])<500 & 
-   yCoord(I[1])>0 & yCoord(I[1])<100
+   yCoord(I[1])>25 & yCoord(I[1])<75
 ---------------------------------------------/
 
 *moveMade(c)* means that cell c has been clicked and the player to move may legally move there. *movesMade* is the set of all moves made by the most recent mouse click, which will either be a singleton or empty.
 
 /-------------------------------------------------------------
- moveMadeIn(c,I) iff clicked(c,I) & legalToMoveIn(c)
+ moveMadeIn(c,I,S) iff clicked(c,I) & legalToMoveIn(c,S)
 
- movesMade(I) := {(currentPlayer,c) | c in cells & moveMadeIn(c,I)}
+ movesMade(I,S) := {(currentPlayer(S),c) | c in cells & moveMadeIn(c,I,S)}
 --------------------------------------------------------------/
 
 
@@ -284,9 +291,9 @@ clicked(c) means that cell c has been clicked.
 ----------------------------------------/
 
 /----------------------------------------
-  transition(I) :=
+  transition(I,S) :=
     initialState  if restartClicked(I);
-    Gamma U movesMade(I)  otherwise
+    S U movesMade(I,S)  otherwise
 -----------------------------------------/
 
 
