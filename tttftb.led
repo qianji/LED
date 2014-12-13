@@ -44,10 +44,10 @@ GAME RULES
 
 This section defines the rules of tic-tac-toe in LED.
 
-Since the state of the game is the set of moves that have been made, the beginning state *init* is the empty set.
+Since the state of the game is the set of moves that have been made, the beginning state *initialState* is the empty set.
 
 /-----------
- init := {} 
+ initialState := {} 
 -------------/
 
 *cells* is the set of all cells on the board:
@@ -125,16 +125,20 @@ and `o otherwise.
 VIDEO OUTPUT
 ======================================================================
 
+The default color used in this game is BLACK
+/----------------------------
+BLACK := (0,0,0)
+-----------------------------/
 This section defines the *display* function, specifying the images to display on the screen in each game state. The data model for this section can be found in EaselLED.py.
 The  *grid* consists is a set of four line segments that make up the tic tac toe playing area.  
 
 /----------------------------
 gridDisplay := {L1,L2,L3,L4} 
 where
- L1 = ((200,100),(200,400)) &
- L2 = ((300,100),(300,400)) &
- L3 = ((100,200),(400,200)) &
- L4 = ((100,300),(400,300))
+ L1 = (`seg,(200,100),(200,400),BLACK) &
+ L2 = (`seg,(300,100),(300,400),BLACK) &
+ L3 = (`seg,(100,200),(400,200),BLACK) &
+ L4 = (`seg,(100,300),(400,300),BLACK)
 -----------------------------/
 
 The default font size for displayed text in this program is 15.
@@ -154,10 +158,10 @@ The default font size for displayed text in this program is 15.
 
 /-----------------------------------------------
 xImage(c):=
-  ((centerX(c), centerO(c)), fontSize,"x")
+  (`txt,"x",(centerX(c), centerO(c)),fontSize,BLACK)
   
  oImage(c) :=
-  ((centerX(c), centerO(c)), fontSize,"o")
+  (`txt,"o",(centerX(c), centerO(c)),fontSize,BLACK)
 
  cellDisplay(c) :=
     {xImage(c)} if (`x,c) in Gamma;  
@@ -177,8 +181,8 @@ If the game is not over, *currentPlayerDisplay* is a text in the upper left hand
 /-----------------------------------------------------
 
  currentPlayerDisplay := 
-   {((100,450),15,"x's Turn")} if currentPlayer=`x;
-   {((100,450),15,"o's turn")} if currentPlayer=`o
+   {(`txt,"x's turn",(100,50),fontSize,BLACK)} if currentPlayer=`x;
+   {(`txt,"o's turn",(100,50),fontSize,BLACK)} if currentPlayer=`o
 --------------------------------------------------------/
 
 
@@ -186,11 +190,11 @@ The *restart button* consists of a rectangle around a "restart" text, displayed 
 /------------------------------------
  restartButton := {A1,A2,A3,A4,txt}
  where
-   A1 = ((400,475),(500,475)) &
-   A2 = ((400,425),(500,425)) &
-   A3 = ((400,475),(400,425)) &
-   A4 = ((500,475),(500,425)) &
-   txt = ((450, 450), 15,"restart")
+   A1 = (`seg,(400,25),(500,25),BLACK) &
+   A2 = (`seg,(400,75),(500,75),BLACK) &
+   A3 = (`seg,(400,25),(400,75),BLACK) &
+   A4 = (`seg,(500,25),(500,75),BLACK) &
+   txt = (`txt,"restart",(450, 50), 15,BLACK)
 -------------------------------------/
  
 If the game is over, *gameResultDisplay* is a display in the upper left region of the screen telling the outcome of the game, either 'x won!', "o won!", or "The cat got it!"
@@ -199,9 +203,9 @@ If the game is over, *gameResultDisplay* is a display in the upper left region o
 
  If gameOver then
  gameResultDisplay := 
-    {((100,450),15,"x won")} if threeInRow(`x);
-    {((100,450),15,"o won")} if threeInRow(`o);
-    {((100,450),15,"cat got it")}  otherwise
+    {(`txt,"x won",(100,50),15,BLACK)} if threeInRow(`x);
+    {(`txt,"o won",(100,50),15,BLACK)} if threeInRow(`o);
+    {(`txt,"cat got it",(100,50),15,BLACK)}  otherwise
 ---------------------------------------------------------/
 
 The *display* is the screen display for the current game state. The grid, cell displays, and restart button are always displayed. Additionally, the display includes the game results if the game is over, and the player to move if the game is not over.  
@@ -219,6 +223,8 @@ The *display* is the screen display for the current game state. The grid, cell d
  display := 
    gameOverDisplay   if gameOver;
    gameInPlayDisplay otherwise
+ images :=
+   display
 ------------------------------------------/
 
 
@@ -257,7 +263,7 @@ clicked(c) means that cell c has been clicked.
 /-------------------------------------------
  restartClicked iff 
    xCoord(click)>400 & xCoord(click)<500 & 
-   yCoord(click)>425 & yCoord(click)<725
+   yCoord(click)>0 & yCoord(click)<100
 ---------------------------------------------/
 
 *moveMade(c)* means that cell c has been clicked and the player to move may legally move there. *movesMade* is the set of all moves made by the most recent mouse click, which will either be a singleton or empty.
@@ -270,10 +276,15 @@ clicked(c) means that cell c has been clicked.
 
 
 /---------------------------------------
-newState := 
-  init               if restartClicked;
+ newState := 
+  initialState               if restartClicked;
   Gamma U movesMade  otherwise
 ----------------------------------------/
+
+/----------------------------------------
+  transition(I,S) :=
+    newState
+-----------------------------------------/
 
 
 

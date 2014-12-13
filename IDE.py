@@ -12,6 +12,9 @@ from Parser import *
 from Compiler import *
 from EaselLED import *
 
+import os, pygame
+from pygame.locals import *
+from pygame.compat import geterror
 '''
 If F is a string which is the name of a .led file (without the extension) run(F)
 compiles program F and lets the user enter expressions to evaluate using the
@@ -41,6 +44,8 @@ def run(F=''):
                         return run(expression[2])
                     if expression[0]=='play' and expression[1]=='(' and expression[-1]==')':
                         return play(expression[2])
+                    if expression[0]=='playPygame' and expression[1]=='(' and expression[-1]==')':
+                        return playPygame(expression[2])
                 tree, tFlag = parseExpression(expression)
                 if tFlag:
                     try:
@@ -76,7 +81,7 @@ def play(F):
     DefinedFuns = Program.definedSymbols()
     print('defined funs:', DefinedFuns)
     # initialize the state in LED program memory
-    initBody = Program.body('init',0)
+    initBody = Program.body('initialState',0)
     gammaDef = Definition('Gamma',[],initBody[1])
     # update Gamma in the program
     Program.update(gammaDef)
@@ -97,4 +102,73 @@ def play(F):
         Program.update(gammaDef)
         for I in images: I.undraw()
         images = [convert(x) for x in val(AST('display').expression())[1]]  
+
+def playPygame(F):
+    # Initialize the game engine
+    pygame.init()
+     
+    # Define the colors we will use in RGB format
+    BLACK = (  0,   0,   0)
+    WHITE = (255, 255, 255)
+    BLUE =  (  0,   0, 255)
+    GREEN = (  0, 255,   0)
+    RED =   (255,   0,   0)
+     
+    # Set the height and width of the screen
+    size = [1000, 800]
+    screen = pygame.display.set_mode(size)
+     
+    pygame.display.set_caption("My Game")
+     
+    #Loop until the user clicks the close button.
+    done = False
+    clock = pygame.time.Clock()
+    global images, Gamma, click
+    clickDef = Definition('click',[],AST('tuple',[0,0]))
+    gammaDef = Definition('Gamma',[],AST('set',[]))
+    Program.update(clickDef)
+    Program.update(gammaDef)
+    compile(F+'.led')
+    DefinedFuns = Program.definedSymbols()
+    print('defined funs:', DefinedFuns)
+    # initialize the state in LED program memory
+    initBody = Program.body('initialState',0)
+    gammaDef = Definition('Gamma',[],initBody[1])
+    # update Gamma in the program
+    Program.update(gammaDef)
+    #images = [convert(x) for x in val(AST('display').expression())[1]]
+    #print(val(AST('images').expression()))
+    draw(screen,val(AST('display').expression())[1])
+    while not done:
+        # This limits the while loop to a max of 10 times per second.
+        # Leave this out and we will use all CPU we can.
+        clock.tick(10)
+         
+        for event in pygame.event.get(): # User did something
+            if event.type == pygame.QUIT: # If user clicked close
+                done=True # Flag that we are done so we exit this loop
+            elif event.type == MOUSEBUTTONDOWN:
+                click = pygame.mouse.get_pos()
+                # update click in Program
+                clickAST = AST('tuple',[click[0],click[1] ])
+                clickDef = Definition('click',[],clickAST)
+                Program.update(clickDef)
+                # update newState in Program
+                newStateBody = Program.body('newState',0)
+                # convert the value of newState into a AST and put it as the body of Gamma
+                gammaDef = Definition('Gamma',[],AST(val(AST('newState').expression())))
+                Program.update(gammaDef)
+                # undraw the screen
+                screen.blit(screen, (0, 0))
+                # draw the screen
+                draw(screen,val(AST('display').expression())[1])
+        
+        # Go ahead and update the screen with what we've drawn.
+        # This MUST happen after all the other drawing commands.
+        pygame.display.flip()
+ 
+# Be IDLE friendly
+    pygame.quit()
+
+
 run()
