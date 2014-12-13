@@ -555,10 +555,16 @@ def solutionSet(E):
 #                 print(p1)
             #print(p1)
             Sp1 = solutionSet(p1)
+            if Sp1 ==None:
+                print(p1)
+                return []
             slonSet = []
             for i in range(len(Sp1)):
                 b1 = Sp1[i]
                 Sp2_b1 = solutionSet(subExpression(p2,b1))
+                if Sp2_b1 ==None: 
+                    print (subExpression(p2,b1))
+                    return []
                 for j in range(len(Sp2_b1)):
                     b2 = Sp2_b1[j]
                     if areConsistent(b1, b2):

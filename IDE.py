@@ -78,17 +78,24 @@ def play(F):
     compile(F+'.led')
     DefinedFuns = Program.definedSymbols()
     print('defined funs:', DefinedFuns)
-    # initialize the initial state in LED program memory
-    initBody = Program.body('initialState',0)
-    initStateAST = initBody[1]
-
-    # set the global variable state named "GAMMA" in LED memory
-    gammaDef = Definition('GAMMA',[],initStateAST)
-    Program.update(gammaDef)
-
+    print() 
+    try:
+        # initialize the initial state in LED program memory
+        initBody = Program.body('initialState',0)
+        initStateAST = initBody[1]
+        # set the global variable state named "GAMMA" in LED memory
+        gammaDef = Definition('GAMMA',[],initStateAST)
+        Program.update(gammaDef)
+    except KeyError:
+        print("initialState is not defined in your LED program")
+        return
     # draw the initial images before play
-    draw(screen,val(AST('images',[initStateAST]).expression())[1])
-
+    images = val(AST('images',[initStateAST]).expression())
+    if images ==None:
+        print("Failed evaluating images")
+        return
+    else:
+        drawImages(screen,images[1])
     done = False
     clock = pygame.time.Clock()
     while not done:
@@ -120,15 +127,23 @@ def play(F):
                 currentStateAST = Program.body('GAMMA',0)[1]
 
                 # update the state 
-                gammaDef = Definition('GAMMA',[],AST(val(AST('transition',[inputAST,currentStateAST],).expression())))
+                transition = val(AST('transition',[inputAST,currentStateAST]).expression())
+                if transition==None:
+                    print('transition is not defined in your LED program')
+                    return
+                gammaDef = Definition('GAMMA',[],AST(transition))
                 Program.update(gammaDef)
 
                 # undraw the screen
                 screen.blit(screen, (0, 0))
                 currentStateAST = Program.body('GAMMA',0)[1]
                 # draw the screen with current state
-                draw(screen,val(AST('images',[currentStateAST]).expression())[1])
-        
+                images = val(AST('images',[currentStateAST]).expression())
+                if images ==None:
+                    print("Failed evaluating images")
+                    return
+                else:
+                    drawImages(screen,images[1])
         # Go ahead and update the screen with what we've drawn.
         # This MUST happen after all the other drawing commands.
         pygame.display.flip()

@@ -200,13 +200,6 @@ The *restart button* consists of a rectangle around a "restart" text, displayed 
    A4 = (`seg,(500,25),(500,75),BLACK) &
    txt = (`txt,"restart",(450, 50), fontSize,BLACK)
 -------------------------------------/
-
-An alternative *restart button* consists of a circle around a "restart" text
-/-------------------------------------
- restartButtonCircle :={C,txt}
- where C = (`circ,(450,50),25,RED) &
- txt = (`txt,"restart",(450, 50), fontSize,BLACK)
---------------------------------------/
  
 If the game is over, *gameResultDisplay* is a display in the upper left region of the screen telling the outcome of the game, either 'x won!', "o won!", or "The cat got it!"
 
@@ -223,7 +216,7 @@ The *display* is the screen display for the current game state. The grid, cell d
 
 /------------------------------------------
  alwaysDisplay(S) :=
-   gridDisplay  U cellDisplays(S)  U restartButton 
+   gridDisplay  U cellDisplays(S)  U restartButton
 
  gameInPlayDisplay(S) := 
    alwaysDisplay(S) U currentPlayerDisplay(S)
@@ -235,6 +228,12 @@ The *display* is the screen display for the current game state. The grid, cell d
    gameOverDisplay(S)   if gameOver(S);
    gameInPlayDisplay(S) otherwise
 ------------------------------------------/
+
+/-------------------------------------
+ Circle :={C,txt}
+ where C = (`circ,(450,50),25,RED) &
+ txt = (`txt,"restart",(450, 50), fontSize,BLACK)
+--------------------------------------/
 
 
 ======================================================================

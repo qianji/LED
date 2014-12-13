@@ -90,12 +90,42 @@ def isSegment(I):
             return t=="`seg" and isPoint(p) and isPoint(q) and isColor(c)
     return False
 
+def isTriangle(I):
+    if isinstance(I,tuple):
+        tup,triangle = I
+        if isinstance(triangle,list) and len(triangle)==5:
+            t,p,q,r,c=triangle
+            return t=="`fTri" and isNonCollinear(p,q,r) and isColor(c)
+    return False
+
+def isNonCollinear(p,q,r):
+    if isPoint(p) and isPoint(q) and isPoint(r):
+        return not slope(p,q)==slope(q,r)
+    return False
+
+def slope(p,q):
+    if isPoint(p) and isPoint(q):
+        (tup,[px,py])=p
+        (tup,[qx,qy])=q
+        if not px-qx==0:
+            return (py-qy)/(px-qx)
+        else:
+            return None
+
 def isCircle(I):
     if isinstance(I,tuple):
         tup,circle = I
         if isinstance(circle,list) and len(circle)==4:
             t,p,r,c=circle
             return t=="`circ" and isPoint(p) and isinstance(r,int) and r>0 and isColor(c)
+    return False
+
+def isDisc(I):
+    if isinstance(I,tuple):
+        tup,circle = I
+        if isinstance(circle,list) and len(circle)==4:
+            t,p,r,c=circle
+            return t=="`disc" and isPoint(p) and isinstance(r,int) and r>0 and isColor(c)
     return False
 
 def isText(I):
@@ -111,7 +141,6 @@ def isClick(C):
 
 def drawSegment(screen,L):
     (tup,[tup,(tup,[x1,y1]),(tup,[x2,y2]),(tup,color)]) = L
-    (W,H) = displaySize()
     p1 = [x1,y1]
     p2 = [x2,y2]
     pygame.draw.line(screen, tuple(color), p1,p2, 5)
@@ -120,9 +149,15 @@ def drawCircle(screen,C):
     (tup,[tup,(tup,[x,y]),radius,(tup,color)]) = C
     x=int(x)
     y=int(y)
-    (W,H) = displaySize()
     center = [x,y]
-    pygame.draw.circle(screen, tuple(color), center, radius)
+    pygame.draw.circle(screen, tuple(color), center, radius,1)
+
+def drawDisc(screen,C):
+    (tup,[tup,(tup,[x,y]),radius,(tup,color)]) = C
+    x=int(x)
+    y=int(y)
+    center = [x,y]
+    pygame.draw.circle(screen, tuple(color), center, radius,0)
 
 def drawText(screen,Text):
     (tup,[t,string,center,fontSize,(tup,color)]) = Text
@@ -139,8 +174,11 @@ def drawText(screen,Text):
         #screen.blit(text, [x,y])
         screen.blit(text, textpos)
 
+def drawTriangle(screen,Tri):
+    (tup,[tup,(tup,p),(tup,q),(tup,r),(tup,color)]) = Tri
+    pygame.draw.polygon(screen, tuple(color), [p,q,r], 0)
 
-def draw(screen,images):
+def drawImages(screen,images):
 
     # Define the colors we will use in RGB format
 
@@ -156,18 +194,9 @@ def draw(screen,images):
         if isSegment(x): drawSegment(screen,x)
         # draw circle
         elif isCircle(x): drawCircle(screen,x)
+        elif isDisc(x): drawDisc(screen,x)
         elif isText(x): drawText(screen,x)
-    # Draw on the screen a GREEN line from (0,0) to (50.75) 
-    # 5 pixels wide.
-#    pygame.draw.line(screen, GREEN, [0, 0], [50,30], 5)
-
-    ## Draw on the screen a GREEN line from (0,0) to (50.75) 
-    ## 5 pixels wide.
-    #pygame.draw.lines(screen, BLACK, False, [[0, 80], [50, 90], [200, 80], [220, 30]], 5)
-    
-    ## Draw on the screen a GREEN line from (0,0) to (50.75) 
-    ## 5 pixels wide.
-    #pygame.draw.aaline(screen, GREEN, [0, 50],[50, 80], True)
+        elif isTriangle(x): drawTriangle(screen,x)
 
     ## Draw a rectangle outline
     #pygame.draw.rect(screen, BLACK, [75, 10, 50, 20], 2)
@@ -179,13 +208,5 @@ def draw(screen,images):
     #pygame.draw.ellipse(screen, RED, [225, 10, 50, 20], 2) 
 
     ## Draw an solid ellipse, using a rectangle as the outside boundaries
-    #pygame.draw.ellipse(screen, RED, [300, 10, 50, 20]) 
- 
-    ## This draws a triangle using the polygon command
-    #pygame.draw.polygon(screen, BLACK, [[100, 100], [0, 200], [200, 200]], 5)
-  
-
-    
-    ## Draw a circle
-    #pygame.draw.circle(screen, BLUE, [60, 250], 40)
+    #pygame.draw.ellipse(screen, RED, [300, 10, 50, 20])   
 
