@@ -104,7 +104,8 @@ def play(F):
         clock.tick(30)
 
         for event in pygame.event.get(): # User did something
-            clickAST = AST('tuple',[-1,-1])
+            #clickAST = AST('tuple',[-1,-1])
+            clickAST = AST('`nil')
             keyboardAST = AST('set',[])
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop

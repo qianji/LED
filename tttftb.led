@@ -256,6 +256,7 @@ clicked(c) means that cell c has been clicked.
 
 /------------------------------------------------------------
  clicked(c,I) iff 
+   ~I[1]=`nil &
    (xCoord(I[1])>xMin(c)) & (xCoord(I[1])< xMax(c)) &
    (yCoord(I[1])>yMin(c)) & (yCoord(I[1])< yMax(c))
    
@@ -273,10 +274,16 @@ pressed(c,I) iff
 
 /-------------------------------------------
  restartClicked(I) iff 
+   ~I[1]=`nil &
    xCoord(I[1])>400 & xCoord(I[1])<500 & 
-   yCoord(I[1])>25 & yCoord(I[1])<75 or (|I[2]|>0 & I[2][1]="r")
+   yCoord(I[1])>25 & yCoord(I[1])<75
 ---------------------------------------------/
 
+*restartPressed* means that "r" has been pressed on the keyboard
+/-------------------------------------------
+ restartPressed(I) iff
+    |I[2]|>0 & I[2][1]="r"
+-------------------------------------------/
 *moveMade(c)* means that cell c has been clicked and the player to move may legally move there. *movesMade* is the set of all moves made by the most recent mouse click, which will either be a singleton or empty.
 
 /-------------------------------------------------------------
@@ -286,15 +293,9 @@ pressed(c,I) iff
 --------------------------------------------------------------/
 
 
-/---------------------------------------
- newState := 
-  initialState               if restartClicked;
-  Gamma U movesMade  otherwise
-----------------------------------------/
-
 /----------------------------------------
   transition(I,S) :=
-    initialState  if restartClicked(I);
+    initialState  if restartClicked(I) or restartPressed(I);
     S U movesMade(I,S)  otherwise
 -----------------------------------------/
 
