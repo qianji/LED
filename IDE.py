@@ -107,14 +107,10 @@ def play(F):
         keyboardAST = AST('set',[])
         keys=[]
         for event in pygame.event.get(): # User did something
-            #clickAST = AST('tuple',[-1,-1])
-            #clickAST = AST('`nil')
-            #keyboardAST = AST('set',[])
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
                 sys.exit()
             elif event.type == KEYDOWN:
-                #clickAST = AST("`nil")
                 if event.key == pygame.K_ESCAPE:
                     done=True
                     sys.exit()
@@ -124,10 +120,6 @@ def play(F):
                 click = pygame.mouse.get_pos()
                 # update click in Program
                 clickAST = AST('tuple',[click[0],click[1]])
-                #keyboardAST = AST('set',[])                
-                # update input in Program
-                #inputAST = AST('tuple',[clickAST,keyboardAST])
-                #drawSreeen(screen,inputAST)
         if len(keys)>0:
             keyboardAST = AST('set',[AST('string',keys)])
         inputAST = AST('tuple',[clickAST,keyboardAST])
