@@ -782,8 +782,12 @@ def parseT0(S):
                 if isDecimalNonRepeating(S[0]):return (AST(Fraction(S[0])),True)
                 return (AST(numeralRepeatingValue(S[0])),True)
                 # if S[0] is a numeral that has a decimal fraction with a repeating block
-            # identifier or quoted string
-            if isIdentifier(S[0]) or isQuotedString(S[0]): return (AST(S[0]),True)
+            # identifier
+            if isIdentifier(S[0]): return (AST(S[0]),True)
+            # quoted string is represented as sequence with a list of asscii code
+            if isQuotedString(S[0]): 
+                L=[ord(i) for i in S[0][1:-1]]
+                return (AST('string',L),True)
         (tree,flag) = parseContainer(S)
         if flag: return (tree,True)
         # parse range { term .. term }

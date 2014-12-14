@@ -6,7 +6,7 @@
 
 
 # A character is *white* if it is a space, return, tab, or vertical tab.
-def white(c): return c in [' ', '\r','\t','\v','\n']
+def white(c): return c in [' ', '\r','\t','\v','\n','\\s']
 
 
 #  If S is a list of characters, remInitialWhite(S) removes initial white space chars
@@ -84,7 +84,7 @@ def canPush(S,state):
     if state =='repeatingBlockPP': return c==')'
     if state =='repeatingBlockRP': return False
     if state =='quoteClose': return False
-    if state =='quoteSepcial': return c in ['\\','t','r','"']
+    if state =='quoteSepcial': return c in ['\\','t','r','"','s']
     if state =='quoteOpen' or state=='quoteContent': return True
     if state == 'dash': return c=='>'
     if state == 'arrow': return False
@@ -125,7 +125,7 @@ def newState(state,c):
     # state for quoted string
     if state =='quoteOpen': return 'quoteClose' if c=='"' else 'quoteSpecial' if c=='\\' else 'quoteContent'
     if state =='quoteClose': return 'spec1'
-    if state == 'quoteSepcial': return 'quoteContent' if c in ['\\','t','r','"'] else 'spec1'
+    if state == 'quoteSepcial': return 'quoteContent' if c in ['\\','t','r','"','s'] else 'spec1'
     if state =='quoteContent': return 'quoteSepcial' if c=='\\' else 'quoteClose' if c=='"' else 'quoteContent'
     if state =='dash': return 'arrow' if c=='>' else 'spec1'
     if state =='arrow': return 'spec1'

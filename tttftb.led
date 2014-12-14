@@ -264,6 +264,14 @@ clicked(c) means that cell c has been clicked.
  clicked(c,I) iff 
    (xCoord(I[1])>xMin(c)) & (xCoord(I[1])< xMax(c)) &
    (yCoord(I[1])>yMin(c)) & (yCoord(I[1])< yMax(c))
+   
+
+-------------------------------------------------------------/
+
+pressed(c,I) means that cell c has been pressed
+
+/------------------------------------------------------------
+
 -------------------------------------------------------------/
 
 *restartClicked* means that the most recent mouse click is inside the region of the play again button.
@@ -291,6 +299,7 @@ clicked(c) means that cell c has been clicked.
 
 /----------------------------------------
   transition(I,S) :=
+    S if I[1]=`nil;
     initialState  if restartClicked(I);
     S U movesMade(I,S)  otherwise
 -----------------------------------------/

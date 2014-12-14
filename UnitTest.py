@@ -313,6 +313,12 @@ class ParserTest(unittest.TestCase):
         actural = self.expressionValues(expressions)
         expected = [('tuple', [('tuple', [1, ('tuple', [10, 10])]), ('tuple', [1, 0]), ('tuple', [('set', [('tuple', [2, ('tuple', [11, 10])]), ('tuple', [2, ('tuple', [12, 10])]), ('tuple', [1, ('tuple', [13, 10])])]), 1, 0, 0])])]
         self.assertEqual(expected,actural) 
+
+        # test for string
+        expressions = ['"hi\smom"','"Go\stell\sthe\sSpartans\rThou\swho\spassest\sby"','"John\ssaid\s\\"hello\\""','"John\ssaid\s\'hello\'"']
+        actural = self.expressionPrettyValues(expressions)
+        expected = ['"hi\smom"','"Go\stell\sthe\sSpartans\rThou\swho\spassest\sby"','"John\ssaid\s\\"hello\\""','"John\ssaid\s\'hello\'"']
+        self.assertEqual(expected,actural)
  
         ########################################
         # test for type expression

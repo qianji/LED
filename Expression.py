@@ -24,7 +24,7 @@ class AST:
             self.tree= AST(F[0],F[1]).tree
         if len(args)==0:
 			# deal with empty set, tuple or vector
-            if F in ['set','tuple','seq','cstack']:
+            if F in ['set','tuple','seq','cstack','string']:
                 self.tree = [F]
             else:
                 if isAtom(F) or isQuotedString(F):
@@ -74,6 +74,7 @@ def isVector(x): return isinstance(x,tuple) and x[0] == 'seq'
 def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
 def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
 def isSymbol(x): return False if x==None else isinstance(x,str) and len(x)>1 and x[0]=='`'  
+def isString(x): return False if x==None else isinstance(x,tuple) and x[0]=='string'
 def isVar(x): return isinstance(x,str) and not isSymbol(x)
 def isBool(x): return isinstance(x,bool)
 def isAtom(x): return False if x==None else isScalar(x) or isVar(x) or isLambda(x)
@@ -86,8 +87,15 @@ def prettyString(E):
     if isSet(E): return('{' + prettyStack(E[1]) + '}')
     if isVector(E): return( '<' + prettyStack(E[1]) + '>')
     if isTuple(E): return( '(' + prettyStack(E[1]) + ')')
+    if isString(E): return('"'+prettyLEDString(E[1])+'"')
 
-    
+def prettyLEDString(elts):
+    Str =''
+    if not elts==[]:
+        for e in elts:
+            Str+=chr(e)
+    return Str
+
 def prettyStack(elts):
     Str = ''
     if not elts==[]:

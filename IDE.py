@@ -103,47 +103,52 @@ def play(F):
         # Leave this out and we will use all CPU we can.
         #clock.tick(10)
 
-        #clickAST = AST('tuple',[0,1])
-        #keyboardAST = AST('set',[1,2])
+        clickAST = AST("`nil")
+        keyboardAST = AST('set',[])
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
-            #elif event.type == KEYDOWN:
-                #if event.key == pygame.K_ESCAPE:
-                    #done=True
-                    #sys.exit()
-                #elif event.key ==pygame.K_LEFT:
-                    #keyboardAST = AST('set',[AST("L")])
-                #elif event.key ==pygame.K_RIGHT:
-                    #keyboardAST = AST('set',[AST("R")])
+            elif event.type == KEYDOWN:
+                clickAST = AST("`nil")
+                if event.key == pygame.K_ESCAPE:
+                    done=True
+                    sys.exit()
+                elif event.key ==pygame.K_LEFT:
+                    keyboardAST = AST('set',[AST("L")])
+                elif event.key ==pygame.K_RIGHT:
+                    keyboardAST = AST('set',[AST("R")])
+                else:
+                    key = pygame.key.name(event.key)
+                    #print(pygame.key.name(event.key))
+                    keyboardAST = AST('set',[key])
             elif event.type == MOUSEBUTTONDOWN:
                 click = pygame.mouse.get_pos()
                 # update click in Program
                 clickAST = AST('tuple',[click[0],click[1]])
-                keyboardAST = AST('set',[1,2])                
+                keyboardAST = AST('set',[])                
                 # update input in Program
-                inputAST = AST('tuple',[clickAST,keyboardAST])
-                # get the current state in the program
-                currentStateAST = Program.body('GAMMA',0)[1]
+            inputAST = AST('tuple',[clickAST,keyboardAST])
+            # get the current state in the program
+            currentStateAST = Program.body('GAMMA',0)[1]
 
-                # update the state 
-                transition = val(AST('transition',[inputAST,currentStateAST]).expression())
-                if transition==None:
-                    print('transition is not defined in your LED program')
-                    return
-                gammaDef = Definition('GAMMA',[],AST(transition))
-                Program.update(gammaDef)
+            # update the state 
+            transition = val(AST('transition',[inputAST,currentStateAST]).expression())
+            if transition==None:
+                print('transition is not defined in your LED program')
+                return
+            gammaDef = Definition('GAMMA',[],AST(transition))
+            Program.update(gammaDef)
 
-                # undraw the screen
-                screen.blit(screen, (0, 0))
-                currentStateAST = Program.body('GAMMA',0)[1]
-                # draw the screen with current state
-                images = val(AST('images',[currentStateAST]).expression())
-                if images ==None:
-                    print("Failed evaluating images")
-                    return
-                else:
-                    drawImages(screen,images[1])
+            # undraw the screen
+            screen.blit(screen, (0, 0))
+            currentStateAST = Program.body('GAMMA',0)[1]
+            # draw the screen with current state
+            images = val(AST('images',[currentStateAST]).expression())
+            if images ==None:
+                print("Failed evaluating images")
+                return
+            else:
+                drawImages(screen,images[1])
         # Go ahead and update the screen with what we've drawn.
         # This MUST happen after all the other drawing commands.
         pygame.display.flip()
