@@ -155,7 +155,7 @@ The default font size for displayed text in this program is 36.
 
 /-----------------------------------
  centerX(c):= 150+100*((c-1) mod 3)
- centerO(c):= 350-100*(floor((c-1)/3))
+ centerO(c):= 150+100*(floor((c-1)/3))
 ------------------------------------/
 
 *cellDisplay(c)* is a display of a text character 'x' or an 'o' in cell c, or the empty display, respectively in case cell c is occupied by `x, occupied by `o, or not occupied in the current game state. 
@@ -229,12 +229,6 @@ The *display* is the screen display for the current game state. The grid, cell d
    gameInPlayDisplay(S) otherwise
 ------------------------------------------/
 
-/-------------------------------------
- Circle :={C,txt}
- where C = (`circ,(450,50),25,RED) &
- txt = (`txt,"restart",(450, 50), fontSize,BLACK)
---------------------------------------/
-
 
 ======================================================================
 MOUSE INPUT
@@ -248,8 +242,8 @@ This section defines *update*, which specifies the program's response to mouse i
 /----------------------------------
  xMin(c) := 100+100*((c-1) mod 3) 
  xMax(c) := 200+100*((c-1) mod 3)
- yMin(c) := 300-100*(floor((c-1)/3))
- yMax(c) := 400-100*(floor((c-1)/3)) 
+ yMin(c) := 100+100*(floor((c-1)/3))
+ yMax(c) := 200+100*(floor((c-1)/3)) 
 ------------------------------------/
 
 The x and y coordinates of a point are its 1st and 2nd coordinates, respectively.
@@ -271,7 +265,8 @@ clicked(c) means that cell c has been clicked.
 pressed(c,I) means that cell c has been pressed
 
 /------------------------------------------------------------
-
+pressed(c,I) iff
+    |I[2]|>0 & c=I[2][1][1]-48
 -------------------------------------------------------------/
 
 *restartClicked* means that the most recent mouse click is inside the region of the play again button.
@@ -279,13 +274,13 @@ pressed(c,I) means that cell c has been pressed
 /-------------------------------------------
  restartClicked(I) iff 
    xCoord(I[1])>400 & xCoord(I[1])<500 & 
-   yCoord(I[1])>25 & yCoord(I[1])<75
+   yCoord(I[1])>25 & yCoord(I[1])<75 or (|I[2]|>0 & I[2][1]="r")
 ---------------------------------------------/
 
 *moveMade(c)* means that cell c has been clicked and the player to move may legally move there. *movesMade* is the set of all moves made by the most recent mouse click, which will either be a singleton or empty.
 
 /-------------------------------------------------------------
- moveMadeIn(c,I,S) iff clicked(c,I) & legalToMoveIn(c,S)
+ moveMadeIn(c,I,S) iff (clicked(c,I) or pressed(c,I) ) & legalToMoveIn(c,S)
 
  movesMade(I,S) := {(currentPlayer(S),c) | c in cells & moveMadeIn(c,I,S)}
 --------------------------------------------------------------/
@@ -299,7 +294,6 @@ pressed(c,I) means that cell c has been pressed
 
 /----------------------------------------
   transition(I,S) :=
-    S if I[1]=`nil;
     initialState  if restartClicked(I);
     S U movesMade(I,S)  otherwise
 -----------------------------------------/

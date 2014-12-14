@@ -133,7 +133,7 @@ def isText(I):
         tup,text = I
         if isinstance(text,list) and len(text)==5:
             t,s,p,n,c=text
-            return t=="`txt" and isinstance(s,str) and isPoint(p) and isColor(c) and isinstance(n,int) and n in range(4,101)
+            return t=="`txt" and isinstance(s,tuple) and s[0]=='string' and isPoint(p) and isColor(c) and isinstance(n,int) and n in range(4,101)
     return False
 
 def isClick(C):
@@ -165,7 +165,7 @@ def drawText(screen,Text):
     x=int(x)
     y=int(y)
     #print(center)
-    (W,H) = displaySize()
+    string = prettyString(string)
     T = string[1:-1]
     if pygame.font:
         font = pygame.font.Font(None, fontSize)

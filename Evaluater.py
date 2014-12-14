@@ -60,6 +60,7 @@ def val(E):
     # if Op=='star': return ('star',Args)
     # if Op=='comStar': return ('comStar',Args)
     # if Op=='lambda': return('lambda',Args)
+    #if Op=='string': return prettyString((Op,Args))
     if Op in ['seq','set','tuple','star','comStar','lambda','fSet','Seq','string']: return (Op,Args)
     if Op in builtIns : 
         # check if Op is one of the Big Operations
@@ -293,7 +294,7 @@ def valPlus(X):
     print('Operation + not valid on arguments:',prettyString(X[0]), 'and',prettyString(X[1]) )
 def valPipes(X):
     if isNumber(X[0]): return valAbs(X)
-    if isVector(X[0]): return valLen(X)
+    if isVector(X[0]) or isString(X[0]): return valLen(X)
     if isSet(X[0])   : return valCardinal(X)
     print('Operation || not valid on arguments:',prettyString(X[0]))    
 def valEq(X):
@@ -303,6 +304,7 @@ def valEq(X):
     if isTuple(a) and isTuple(b): return respEqual(X)
     if isNumber(a) and isNumber(b): return a==b
     if isSymbol(a) and isSymbol(b): return a==b
+    if isString(a) and isString(b): return respEqual(X)
     return False
 def valStar(X):
     if isNumber(X[0]) and isNumber(X[1]): return valMult(X)
@@ -485,7 +487,7 @@ def isGround(E):
             return True
         if E in builtIns:
             return True
-        if E in ['set','tuple','seq']:
+        if E in ['set','tuple','seq','string']:
             return True
         if Program.defined(E,0):
             return True
