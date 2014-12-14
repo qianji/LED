@@ -101,37 +101,37 @@ def play(F):
     while not done:
         # This limits the while loop to a max of 10 times per second.
         # Leave this out and we will use all CPU we can.
-        clock.tick(30)
-
+        # 60 frame per second
+        clock.tick(60)
+        clickAST = AST('`nil')
+        keyboardAST = AST('set',[])
+        keys=[]
         for event in pygame.event.get(): # User did something
             #clickAST = AST('tuple',[-1,-1])
-            clickAST = AST('`nil')
-            keyboardAST = AST('set',[])
+            #clickAST = AST('`nil')
+            #keyboardAST = AST('set',[])
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
+                sys.exit()
             elif event.type == KEYDOWN:
                 #clickAST = AST("`nil")
                 if event.key == pygame.K_ESCAPE:
                     done=True
                     sys.exit()
-                elif event.key ==pygame.K_LEFT:
-                    keyboardAST = AST('set',[AST("L")])
-                elif event.key ==pygame.K_RIGHT:
-                    keyboardAST = AST('set',[AST("R")])
                 else:
-                    #key = pygame.key.name(event.key)
-                    keyboardAST = AST('set',[AST('string',[event.key])])
-                    #print(event.key)
-                    inputAST = AST('tuple',[clickAST,keyboardAST])
-                    drawSreeen(screen,inputAST)
+                    keys.append(event.key);
             elif event.type == MOUSEBUTTONDOWN:
                 click = pygame.mouse.get_pos()
                 # update click in Program
                 clickAST = AST('tuple',[click[0],click[1]])
-                keyboardAST = AST('set',[])                
+                #keyboardAST = AST('set',[])                
                 # update input in Program
-                inputAST = AST('tuple',[clickAST,keyboardAST])
-                drawSreeen(screen,inputAST)
+                #inputAST = AST('tuple',[clickAST,keyboardAST])
+                #drawSreeen(screen,inputAST)
+        if len(keys)>0:
+            keyboardAST = AST('set',[AST('string',keys)])
+        inputAST = AST('tuple',[clickAST,keyboardAST])
+        drawSreeen(screen,inputAST)
         # Go ahead and update the screen with what we've drawn.
         # This MUST happen after all the other drawing commands.
         pygame.display.flip()
