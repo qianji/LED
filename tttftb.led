@@ -139,10 +139,10 @@ The  *grid* consists is a set of four line segments that make up the tic tac toe
 /----------------------------
 gridDisplay := {L1,L2,L3,L4} 
 where
- L1 = (`seg,(200,100),(200,400),BLACK) &
- L2 = (`seg,(300,100),(300,400),BLACK) &
- L3 = (`seg,(100,200),(400,200),BLACK) &
- L4 = (`seg,(100,300),(400,300),BLACK)
+ L1 = (`seg,(200,700),(200,400),BLACK) &
+ L2 = (`seg,(300,700),(300,400),BLACK) &
+ L3 = (`seg,(100,600),(400,600),BLACK) &
+ L4 = (`seg,(100,500),(400,500),BLACK)
 -----------------------------/
 
 The default font size for displayed text in this program is 36.
@@ -155,7 +155,7 @@ The default font size for displayed text in this program is 36.
 
 /-----------------------------------
  centerX(c):= 150+100*((c-1) mod 3)
- centerO(c):= 150+100*(floor((c-1)/3))
+ centerO(c):= 650-100*(floor((c-1)/3))
 ------------------------------------/
 
 *cellDisplay(c)* is a display of a text character 'x' or an 'o' in cell c, or the empty display, respectively in case cell c is occupied by `x, occupied by `o, or not occupied in the current game state. 
@@ -185,8 +185,8 @@ If the game is not over, *currentPlayerDisplay* is a text in the upper left hand
 /-----------------------------------------------------
 
  currentPlayerDisplay(S) := 
-   {(`txt,"x's turn",(100,50),fontSize,BLACK)} if currentPlayer(S)=`x;
-   {(`txt,"o's turn",(100,50),fontSize,BLACK)} if currentPlayer(S)=`o
+   {(`txt,"x's turn",(100,750),fontSize,BLACK)} if currentPlayer(S)=`x;
+   {(`txt,"o's turn",(100,750),fontSize,BLACK)} if currentPlayer(S)=`o
 --------------------------------------------------------/
 
 
@@ -194,11 +194,11 @@ The *restart button* consists of a rectangle around a "restart" text, displayed 
 /------------------------------------
  restartButton := {A1,A2,A3,A4,txt}
  where
-   A1 = (`seg,(400,25),(500,25),BLACK) &
-   A2 = (`seg,(400,75),(500,75),BLACK) &
-   A3 = (`seg,(400,25),(400,75),BLACK) &
-   A4 = (`seg,(500,25),(500,75),BLACK) &
-   txt = (`txt,"restart",(450, 50), fontSize,BLACK)
+   A1 = (`seg,(400,725),(500,725),BLACK) &
+   A2 = (`seg,(400,775),(500,775),BLACK) &
+   A3 = (`seg,(400,725),(400,775),BLACK) &
+   A4 = (`seg,(500,725),(500,775),BLACK) &
+   txt = (`txt,"restart",(450, 750), fontSize,BLACK)
 -------------------------------------/
  
 If the game is over, *gameResultDisplay* is a display in the upper left region of the screen telling the outcome of the game, either 'x won!', "o won!", or "The cat got it!"
@@ -207,9 +207,9 @@ If the game is over, *gameResultDisplay* is a display in the upper left region o
 
  If gameOver(S) then
  gameResultDisplay(S) := 
-    {(`txt,"x won",(100,50),fontSize,BLUE)} if threeInRow(`x,S);
-    {(`txt,"o won",(100,50),fontSize,GREEN)} if threeInRow(`o,S);
-    {(`txt,"cat got it",(100,50),fontSize,RED)}  otherwise
+    {(`txt,"x won",(100,750),fontSize,BLUE)} if threeInRow(`x,S);
+    {(`txt,"o won",(100,750),fontSize,GREEN)} if threeInRow(`o,S);
+    {(`txt,"cat got it",(100,750),fontSize,RED)}  otherwise
 ---------------------------------------------------------/
 
 The *display* is the screen display for the current game state. The grid, cell displays, and restart button are always displayed. Additionally, the display includes the game results if the game is over, and the player to move if the game is not over.  
@@ -242,8 +242,8 @@ This section defines *update*, which specifies the program's response to mouse i
 /----------------------------------
  xMin(c) := 100+100*((c-1) mod 3) 
  xMax(c) := 200+100*((c-1) mod 3)
- yMin(c) := 100+100*(floor((c-1)/3))
- yMax(c) := 200+100*(floor((c-1)/3)) 
+ yMin(c) := 600-100*(floor((c-1)/3))
+ yMax(c) := 700-100*(floor((c-1)/3)) 
 ------------------------------------/
 
 The x and y coordinates of a point are its 1st and 2nd coordinates, respectively.
@@ -276,7 +276,7 @@ pressed(c,I) iff
  restartClicked(I) iff 
    ~I[1]=`nil &
    xCoord(I[1])>400 & xCoord(I[1])<500 & 
-   yCoord(I[1])>25 & yCoord(I[1])<75
+   yCoord(I[1])>725 & yCoord(I[1])<775
 ---------------------------------------------/
 
 *restartPressed* means that "r" has been pressed on the keyboard

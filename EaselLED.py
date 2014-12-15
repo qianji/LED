@@ -172,16 +172,17 @@ def drawText(screen,Text):
     if pygame.font:
         font = pygame.font.Font(None, fontSize)
         text = font.render(T, 1, color)
-        textpos = text.get_rect(centerx=x,centery=y)
+        textpos = text.get_rect(centerx=int(x),centery=int(y))
         #screen.blit(text, [x,y])
         screen.blit(text, textpos)
 
 def drawTriangle(screen,Tri):
     (tup,[tup,(tup,p),(tup,q),(tup,r),(tup,color)]) = Tri
     W,H=displaySize()
-    p=(p[0],H-p[1])
-    q=(q[0],H-q[1])
-    r=(r[0],H-r[1])
+    #x or y might be Franction(12,1) instead of 12
+    p=(int(p[0]),int(H-p[1]))
+    q=(int(q[0]),int(H-q[1]))
+    r=(int(r[0]),int(H-r[1]))
     pygame.draw.polygon(screen, tuple(color), [p,q,r], 0)
 
 def drawImages(screen,images):
