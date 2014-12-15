@@ -141,30 +141,32 @@ def isClick(C):
 
 def drawSegment(screen,L):
     (tup,[tup,(tup,[x1,y1]),(tup,[x2,y2]),(tup,color)]) = L
-    p1 = [x1,y1]
-    p2 = [x2,y2]
+    W,H=displaySize()
+    p1 = [x1,H-y1]
+    p2 = [x2,H-y2]
     pygame.draw.line(screen, tuple(color), p1,p2, 5)
 
 def drawCircle(screen,C):
     (tup,[tup,(tup,[x,y]),radius,(tup,color)]) = C
     x=int(x)
     y=int(y)
-    center = [x,y]
+    center = [x,H-y]
     pygame.draw.circle(screen, tuple(color), center, radius,1)
 
 def drawDisc(screen,C):
     (tup,[tup,(tup,[x,y]),radius,(tup,color)]) = C
     x=int(x)
     y=int(y)
-    center = [x,y]
+    W,H=displaySize()
+    center = [x,H-y]
     pygame.draw.circle(screen, tuple(color), center, radius,0)
 
 def drawText(screen,Text):
     (tup,[t,string,center,fontSize,(tup,color)]) = Text
     (tup,[x,y]) = center
-    x=int(x)
-    y=int(y)
-    #print(center)
+    # (0,0) is left botton
+    W,H=displaySize()    
+    y=H-int(y)
     string = prettyString(string)
     T = string[1:-1]
     if pygame.font:
@@ -176,6 +178,10 @@ def drawText(screen,Text):
 
 def drawTriangle(screen,Tri):
     (tup,[tup,(tup,p),(tup,q),(tup,r),(tup,color)]) = Tri
+    W,H=displaySize()
+    p=(p[0],H-p[1])
+    q=(q[0],H-q[1])
+    r=(r[0],H-r[1])
     pygame.draw.polygon(screen, tuple(color), [p,q,r], 0)
 
 def drawImages(screen,images):

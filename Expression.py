@@ -88,6 +88,7 @@ def prettyString(E):
     if isVector(E): return( '<' + prettyStack(E[1]) + '>')
     if isTuple(E): return( '(' + prettyStack(E[1]) + ')')
     if isString(E): return('"'+prettyLEDString(E[1])+'"')
+    return "None"
 
 def prettyLEDString(elts):
     Str =''
