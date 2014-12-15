@@ -205,6 +205,8 @@ def parseDfn(S):
             return (None,False)
     if hasKeywords(S,['iff','If','then']):
         return parseRelIfThenDef(S,signature)
+    if hasKeywords(S,['iff','where']):
+        return parseRelWhereDef(S,signature)
     if hasKeywords(S,['iff']):
         return parseRelDef(S,signature)
     if hasKeywords(S,['If','then','where']):
@@ -463,6 +465,24 @@ def parseRelIfThenDef(S,FS):
             else:
                         print('cannot parse function definition left side: ',' '.join(S[j+1:i]))    
     return (None,False) 
+
+# relWhereDef -> identifier (vars) iff sentence where 
+def parseRelWhereDef(S,FS):
+    for i in range(len(S)):
+        if S[i]=='where':
+            t,f1 = parseWhereClause(S[i:])
+            if f1:
+                p,f2 = parseRelDef(S[0:i],FS)
+                if f2:
+                    key,value = p.head,p.body
+                    d=Definition(key[0],value[0],p.body[1],t,FS)
+                    return(d,True)
+                else:
+                    print('cannot parse definition: ',' '.join(S[0:i])) 
+            else:
+                print('cannot parse where statement definition: ',' '.join(S[i:])) 
+    return(None,False)
+
 
 # relDef -> identifier ( vars ) iff   sentence
 # duplicate with parseFuncDef. To be refactored soon
