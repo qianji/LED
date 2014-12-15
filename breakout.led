@@ -202,8 +202,8 @@ brick15t := brick(brick15tTL, brick15tTR, brick15tBL, brick15tBR)
 
 /-----------------------------------------------------------------------------------------------
   originPoint := point(-1000,-800)
-ballStart := ball(point(700, 200), 7, 14.0, 12.5)
-ballDead := ball(point(700, 200), 7, 0.0, 0.0)
+ballStart := ball(point(700, 200), 7, 14, 12)
+ballDead := ball(point(700, 200), 7, 0, 0)
 paddleStart := paddle(pTL, pTR, pBL, pBR)
 brickStart := {brick1, brick2, brick3, brick4, brick5, brick6, brick7, brick8, brick9, brick10, brick11, brick12, brick13, brick14, brick15, brick5t, brick15t, brick10t}
 ------------------------------------------------------------------------------------------------/
@@ -225,15 +225,105 @@ initialState := {}
   staticImgs := {reset, topBorder, leftBorder, rightBorder, botBorder, rtBorder, rlBorder, rrBorder, rbBorder}
 ------------------------------------------------------------------------------------------------/
 
+==================================================================================================================================================
+S is a struct in SequenceL (sBall: ba, sPaddle: p, bricks: br, clear: c, dead: d, dust: u, expl: e, time: t);
+==================================================================================================================================================
+
 /-----------------------------------------------------------------------------------------------
   brImg(B):=Union[br in B] boxImg(br,dOrange)
-  boxImg(L,c):= {segment(TL,TR,dBlack),segment(TL, BL, dBlack), segment(BL, BR, dBlack), segment(TR, BR, dBlack),fTri(TL, BR, BL, c), fTri(TL, TR, BR, c)}
-              where TL=L[1] & TR=L[2] & BL=L[3] & BR=L[4]
+  boxImg(L,c):= 
+    {segment(TL,TR,dBlack),segment(TL, BL, dBlack), segment(BL, BR, dBlack), segment(TR, BR, dBlack),fTri(TL, BR, BL, c), fTri(TL, TR, BR, c)}
+    where TL=L[1] & TR=L[2] & BL=L[3] & BR=L[4]
   ballImg(b):={disc(p,r,c)} where p=b[1] & r=b[2] & c= dViolet
   padImg(pad):=boxImg(pad,dBlue)
+  sImg(dust):= {} if |dust|=0;
+    disc(dust[3],dust[4],dRed) otherwise
 ------------------------------------------------------------------------------------------------/
 /-----------------------------------------------------------------------------------------------  
-initialState := buildState(ballStart, paddleStart, brickStart,1,1,1,1,0)
-transition(I,S):= {}
-images(S):= staticImgs U ballImg(S[1]) U padImg(S[2]) U brImg(S[3])
+initialState := buildState(ballStart, paddleStart, brickStart,0,0,{},{},0)
+------------------------------------------------------------------------------------------------/
+
+
+ where (sBall,sPaddle,bricks,clear,dead,dust,expl,time) = S
+/-----------------------------------------------------------------------------------------------   
+If keys=I[2] & ballMoveState = sClean(sHelper(motionHelper(S))) 
+then
+  transition(I,S):= 
+    paddleHelper(ballMoveState, 1) if equalList(keys, "d") ;
+    paddleHelper(ballMoveState, 0) if equalList(keys, "a");
+    ballMoveState otherwise
+
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  equalList(keys,char) iff
+    |keys|>0 & keys[1]=char
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  paddleHelper(S,flag) :=
+    buildState(S[1],nextPaddle,S[3],S[4],S[5],S[6],S[7],S[8]) where nextPaddle = paddleMove(S[2],flag)
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  paddleMove(pad,flag) :=
+    paddle(TL,TR,BL,BR) where TL=nextPaddle(pad[1],flag)  & TR=nextPaddle(pad[2],flag) & 
+                        BL = nextPaddle(pad[3],flag) & BR = nextPaddle(pad[4],flag)
+  
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  nextPaddle(p,flag):=
+    point(nextX,p[2]) where nextX = nextPX(p,flag)
+
+If val=20
+then
+  nextPX(p,flag):=
+    p[1]+val if flag & ~outOfBoundsR(p);
+    p[1]-val if ~flag & ~ outOfBoundsL(p);
+    p[1] otherwise
+
+  outOfBoundsL: (Int*Int) -> Bool
+  outOfBoundsL(p) iff p[1]<=400
+
+  outOfBoundsR: (Int*Int) -> Bool
+  outOfBoundsR(p) iff p[2]>=1000
+------------------------------------------------------------------------------------------------/
+
+
+/-----------------------------------------------------------------------------------------------
+  ballMove(B) :=
+    ball(nextCenter(B[1],B[3],B[4]),B[2],B[3],B[4])
+
+  nextCenter(p,xV,yV):=
+    point(nextX,nextY) where x=p[1] & y=p[2] & nextX=x+xV & nextY=y+yV
+    
+------------------------------------------------------------------------------------------------/
+
+
+/-----------------------------------------------------------------------------------------------
+  motionHelper(S) :=
+    buildState(ballMove(S[1]),S[2],S[3],S[4],S[5],S[6],S[7],S[8])
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  sHelper(S) := S
+    
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  sClean(S) := (S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[8]+1)
+------------------------------------------------------------------------------------------------/
+
+
+
+/-----------------------------------------------------------------------------------------------
+  
+------------------------------------------------------------------------------------------------/
+
+
+
+
+/-----------------------------------------------------------------------------------------------  
+images(S):= 
+  staticImgs U ballImg(S[1]) U padImg(S[2]) U brImg(S[3]) U sImg(S[6]) if S[4]=0 & S[5]=0;
+  staticImgs U {text("YOU WIN, GUY",point(750,400),65,dBlue)} if S[4]=1;
+  staticImgs U {text("YOU DED DINGUS", point(715,400), 65, dRed)} otherwise
 ------------------------------------------------------------------------------------------------/

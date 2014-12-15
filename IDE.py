@@ -77,7 +77,7 @@ def play(F):
     # compile LED program
     compile(F+'.led')
     DefinedFuns = Program.definedSymbols()
-    print('defined funs:', DefinedFuns)
+    #print('defined funs:', DefinedFuns)
     print() 
     try:
         # initialize the initial state in LED program memory

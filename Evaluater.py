@@ -32,6 +32,8 @@ from LEDProgram import Program
 from _functools import reduce
 from fractions import Fraction
 def val(E):
+    if E==None:
+        return
     # if E is an expression
     if isScalar(E) or isBuiltInType(E): return E
     if isinstance(E,str) and Program.defined(E,0) :  
@@ -158,6 +160,8 @@ def subAll(Vals,Vars,E):
     return a
 
 def sub(c,x,T):
+    if T==None:
+        return
     if isScalar(T): return T
     elif T==x     :  return c
     elif isinstance(T, str): return T
