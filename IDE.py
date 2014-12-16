@@ -137,7 +137,7 @@ def drawSreeen(screen,inputAST):
     # get the current state in the program
     currentStateAST = Program.body('GAMMA',0)[1]
     #print out the first element in the state
-    print(prettyString(val(currentStateAST.expression())[1][0]))
+    #print(prettyString(val(currentStateAST.expression())[1][0]))
     # update the state 
     transition = val(AST('transition',[inputAST,currentStateAST]).expression())
     if transition==None:

@@ -294,8 +294,13 @@ then
   nextCenter(p,xV,yV):=
     point(nextX,nextY) where x=p[1] & y=p[2] & nextX=x+xV & nextY=y+yV
  
-  nextBall(B):=
+If B=S[1] & bricks=S[3] & sPaddle=S[2]
+then
+  nextBall(S):=
 	  yFlip(xFlip(B)) if vWallCollide(B) & hWallCollide(B);
+    xFlip(B) if vWallCollide(B) or brickBool(B,bricks) = "h" or brickCollide(B,sPaddle)="h";
+    yFlip(B) if hWallCollide(B) or brickBool(B,bricks) ="v" or brickCollide(B,sPaddle)="v";
+    yFlip(xFlip(B)) if brickBool(B,bricks) = "b" or brickCollide(B,sPaddle)="b";
     B otherwise
 	
   yFlip(B) := ball(B[1], B[2], B[3], -1*B[4])
@@ -303,12 +308,68 @@ then
 
   vWallCollide(B) iff 		
     (box[1][1] <= 400) or (box[2][1] >= 1000) or		
-		(nBox[1][1] < 400) or (nBox[2][1] > 1000) where box=ballBox(B) & nBox=ballBox(ballMove(B))
+		(nBox[1][1] < 400) or (nBox[2][1] > 1000) where box=ballBox(B) & nBox=ballBox(B)
   hWallCollide(B) iff
     		(box[3][2] <= 0) or (box[2][2] >= 800) or		
-		(nBox[3][2] < 0) or (nBox[2][2] > 800) where  box=ballBox(B) & nBox=ballBox(ballMove(B))
+		(nBox[3][2] < 0) or (nBox[2][2] > 800) where  box=ballBox(B) & nBox=ballBox(B)
 
 ------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+If collitions = bricksCollitions(B,bricks)
+then  
+  brickBool(B,bricks) :=
+    "b" if someBrick("b",collitions) or (someBrick("h",collitions) & someBrick("v",collitions));
+    "v" if noneBrick("b",collitions) & noneBrick("h",collitions) & someBrick("v",collitions);
+    "h" if noneBrick("b",collitions) & noneBrick("v",collitions) & someBrick("h",collitions);
+    "n" otherwise
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  bricksCollitions(B,bricks) :=
+    Union[brick in bricks]{brickCollide(B,brick)}
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  someBrick(c,collitions) iff
+    c in collitions
+  noneBrick(c,collitions) iff
+    ~someBrick(c,collitions)
+------------------------------------------------------------------------------------------------/
+
+
+
+/-----------------------------------------------------------------------------------------------
+  brickCollide(B,brick) :=
+    "b" if cornerCollision(ballMove(B), brick) or cornerCollision(B, brick);
+    "v" if (vCollision(ballMove(B), brick) or vCollision(B, brick));
+    "h" if (hCollision(ballMove(B), brick) or hCollision(B, brick));
+    "n" otherwise
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  vCollision(B,L) iff
+    ((bRight >= rLeft & bLeft < rLeft) or (bLeft <= rRight & bRight > rRight)) & between(rBot, rTop, {bBot..bTop}) where
+      box=ballBox(B) & bTop = box[1][2] & bBot=box[4][2] & bLeft = box[3][1] & bRight =box[2][1] & rTop = L[1][2] & rBot = L[4][2] & rLeft=L[3][1] & rRight=L[2][1]
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  hCollision(B,L) iff
+    ((bRight >= rLeft & bLeft < rLeft) or (bLeft <= rRight & bRight > rRight)) & between(rBot, rTop, {bBot..bTop}) where
+      box=ballBox(B) & bTop = box[1][2] & bBot=box[4][2] & bLeft = box[3][1] & bRight =box[2][1] & rTop = L[1][2] & rBot = L[4][2] & rLeft=L[3][1] & rRight=L[2][1]
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  cornerCollision(B,L) :=
+    vCollision(B,L) & hCollision(B,L)
+------------------------------------------------------------------------------------------------/
+
+
+/-----------------------------------------------------------------------------------------------
+  between(bot,top,vals) iff
+    some x in vals. (x<=top & x>=bot)
+------------------------------------------------------------------------------------------------/
+
+
+
 
 /-----------------------------------------------------------------------------------------------
   ballBox(B):= (point(B[1][1]-B[2],B[1][2]+B[2]),point(B[1][1]+B[2],B[1][2]+B[2]), point(B[1][1]-B[2],B[1][2]-B[2]), point(B[1][1]+B[2],B[1][2]-B[2]))
@@ -318,7 +379,7 @@ then
 
 /-----------------------------------------------------------------------------------------------
   motionHelper(S) :=
-    buildState(ballMove(nextBall(S[1])),S[2],S[3],S[4],S[5],S[6],S[7],S[8])
+    buildState(ballMove(nextBall(S)),S[2],S[3],S[4],S[5],S[6],S[7],S[8])
 ------------------------------------------------------------------------------------------------/
 
 /-----------------------------------------------------------------------------------------------
