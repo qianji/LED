@@ -1,5 +1,16 @@
 
 /-----------------------------------------------------------------------------------------------
 f(p):= nextCenter where x=p[1] & y=p[2] & nextCenter = (x+2,y+2) 
+
+g(p) iff x=1 or y=1 where x=p[1] & y=p[2]
+
+  nextBall(B):=
+	  yFlip(xFlip(B)) if vWallCollide(B) & hWallCollide(B);
+    2 otherwise
+  yFlip(B):=B
+  xFlip(B):=B
+
+vWallCollide(B) iff 1=1
+hWallCollide(B) iff 1=1
 ------------------------------------------------------------------------------------------------/
 

@@ -102,7 +102,7 @@ def play(F):
         # This limits the while loop to a max of 10 times per second.
         # Leave this out and we will use all CPU we can.
         # 60 frame per second
-        clock.tick(60)
+        #clock.tick(60)
         clickAST = AST('`nil')
         keyboardAST = AST('set',[])
         keys=[]
@@ -124,6 +124,8 @@ def play(F):
             keyboardAST = AST('set',[AST('string',keys)])
         inputAST = AST('tuple',[clickAST,keyboardAST])
         drawSreeen(screen,inputAST)
+        #if ~drawSreeen(screen,inputAST):
+        #    return
         # Go ahead and update the screen with what we've drawn.
         # This MUST happen after all the other drawing commands.
         pygame.display.flip()
@@ -134,13 +136,13 @@ def play(F):
 def drawSreeen(screen,inputAST):
     # get the current state in the program
     currentStateAST = Program.body('GAMMA',0)[1]
-
-    #print(inputAST)
+    #print out the first element in the state
+    print(prettyString(val(currentStateAST.expression())[1][0]))
     # update the state 
     transition = val(AST('transition',[inputAST,currentStateAST]).expression())
     if transition==None:
         print('transition is not defined in your LED program')
-        return
+        return False
     gammaDef = Definition('GAMMA',[],AST(transition))
     Program.update(gammaDef)
 
@@ -151,8 +153,9 @@ def drawSreeen(screen,inputAST):
     images = val(AST('images',[currentStateAST]).expression())
     if images ==None:
         print("Failed evaluating images")
-        return
+        return False
     else:
         drawImages(screen,images[1])
+    return True
 
 run()
