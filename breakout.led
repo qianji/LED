@@ -347,7 +347,7 @@ then
 
 /-----------------------------------------------------------------------------------------------
   vCollision(B,L) iff
-    ((bRight >= rLeft & bLeft < rLeft) or (bLeft <= rRight & bRight > rRight)) & between(rBot, rTop, {bBot..bTop}) where
+    ((bTop >= rBot & bBot < rBot) or (bBot <= rTop & bTop > rTop)) & between(rLeft, rRight, {bLeft..bRight}) where
       box=ballBox(B) & bTop = box[1][2] & bBot=box[4][2] & bLeft = box[3][1] & bRight =box[2][1] & rTop = L[1][2] & rBot = L[4][2] & rLeft=L[3][1] & rRight=L[2][1]
 ------------------------------------------------------------------------------------------------/
 
