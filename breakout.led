@@ -201,7 +201,7 @@ brick15t := brick(brick15tTL, brick15tTR, brick15tBL, brick15tBR)
 
 /-----------------------------------------------------------------------------------------------
   originPoint := point(-1000,-800)
-ballStart := ball(point(700, 200), 7, 14, 12)
+ballStart := ball(point(700, 200), 7, 20, 16)
 ballDead := ball(point(700, 200), 7, 0, 0)
 paddleStart := paddle(pTL, pTR, pBL, pBR)
 brickStart := {brick1, brick2, brick3, brick4, brick5, brick6, brick7, brick8, brick9, brick10, brick11, brick12, brick13, brick14, brick15, brick5t, brick15t, brick10t}
@@ -298,9 +298,9 @@ If B=S[1] & bricks=S[3] & sPaddle=S[2]
 then
   nextBall(S):=
 	  yFlip(xFlip(B)) if vWallCollide(B) & hWallCollide(B);
-    xFlip(B) if vWallCollide(B) or brickBool(B,bricks) = "h" or brickCollide(B,sPaddle)="h";
-    yFlip(B) if hWallCollide(B) or brickBool(B,bricks) ="v" or brickCollide(B,sPaddle)="v";
-    yFlip(xFlip(B)) if brickBool(B,bricks) = "b" or brickCollide(B,sPaddle)="b";
+    xFlip(B) if vWallCollide(B) or brickCollide(B,sPaddle)="h";
+    yFlip(B) if hWallCollide(B) or brickCollide(B,sPaddle)="v";
+    yFlip(xFlip(B)) if brickCollide(B,sPaddle)="b";
     B otherwise
 	
   yFlip(B) := ball(B[1], B[2], B[3], -1*B[4])
