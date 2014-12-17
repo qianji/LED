@@ -270,13 +270,18 @@ def valChoose(X):
 def valIntRange(X):
     s = []
     l,u = X
-    if not (isinstance(l,int) and isinstance(u,int)):
+    if not (isIntegerValue(l) and isIntegerValue(u))  :
         print('Operation .. not valid on arguments:',prettyArgs(Args))            
         return
-    for i in range(l,u+1):
+    for i in range(int(l),int(u+1)):
         s.append(i)
     return ('set',s)
-        
+
+def isIntegerValue(n):
+    """
+    helper functoin to check whether an LED object is an integer to prevent it to be a fraction whose dominator is 1
+    """
+    return isinstance(n,int) or isinstance(n,Fraction) and n.denominator==1
 # Boolean connectives
 def valAnd(X):
     p = val(X[0])
