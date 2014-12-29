@@ -1,16 +1,80 @@
 
 /-----------------------------------------------------------------------------------------------
-f(p):= nextCenter where x=p[1] & y=p[2] & nextCenter = (x+2,y+2) 
+S:=(((700,200),7,20,16),((655,100),(745,100),(655,95),(745,95)),{((401,800),(499,800),(400,750),(499,750)),((501,800),(599,800),(501,750),(599,750)),((601,800),(699,800),(601,750),(699,750)),((701,800),(799,800),(701,750),(799,750)),((801,800),(899,800),(801,750),(899,750)),((401,750),(499,750),(400,700),(499,700)),((501,750),(599,750),(501,700),(599,700)),((601,750),(699,750),(601,700),(699,700)),((701,750),(799,750),(701,700),(799,700)),((801,750),(899,750),(801,700),(899,700)),((401,700),(499,700),(400,650),(499,650)),((501,700),(599,700),(501,650),(599,650)),((601,700),(699,700),(601,650),(699,650)),((701,700),(799,700),(701,650),(799,650)),((801,700),(899,700),(801,650),(899,650)),((901,800),(999,800),(901,750),(999,750)),((901,700),(999,700),(901,650),(999,650)),((901,750),(999,750),(901,700),(999,700))},0,0,{},{},0)
 
-g(p) iff x=1 or y=1 where x=p[1] & y=p[2]
+B:=S[1]
 
-  nextBall(B):=
-	  yFlip(xFlip(B)) if vWallCollide(B) & hWallCollide(B);
-    2 otherwise
-  yFlip(B):=B
-  xFlip(B):=B
+bricks:=S[3]
 
-vWallCollide(B) iff 1=1
-hWallCollide(B) iff 1=1
+  bricksCollitions(B,bricks) :=
+    Union[brick in bricks]{brickCollide(B,brick)}
+
+  bc(B,bricks):=bc1(B,bricks) U bc2(B,bricks) U bc3(B,bricks) U bc4(B,bricks) U bc5(B,bricks)
+  bc1(B,bricks):=bc10(B,bricks) U bc11(B,bricks)
+  bc10(B,bricks) :=
+    {brickCollide(B,bricks[1])} U {brickCollide(B,bricks[2])}
+  bc11(B,bricks):=
+  {brickCollide(B,bricks[3])} U{brickCollide(B,bricks[4])}
+  bc2(B,bricks):=
+    {brickCollide(B,bricks[5])} U {brickCollide(B,bricks[9])} U {brickCollide(B,bricks[13])} U {brickCollide(B,bricks[17])} 
+  bc3(B,bricks):=
+    {brickCollide(B,bricks[6])} U {brickCollide(B,bricks[10])} U{brickCollide(B,bricks[14])}  U {brickCollide(B,bricks[18])} 
+  bc4(B,bricks):=
+    {brickCollide(B,bricks[7])}  U{brickCollide(B,bricks[11])} U{brickCollide(B,bricks[15])}  U {brickCollide(B,bricks[8])}
+  bc5(B,bricks):=
+{brickCollide(B,bricks[12])} U {brickCollide(B,bricks[16])} 
+
+  b:=b1 U b2 U b3 U b4 U b5
+  b1:={1} U {2} U {3} U {4}
+  b2:={1} U {2} U {3} U {4}
+  b3:={1} U {2} U {3} U {4}
+  b4:={1} U {2} U {3} U {4}
+  b5:={1} U {2} U {3} U {4}
+  ub := Union[i in b]{i}
 ------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  brickCollide(B,brick) :=
+    "b" if cornerCollision(ballMove(B), brick) or cornerCollision(B, brick);
+    "v" if vCollision(ballMove(B), brick) or vCollision(B, brick);
+    "h" if hCollision(ballMove(B), brick) or hCollision(B, brick);
+    "n" otherwise
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  vCollision(B,L) iff 1=2
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  hCollision(B,L) iff 1=2
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  cornerCollision(B,L) :=
+    vCollision(B,L) & hCollision(B,L)
+------------------------------------------------------------------------------------------------/
+
+
+/-----------------------------------------------------------------------------------------------
+  between(bot,top,vals) iff
+    some x in vals. (x<=top & x>=bot)
+------------------------------------------------------------------------------------------------/
+
+/--
+  ballMove(B) :=
+    ball(nextCenter(B[1],B[3],B[4]),B[2],B[3],B[4]) 
+
+  nextCenter(p,xV,yV):=
+    point(nextX,nextY) where x=p[1] & y=p[2] & nextX=x+xV & nextY=y+yV
+
+  point(x,y) :=
+    (x,y)
+
+  ball(c,r,x,y) :=
+    (c,r,x,y)
+  ballBox(B):= (point(B[1][1]-B[2],B[1][2]+B[2]),point(B[1][1]+B[2],B[1][2]+B[2]), point(B[1][1]-B[2],B[1][2]-B[2]), point(B[1][1]+B[2],B[1][2]-B[2]))
+
+
+--/
+
 
