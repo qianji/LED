@@ -11,7 +11,6 @@ from LEDProgram import *
 from Evaluater import val
 from Parser import *
 from Compiler import *
-from EaselLED import *
 
 def evaluateLEDExpression():
     e = sys.argv[1]
