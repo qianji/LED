@@ -377,6 +377,8 @@ def valBigProd(Args):
     t= Args[1]
     p= Args[0]
     l = [val(dot(t,b)) for b in solutionSet(p)]
+    if len(l)==0:
+        return 1
     return reduce(mul, l)
 
 def valBigNrsec(Args):
