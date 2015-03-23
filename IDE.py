@@ -38,7 +38,20 @@ def run(F=''):
         else:
             expression,eFlag = tokens(e)
             if eFlag:
-                if len(expression)==3 and expression[0]=='quit' and expression[1]=='(' and expression[-1]==')': return
+                # building in commands
+                if len(expression)==3:
+                    if expression[0]=='quit' and expression[1]=='(' and expression[-1]==')': return
+                    # turn on the type checking
+                    if expression[0]=='TCon' and expression[1]=='(' and expression[-1]==')':
+                        #TypeChecking = True
+                        TypeChecking.on()
+                        print("Type checking is turned on. The intepreter might run slow")
+                        continue
+                    # turn off the type checking
+                    if expression[0]=='TCoff' and expression[1]=='(' and expression[-1]==')':
+                        TypeChecking.off()
+                        print("Type checking is turned off")                        
+                        continue
                 if len(expression)>3:
                     if expression[0]=='run' and expression[1]=='(' and expression[-1]==')':
                         return run(expression[2])

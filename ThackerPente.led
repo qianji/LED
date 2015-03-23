@@ -1,0 +1,175 @@
+/---------------------------------------------------------------------------
+player:= {1, 2}
+cell:= {1..19}*{1..19}
+move:= player*cell
+Layout:= fSet(move)
+State:= Layout*player*Nat*Nat*(player*(Int*Int))
+result:= {1,2,3}
+centerCell:= (10,10)
+
+B:= 1
+W:= 2
+bwon:= 1
+wwon:= 2
+tie:= 3
+---------------------------------------------------------------------------/
+
+A direction is a pair of integers in the set dirs. In the order given, they correspond to the following "compass directions," such that the "Northwest" corner of the board is the cell (1,1):
+(0,1):   South
+(1,1):   Southeast
+(1,0):   East
+(1,-1):  Northeast
+(0,-1):  North
+(-1,-1): Northwest
+(-1,0):  West
+(-1,1):  Southwest
+
+/------------
+dirs:= {(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1, 0), (-1,1)}
+--------------/
+
+other(p) is the player that is not player p.
+
+/------------------------------
+other: player -> player
+other(p):= B    if p=W;
+           W    if p=B
+-------------------------------/
+
+layout(S) is the layout of the game in state S.
+
+/-----
+layout: State -> Layout
+layout(S):= S[1]
+-----/
+
+If the game is not over in state S, whoseTurn(S) is the player whose turn it is in state S.
+
+/-----
+whoseTurn: State -> player
+whoseTurn(S):= S[2]
+------/
+
+lastMove(S) is the last move made in a game that is in state S, or (whoseTurn(S),(0,0)) if no moves have yet been made.
+/-----
+lastMove: State -> player*(Int*Int)
+lastMove(S):= S[5]
+------/
+
+cellEmpty(c,S) means that cell c is unoccupied in state S.
+
+/-----
+cellEmpty: cell*State -> Bool
+cellEmpty(c,S):= ~((B,c) in layout(S) or (W,c) in layout(S))
+------/
+
+initState(p) is the initial state of a game where player p goes first.
+
+/---------------------------------------------------------------------------
+initState: player -> State
+initState(p):= ({},p,0,0,(p,(0,0)))
+---------------------------------------------------------------------------/
+
+If u is a cell and v is a pair of integers, then vecAdd(u,v) is the pair equal to (u[1]+v[1], u[2]+v[2]).
+
+/---------------------------------------------------------------------------
+vecAdd: cell*(Int*Int) -> Int*Int
+vecAdd(u,v):= (u[1]+v[1], u[2]+v[2])
+---------------------------------------------------------------------------/
+
+If n is an integer and v is a pair of integers, then vecMult(n,v) is the pair equal to (n*v[1],n*v[2]).
+
+/---------------------------------------------------------------------------
+vecMult: Int*(Int*Int) -> Int*Int
+vecMult(n,v):= (n*v[1],n*v[2])
+---------------------------------------------------------------------------/
+
+If m is a move, p is a player, and S is a state, captureSet(m,p,S) is the set of stones that, if they are in the layout of S, will be captured by executing move m in state S.
+
+/---------------------------------------------------------------------------
+captureSet: move*player*State->Layout
+captureSet(m,p,S):= captureHelp(m,dirSet(m,S))  if p=other(m[1]);
+		    {} otherwise
+---------------------------------------------------------------------------/
+
+If dSet is a set of directions, captureHelp(m,dSet) is the set of moves representing the stones in the directions of dSet that m could capture, provided the moves are in the layout of the current state.
+
+/----------------------------
+captureHelp: move*fSet(Int*Int) -> Layout
+captureHelp(m,dSet):= { (other(m[1]),vecAdd(m[2],d)) | d in dSet} U {(other(m[1]),vecAdd(m[2],vecMult(2,d))) | d in dSet}
+-----------------------------/
+
+dirSet(m,S) is the set of directions in which move m makes captures in state S.
+
+/---------------------------
+dirSet: move*State -> fSet(Int*Int)
+dirSet(m,S):= {d | d in dirs & capture(m,d,S)}
+----------------------------/
+
+If d is a pair of integers, capture(m,d,S) means that move m made a capture in the direction of cell vecAdd(m[2],d) in state S.
+
+/---------------------------------------------------------------------------
+capture: move*(Int*Int)*State -> Bool
+capture(m,d,S) iff (other(m[1]),vecAdd(m[2],d)) in layout(S) & (other(m[1]),vecAdd(m[2],vecMult(2,d))) in layout(S) & (m[1],vecAdd(m[2],vecMult(3,d))) in layout(S)
+---------------------------------------------------------------------------/
+
+fiveRow(m,p,L) means that move m gives player p at least five stones in a row in a state with layout L.
+/---------------------------------------------------------------------------
+fiveRow: move*player*Layout->Bool
+fiveRow(m,p,L) iff p=m[1] & some i in {-2..0}.some d in dirs.all j in {i..i+4}\{0}.fRowHelp(m,d,j,L)
+---------------------------------------------------------------------------/
+
+If i is an integer, fRowHelp(m,d,i,L) means that player m[1] has a stone i stones away from move m in direction d in a state with layout L. A negative value of i means that the stone is |i| stones away in the opposite direction from d.
+
+/--------------------------------------------------------------------------
+fRowHelp: move*dirs*Int*Layout -> Bool
+fRowHelp(m,d,i,L) iff (m[1],vecAdd(m[2],vecMult(i,d))) in L
+--------------------------------------------------------------------------/
+
+fullBoard(S) means that the board is full in state S.
+
+/---------------------------------------------------------------------------
+fullBoard: State -> Bool
+fullBoard(S) iff |layout(S)| = 361
+---------------------------------------------------------------------------/
+
+If m is a legal move, newState(m,S) is the state resulting from executing move m in state S.
+
+/---------------------------------------------------------------------------
+newState: move*State -> State
+newState(m,S):= ((layout(S) U {m}), other(whoseTurn(S)), S[3], S[4], m)    if fiveRow(m,whoseTurn(S),layout(S));
+                ((layout(S)\captureSet(m,other(whoseTurn(S)),S) U {m}), other(whoseTurn(S)), S[3] + floor(|captureSet(m,W,S)|/2), S[4] + floor(|captureSet(m,B,S)|/2), m)   otherwise
+---------------------------------------------------------------------------/
+
+legalMove(m,S) means that move m is legal in state S.
+
+/---------------------------------------------------------------------------
+legalMove: move*State -> Bool
+legalMove(m,S) iff ~gameOver(S)
+& ((m = (whoseTurn(S),(10,10)) & |layout(S)|=0)
+or |layout(S)| = 2 & tournament(m,S)
+or (m[1] = whoseTurn(S) & cellEmpty(m[2], S) & ~(|layout(S)|=0 or |layout(S)|=2)))
+---------------------------------------------------------------------------/
+
+If S is a state in which the first player is to make his second move of the game, then tournament(m,S) means that move m satisfies the tournament rule in state S.
+
+/---------------------------------------------------------------------------
+tournament: move*State -> Bool
+tournament(m,S) iff (m[2][1] < 8 or m[2][1] > 12) or (m[2][2] < 8 or m[2][2] > 12)  & m[1] = whoseTurn(S) & cellEmpty(m[2], S)
+---------------------------------------------------------------------------/
+
+gameOver(S) means that the game is over in state S.
+
+/--------------------------------------------------------------------------
+gameOver: State -> Bool
+gameOver(S) iff ~lastMove(S)[2]=(0,0) & (fullBoard(S) or S[3]>4 or S[4]>4 or fiveRow(lastMove(S),W,layout(S)) or fiveRow (lastMove(S),B,layout(S)))
+--------------------------------------------------------------------------/
+
+If S is a state and gameOver(S) is true, then outcome(S) is the result of a game ending in state S (either bwon, wwon, or tie).
+
+/--------------------------------------------------------------------------
+outcome: State -> Nat
+outcome(S):= bwon      if fiveRow(lastMove(S),B,layout(S)) or S[3]>4;
+             wwon      if fiveRow(lastMove(S),W,layout(S)) or S[4]>4;
+             tie       otherwise
+--------------------------------------------------------------------------/

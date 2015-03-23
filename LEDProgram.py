@@ -54,4 +54,14 @@ class Definition:
 # For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represented by the following dictionary: 
 # {('f',1):(['x'],('^',['x',2])) , 
 # ('g',2):(['x','y'],('+',['y',('*',[2,'x'])])) } 
+
+class TypeCheck:
+    def __init__(self):
+        self.flag = False
+    def on(self):
+        self.flag = True
+    def off(self):
+        self.flag = False
+
 Program=LEDProgram()
+TypeChecking = TypeCheck()

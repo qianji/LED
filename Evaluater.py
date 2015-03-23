@@ -29,6 +29,7 @@ All the functions that are called within val should return the same format of th
 """
 from Expression import *
 from LEDProgram import Program
+from LEDProgram import TypeChecking
 from _functools import reduce
 from fractions import Fraction
 def val(E):
@@ -122,7 +123,7 @@ def valDefined(Op,Args):
         if len(Args)==1:
             Args = Args[0]
 
-    if signature!=None:
+    if signature!=None and TypeChecking.flag:
         if not valMember([Args,val(signature[0].expression())]):
             print('The input of the function:',Args,'does not comply with type',signature[0],'in the function signature')
             return
