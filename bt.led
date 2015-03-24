@@ -1,0 +1,414 @@
+Breakout
+By Qianji Zheng and J. Nelson Rushton, Texas Tech University 
+12/15/2014
+
+This is an LED program that defines a simple breakout game to 
+run in the Easel environment.
+
+/-----------------------------------------------------------------------------------------------
+  point(x,y) :=
+    (x,y)
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  color(r,g,b) :=
+    (r,g,b)
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  click(cl,p) :=
+    (cl,p)
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  input(cl,k) :=
+    (cl,k)
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  text(s,p,n,c) :=
+    (`txt,s,p,n,c)
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  brick(tl,tr,bl,br) :=
+    (tl,tr,bl,br)
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  ball(c,r,x,y) :=
+    (c,r,x,y)
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  paddle(tl,tr,bl,br) :=
+    (tl,tr,bl,br)
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  segment(p,r,c) :=
+    (`seg,p,r,c)
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  buildState(ba,p,br,c,d,u,e,t) :=
+    (ba,p,br,c,d,u,e,t)
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  fTri(p,q,r,c) :=
+    (`fTri,p,q,r,c)
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  disc(p,r,c) :=
+    (`disc,p,r,c)
+------------------------------------------------------------------------------------------------/
+
+
+
+
+/-----------------------------------------------------------------------------------------------
+  dBlack := color(0, 0, 0)
+  dRed := color(255, 0, 0)
+  dOrange := color(255, 128, 0)
+  dYellow := color(255, 255, 0)
+  dGreen := color(0, 255, 0)
+  dBlue := color(0, 0, 255)
+  dIndigo := color(70, 0, 130)
+  dViolet := color(148, 0, 211)
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  boardTL := point(400, 800)
+boardTR := point(1000, 800)
+boardBL := point(400, 0)
+boardBR := point(1000, 0)
+reset := text("RESET GAME", point(100,750), 25, dGreen)
+
+pTL := point(655, 100)
+pTR := point(745, 100)
+pBL := point(655, 95)
+pBR := point(745, 95)
+
+resetTL := point(0, 800)
+resetTR := point(200, 800)
+resetBL := point(0, 700)
+resetBR := point(200, 700)
+
+brick1TL := point(401, 800)
+brick1TR := point(499, 800)
+brick1BL := point(400, 750)
+brick1BR := point(499, 750)
+brick1 := brick(brick1TL, brick1TR, brick1BL, brick1BR)
+
+brick2TL := point(501, 800)
+brick2TR := point(599, 800)
+brick2BL := point(501, 750)
+brick2BR := point(599, 750)
+brick2 := brick(brick2TL, brick2TR, brick2BL, brick2BR)
+
+brick3TL := point(601, 800)
+brick3TR := point(699, 800)
+brick3BL := point(601, 750)
+brick3BR := point(699, 750)
+brick3 := brick(brick3TL, brick3TR, brick3BL, brick3BR)
+
+brick4TL := point(701, 800)
+brick4TR := point(799, 800)
+brick4BL := point(701, 750)
+brick4BR := point(799, 750)
+brick4 := brick(brick4TL, brick4TR, brick4BL, brick4BR)
+
+brick5TL := point(801, 800)
+brick5TR := point(899, 800)
+brick5BL := point(801, 750)
+brick5BR := point(899, 750)
+brick5 := brick(brick5TL, brick5TR, brick5BL, brick5BR)
+
+brick5tTL := point(901, 800)
+brick5tTR := point(999, 800)
+brick5tBL := point(901, 750)
+brick5tBR := point(999, 750)
+brick5t := brick(brick5tTL, brick5tTR, brick5tBL, brick5tBR)
+
+brick6TL := point(401, 750)
+brick6TR := point(499, 750)
+brick6BL := point(400, 700)
+brick6BR := point(499, 700)
+brick6 := brick(brick6TL, brick6TR, brick6BL, brick6BR)
+
+brick7TL := point(501, 750)
+brick7TR := point(599, 750)
+brick7BL := point(501, 700)
+brick7BR := point(599, 700)
+brick7 := brick(brick7TL, brick7TR, brick7BL, brick7BR)
+
+brick8TL := point(601, 750)
+brick8TR := point(699, 750)
+brick8BL := point(601, 700)
+brick8BR := point(699, 700)
+brick8 := brick(brick8TL, brick8TR, brick8BL, brick8BR)
+
+brick9TL := point(701, 750)
+brick9TR := point(799, 750)
+brick9BL := point(701, 700)
+brick9BR := point(799, 700)
+brick9 := brick(brick9TL, brick9TR, brick9BL, brick9BR)
+
+brick10TL := point(801, 750)
+brick10TR := point(899, 750)
+brick10BL := point(801, 700)
+brick10BR := point(899, 700)
+brick10 := brick(brick10TL, brick10TR, brick10BL, brick10BR)
+
+brick10tTL := point(901, 750)
+brick10tTR := point(999, 750)
+brick10tBL := point(901, 700)
+brick10tBR := point(999, 700)
+brick10t := brick(brick10tTL, brick10tTR, brick10tBL, brick10tBR)
+
+brick11TL := point(401, 700)
+brick11TR := point(499, 700)
+brick11BL := point(400, 650)
+brick11BR := point(499, 650)
+brick11 := brick(brick11TL, brick11TR, brick11BL, brick11BR)
+
+brick12TL := point(501, 700)
+brick12TR := point(599, 700)
+brick12BL := point(501, 650)
+brick12BR := point(599, 650)
+brick12 := brick(brick12TL, brick12TR, brick12BL, brick12BR)
+
+brick13TL := point(601, 700)
+brick13TR := point(699, 700)
+brick13BL := point(601, 650)
+brick13BR := point(699, 650)
+brick13 := brick(brick13TL, brick13TR, brick13BL, brick13BR)
+
+brick14TL := point(701, 700)
+brick14TR := point(799, 700)
+brick14BL := point(701, 650)
+brick14BR := point(799, 650)
+brick14 := brick(brick14TL, brick14TR, brick14BL, brick14BR)
+
+brick15TL := point(801, 700)
+brick15TR := point(899, 700)
+brick15BL := point(801, 650)
+brick15BR := point(899, 650)
+brick15 := brick(brick15TL, brick15TR, brick15BL, brick15BR)
+
+brick15tTL := point(901, 700)
+brick15tTR := point(999, 700)
+brick15tBL := point(901, 650)
+brick15tBR := point(999, 650)
+brick15t := brick(brick15tTL, brick15tTR, brick15tBL, brick15tBR)
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  originPoint := point(-1000,-800)
+ballStart := ball(point(700, 200), 7, 20, 16)
+ballDead := ball(point(700, 200), 7, 0, 0)
+paddleStart := paddle(pTL, pTR, pBL, pBR)
+brickStart := {brick1, brick2, brick3, brick4, brick5, brick6, brick7, brick8, brick9, brick10, brick11, brick12, brick13, brick14, brick15, brick5t, brick15t, brick10t}
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  topBorder := segment(boardTL, boardTR, dBlack)
+leftBorder := segment(boardTL, boardBL, dBlack)
+rightBorder := segment(boardTR, boardBR, dBlack)
+botBorder := segment(boardBL, boardBR, dBlack)
+
+rtBorder := segment(resetTL, resetTR, dGreen)
+rlBorder := segment(resetTL, resetBL, dGreen)
+rrBorder := segment(resetTR, resetBR, dGreen)
+rbBorder := segment(resetBL, resetBR, dGreen)
+------------------------------------------------------------------------------------------------/
+  initialState := buildState(ballStart, paddleStart, brickStart, false, 1>2, <>, <>, 0)
+initialState := {}
+/-----------------------------------------------------------------------------------------------
+  staticImgs := {reset, topBorder, leftBorder, rightBorder, botBorder, rtBorder, rlBorder, rrBorder, rbBorder}
+------------------------------------------------------------------------------------------------/
+
+==================================================================================================================================================
+S is a struct in SequenceL (sBall: ba, sPaddle: p, bricks: br, clear: c, dead: d, dust: u, expl: e, time: t);
+==================================================================================================================================================
+
+/-----------------------------------------------------------------------------------------------
+  brImg(B):=Union[br in B] boxImg(br,dOrange)
+  boxImg(L,c):= 
+    {segment(TL,TR,dBlack),segment(TL, BL, dBlack), segment(BL, BR, dBlack), segment(TR, BR, dBlack),fTri(TL, BR, BL, c), fTri(TL, TR, BR, c)}
+    where TL=L[1] & TR=L[2] & BL=L[3] & BR=L[4]
+  ballImg(b):={disc(p,r,c)} where p=b[1] & r=b[2] & c= dViolet
+  padImg(pad):=boxImg(pad,dBlue)
+  sImg(dust):= {} if |dust|=0;
+    disc(dust[3],dust[4],dRed) otherwise
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------  
+initialState := buildState(ballStart, paddleStart, brickStart,0,0,{},{},0)
+------------------------------------------------------------------------------------------------/
+
+
+ where (sBall,sPaddle,bricks,clear,dead,dust,expl,time) = S
+/-----------------------------------------------------------------------------------------------   
+If keys=I[2] & ballMoveState = sClean(sHelper(motionHelper(S))) 
+then
+  transition(I,S):= 
+    paddleHelper(ballMoveState, 1) if equalList(keys, "d") ;
+    paddleHelper(ballMoveState, 0) if equalList(keys, "a");
+    ballMoveState otherwise
+
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  equalList(keys,char) iff
+    |keys|>0 & keys[1]=char
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  paddleHelper(S,flag) :=
+    buildState(S[1],nextPaddle,S[3],S[4],S[5],S[6],S[7],S[8]) where nextPaddle = paddleMove(S[2],flag)
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  paddleMove(pad,flag) :=
+    paddle(TL,TR,BL,BR) where TL=nextPaddle(pad[1],flag)  & TR=nextPaddle(pad[2],flag) & 
+                        BL = nextPaddle(pad[3],flag) & BR = nextPaddle(pad[4],flag)
+  
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  nextPaddle(p,flag):=
+    point(nextX,p[2]) where nextX = nextPX(p,flag)
+
+If val=20
+then
+  nextPX(p,flag):=
+    p[1]+val if flag & ~outOfBoundsR(p);
+    p[1]-val if ~flag & ~ outOfBoundsL(p);
+    p[1] otherwise
+
+  outOfBoundsL: (Int*Int) -> Bool
+  outOfBoundsL(p) iff p[1]<=400
+
+  outOfBoundsR: (Int*Int) -> Bool
+  outOfBoundsR(p) iff p[2]>=1000
+------------------------------------------------------------------------------------------------/
+
+
+/-----------------------------------------------------------------------------------------------
+  ballMove(B) :=
+    ball(nextCenter(B[1],B[3],B[4]),B[2],B[3],B[4]) 
+
+  nextCenter(p,xV,yV):=
+    point(nextX,nextY) where x=p[1] & y=p[2] & nextX=x+xV & nextY=y+yV
+ 
+If B=S[1] & bricks=S[3] & sPaddle=S[2] & char = brickBool(B,bricks)
+then
+  nextBall(S):=
+	  yFlip(xFlip(B)) if vWallCollide(B) & hWallCollide(B);
+    xFlip(B) if vWallCollide(B) or brickCollide(B,sPaddle)="h" or char ="h";
+    yFlip(B) if hWallCollide(B) or brickCollide(B,sPaddle)="v" or char ="v";
+    yFlip(xFlip(B)) if brickCollide(B,sPaddle)="b" or char="b";
+    B otherwise
+	
+  yFlip(B) := ball(B[1], B[2], B[3], -1*B[4])
+  xFlip(B) := ball(B[1], B[2], -1*B[3], B[4])
+
+  vWallCollide(B) iff 		
+    (box[1][1] <= 400) or (box[2][1] >= 1000) or		
+		(nBox[1][1] < 400) or (nBox[2][1] > 1000) where box=ballBox(B) & nBox=ballBox(B)
+  hWallCollide(B) iff
+    		(box[3][2] <= 0) or (box[2][2] >= 800) or		
+		(nBox[3][2] < 0) or (nBox[2][2] > 800) where  box=ballBox(B) & nBox=ballBox(B)
+
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+If collitions = bricksCollitions(B,bricks)
+then  
+  brickBool(B,bricks) :=
+    "b" if someBrick("b",collitions) or (someBrick("h",collitions) & someBrick("v",collitions));
+    "v" if noneBrick("b",collitions) & noneBrick("h",collitions) & someBrick("v",collitions);
+    "h" if noneBrick("b",collitions) & noneBrick("v",collitions) & someBrick("h",collitions);
+    "n" otherwise
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  bricksCollitions(B,bricks) :=
+    Union[brick in bricks]{brickCollide(B,brick)}
+------------------------------------------------------------------------------------------------/
+/-----------------------------------------------------------------------------------------------
+  someBrick(c,collitions) iff
+    c in collitions
+  noneBrick(c,collitions) iff
+    ~someBrick(c,collitions)
+------------------------------------------------------------------------------------------------/
+
+
+
+/-----------------------------------------------------------------------------------------------
+  brickCollide(B,brick) :=
+    "b" if cornerCollision(ballMove(B), brick) or cornerCollision(B, brick);
+    "v" if (vCollision(ballMove(B), brick) or vCollision(B, brick));
+    "h" if (hCollision(ballMove(B), brick) or hCollision(B, brick));
+    "n" otherwise
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  vCollision(B,L) iff
+    ((box[1][2] >= L[4][2] & box[4][2] < L[4][2]) or (box[4][2] <= L[1][2] & box[1][2] > L[1][2])) & between(L[3][1], L[2][1], {box[3][1]..box[2][1]}) where
+      box=ballBox(B) ------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  hCollision(B,L) iff
+    ((box[2][1] >= L[3][1] & box[3][1] < L[3][1]) or (box[3][1] <= L[2][1] & box[2][1] > L[2][1])) & between(L[4][2], L[1][2], {box[4][2]..box[1][2]}) where
+      box=ballBox(B)
+------------------------------------------------------------------------------------------------/
+
+
+/-----------------------------------------------------------------------------------------------
+  cornerCollision(B,L) :=
+    vCollision(B,L) & hCollision(B,L)
+------------------------------------------------------------------------------------------------/
+
+
+/-----------------------------------------------------------------------------------------------
+  between(bot,top,vals) iff
+    some x in vals. (x<=top & x>=bot)
+------------------------------------------------------------------------------------------------/
+
+
+
+
+/-----------------------------------------------------------------------------------------------
+  ballBox(B):= (point(B[1][1]-B[2],B[1][2]+B[2]),point(B[1][1]+B[2],B[1][2]+B[2]), point(B[1][1]-B[2],B[1][2]-B[2]), point(B[1][1]+B[2],B[1][2]-B[2]))
+
+------------------------------------------------------------------------------------------------/
+
+
+/-----------------------------------------------------------------------------------------------
+  motionHelper(S) :=
+    buildState(ballMove(nextBall(S)),S[2],S[3],S[4],S[5],S[6],S[7],S[8])
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  sHelper(S) := S
+    
+------------------------------------------------------------------------------------------------/
+
+/-----------------------------------------------------------------------------------------------
+  sClean(S) := (S[1],S[2],S[3],S[4],S[5],S[6],S[7],S[8]+1)
+------------------------------------------------------------------------------------------------/
+
+
+
+/-----------------------------------------------------------------------------------------------
+  
+------------------------------------------------------------------------------------------------/
+
+
+
+
+/-----------------------------------------------------------------------------------------------  
+images(S):= 
+  staticImgs U ballImg(S[1]) U padImg(S[2]) U brImg(S[3]) U sImg(S[6]) if S[4]=0 & S[5]=0;
+  staticImgs U {text("YOU WIN, GUY",point(750,400),65,dBlue)} if S[4]=1;
+  staticImgs U {text("YOU DED DINGUS", point(715,400), 65, dRed)} otherwise
+------------------------------------------------------------------------------------------------/
+
+
+/------
+S:=initialState
+I:=(`nil,{})
+------/

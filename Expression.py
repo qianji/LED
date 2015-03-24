@@ -11,6 +11,7 @@ An *Expression* is one of the following
 import numbers, math
 from fractions import Fraction
 BuiltInTypes = ['Bool','Nat','Int','Rat','fSet','Seq','Lambda']
+import timeit
 class AST:
     # An AST or Abstract Expression is either a variable, a number, a quoted symbol, an atom 
     # or a non-empty list, whose first element is an operator and whose remaining elements are AST's.
@@ -64,7 +65,7 @@ class AST:
         else:
             F,args = self.op(),self.args()
             # convert each of the AST in args to an expression
-            eArgs = [x.expression() for x in self.args()]
+            eArgs = tuple([x.expression() for x in self.args()])
             if isinstance(F,str): return (F,eArgs)
             else: return (F.expression(),eArgs)
     
@@ -92,14 +93,14 @@ def prettyString(E):
 
 def prettyLEDString(elts):
     Str =''
-    if not elts==[]:
+    if not len(elts)==0:
         for e in elts:
             Str+=chr(e)
     return Str
 
 def prettyStack(elts):
     Str = ''
-    if not elts==[]:
+    if not len(elts)==0:
         Str += prettyString(elts[0])
         for e in elts[1:]:
             Str += ',' + prettyString(e)
@@ -109,7 +110,7 @@ def prettyStack(elts):
 # For example, if Args = [2,('tuple',[2,3]),3,('seq',[1,2])] then prettyArgs(Args) = '2, (2,3), 3, and [1,2]'
 def prettyArgs(elts):
     Str = ''
-    if not elts==[]:
+    if not len(elts)==0:
         Str += prettyString(elts[0])
         for e in elts[1:]:
             if e == elts[-1]:

@@ -98,6 +98,7 @@ If dSet is a set of directions, captureHelp(m,dSet) is the set of moves represen
 captureHelp: move*fSet(Int*Int) -> Layout
 captureHelp(m,dSet):= { (other(m[1]),vecAdd(m[2],d)) | d in dSet} U {(other(m[1]),vecAdd(m[2],vecMult(2,d))) | d in dSet}
 -----------------------------/
+{ (other(m[1]),vecAdd(m[2],d)) | d in dSet} U {(other(m[1]),vecAdd(m[2],vecMult(2,d))) | d in dSet}
 
 dirSet(m,S) is the set of directions in which move m makes captures in state S.
 
@@ -119,7 +120,7 @@ fiveRow: move*player*Layout->Bool
 fiveRow(m,p,L) iff p=m[1] & some i in {-2..0}.some d in dirs.all j in {i..i+4}\{0}.fRowHelp(m,d,j,L)
 ---------------------------------------------------------------------------/
 
-If i is an integer, fRowHelp(m,d,i,L) means that player m[1] has a stone i stones away from move m in direction d in a state with layout L. A negative value of i means that the stone is |i| stones away in the opposite direction from d.
+If i is an integer, fRowHelp(m,d,i,L) means that player m[1] has a stone i stones awacaptureHelpy from move m in direction d in a state with layout L. A negative value of i means that the stone is |i| stones away in the opposite direction from d.
 
 /--------------------------------------------------------------------------
 fRowHelp: move*dirs*Int*Layout -> Bool

@@ -32,7 +32,10 @@ from LEDProgram import Program
 from LEDProgram import TypeChecking
 from _functools import reduce
 from fractions import Fraction
+dictionary = dict()
 def val(E):
+    if E in dictionary:
+        return dictionary[E]
     if E==None:
         return
     # if E is an expression
@@ -41,6 +44,7 @@ def val(E):
         #return valDefined(E,[])
         value = valDefined(E,[])
         if not value==None:
+            dictionary[E]=value
             return value
         print('Error in evaluating call',str(E)+'()')
         return
@@ -49,10 +53,12 @@ def val(E):
         print("0-ary function",E,"is not defined") 
         return
     (Op,X) = E
+    X=tuple(X)
     if Op in {'and','<=>','=>','some','all','setComp','Union','Sum','Prod','Nrsec','lambda'}: Args=X
     else: 
         #print(E)
         Args = [val(E) for E in X]
+        Args = tuple(Args)
     # return None if one of the arguments is None
     if hasNone(Args): 
         #print('One of the arguments is not valid')
@@ -64,12 +70,14 @@ def val(E):
     # if Op=='comStar': return ('comStar',Args)
     # if Op=='lambda': return('lambda',Args)
     #if Op=='string': return prettyString((Op,Args))
-    if Op in ['seq','set','tuple','star','comStar','lambda','fSet','Seq','string']: return (Op,Args)
+    if Op in ['seq','set','tuple','star','comStar','lambda','fSet','Seq','string']: return (Op,tuple(Args))
     if Op in builtIns : 
         # check if Op is one of the Big Operations
         #if Op in ['setComp','Union','Sum','Prod','Nrsec']:
         try:
-            return valBuiltIn(Op,Args)
+            value = valBuiltIn(Op,Args)
+            dictionary[(Op,Args)]=value
+            return value
         except:
             print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
             return
@@ -77,6 +85,7 @@ def val(E):
     #return  valDefined(Op,Args)
         value = valDefined(Op,Args)
         if not value == None:
+            dictionary[(Op,Args)]=value
             return value
         print('Error in evaluating call',str(Op)+'('+prettyStack(Args)+')')       
         return
@@ -115,9 +124,9 @@ def valDefined(Op,Args):
         expr=subExpression(funBodyExpression,binding[0])
     # check to see if the expr belows to input of the function signature
     groundBody = subAll(Args,params,expr)
-    if isinstance(Args,list):
+    if isinstance(Args,tuple):
         if len(Args)>1:
-            Args = ('tuple',Args)
+            Args = ('tuple',tuple(Args))
         #if len(Args)==1 and len(Args[0])>1:
         #    Args = ('tuple',Args[0])
         if len(Args)==1:
@@ -146,6 +155,7 @@ def DefVal(fbody):
     # function body is a conditional
     for clause in fbody[1]:
         (op,Args) = clause
+        Args=tuple(Args)
         if op == 'if':
             [guard,term] = Args
             guardValue = val(guard)
@@ -167,7 +177,7 @@ def sub(c,x,T):
     elif T==x     :  return c
     elif isinstance(T, str): return T
     (Op,Args) = T
-    return ((sub(c,x,Op),[sub(c,x,A) for A in Args]))
+    return ((sub(c,x,Op),tuple([sub(c,x,A) for A in Args])))
 
 # Each built-in operator is evaluated by a separate function.
 # These functions assume argument X has been evaluated, except
@@ -232,16 +242,16 @@ def valSubeq(X):
     if isSet(X[0]) and isSet(X[1]) : return  all(  {valIn([e,X[1]]) for e in X[0][1]}  )
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valUnion(X): 
-    if isSet(X[0]) and isSet(X[1]) :return ('set', X[0][1] + [e for e in X[1][1] if not valIn([e,X[0]])])
+    if isSet(X[0]) and isSet(X[1]) :return ('set', tuple(X[0][1]) + tuple([e for e in X[1][1] if not valIn([e,X[0]])]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valNrsec(X):
-    if isSet(X[0]) and isSet(X[1]): return ('set',[e for e in X[0][1] if valIn([e,X[1]])])
+    if isSet(X[0]) and isSet(X[1]): return ('set',tuple([e for e in X[0][1] if valIn([e,X[1]])]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valSetSubtr(X):
-    if isSet(X[0]) and isSet(X[1]): return ('set',[e for e in X[0][1] if not valIn([e,X[1]])])
+    if isSet(X[0]) and isSet(X[1]): return ('set',tuple([e for e in X[0][1] if not valIn([e,X[1]])]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valCrossProd(X):
-    if isSet(X[0]) and isSet(X[1]): return ('set',[('tuple',[a,b]) for a in X[0][1] for b in X[1][1]])
+    if isSet(X[0]) and isSet(X[1]): return ('set',tuple([('tuple',[a,b]) for a in X[0][1] for b in X[1][1]]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 
 def valCardinal(X):
@@ -276,7 +286,7 @@ def valIntRange(X):
         return
     for i in range(int(l),int(u+1)):
         s.append(i)
-    return ('set',s)
+    return ('set',tuple(s))
 
 def isIntegerValue(n):
     """
@@ -354,13 +364,13 @@ def valLambda(Args):
 def valSetComp(Args):
     t= Args[0]
     p= Args[1]
-    return ('set',[val(dot(t,b)) for b in solutionSet(p)])
+    return ('set',tuple([val(dot(t,b)) for b in solutionSet(p)]))
 
 # The value of Union[p] T is ('set', [x for b in S(p) for x in val(dot(T,b))[1]]
 def valBigUnion(Args):
     t= Args[1]
     p= Args[0]
-    return ('set', [x for b in solutionSet(p) for x in val(dot(t,b))[1]])
+    return ('set', tuple([x for b in solutionSet(p) for x in val(dot(t,b))[1]]))
 #     slonSet = solutionSet(p)
 #     #print(slonSet)
 #     d = [[x for x in val(dot(t,b))[1]] for b in solutionSet(p)]
@@ -387,7 +397,7 @@ def valBigNrsec(Args):
     p= Args[0]
     slonSet = solutionSet(p)
     d = [[x for x in val(dot(t,b))[1]] for b in solutionSet(p)]
-    return ('set',list(set(d[0]).intersection(*d)))
+    return ('set',tuple(list(set(d[0]).intersection(*d))))
 
 
 def valMember(Args):

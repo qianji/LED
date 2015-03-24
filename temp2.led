@@ -1,0 +1,4 @@
+/-----
+dirSet:={d | d in {2..10} }
+captureHelp(dSet) := {d | d in dSet}
+------/

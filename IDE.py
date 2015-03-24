@@ -36,7 +36,12 @@ def run(F=''):
         if e=='':
             continue
         else:
+            s = timeit.default_timer()
+
+            start_time = timeit.default_timer()
             expression,eFlag = tokens(e)
+            elapsed = timeit.default_timer() - start_time
+            print("Tokenizing time",elapsed)
             if eFlag:
                 # building in commands
                 if len(expression)==3:
@@ -57,14 +62,26 @@ def run(F=''):
                         return run(expression[2])
                     if expression[0]=='play' and expression[1]=='(' and expression[-1]==')':
                         return play(expression[2])
+                start_time = timeit.default_timer()
                 tree, tFlag = parseExpression(expression)
+                elapsed = timeit.default_timer() - start_time
+                print("Parsing time",elapsed)
                 if tFlag:
                     try:
+                        start_time = timeit.default_timer()
                         value = val(tree.expression())
+                        elapsed = timeit.default_timer() - start_time
+                        print("Evaluating time",elapsed)
                         if not value ==None:
+                            start_time = timeit.default_timer()                            
                             if isinstance(value,Fraction):
                                 value = numeralValue(value)
                             print(prettyString(value))
+                            elapsed = timeit.default_timer() - start_time
+                            print("pretty printing time",elapsed)
+                            elapsed = timeit.default_timer() - s
+                            print("total time",elapsed)
+
                         print()
                     except:
                         print('Failed to evaluate the expression. It is not a valid expression')
@@ -115,7 +132,7 @@ def play(F):
         # This limits the while loop to a max of 10 times per second.
         # Leave this out and we will use all CPU we can.
         # 60 frame per second
-        #clock.tick(60)
+        #clock.tick(1000)
         clickAST = AST('`nil')
         keyboardAST = AST('set',[])
         keys=[]
@@ -152,12 +169,16 @@ def drawSreeen(screen,inputAST):
     #print out the first element in the state
     #print(prettyString(val(currentStateAST.expression())[1][0]))
     # update the state 
+    #start_time = timeit.default_timer()
+    
     transition = val(AST('transition',[inputAST,currentStateAST]).expression())
     if transition==None:
         print('transition is not defined in your LED program')
         return False
     gammaDef = Definition('GAMMA',[],AST(transition))
     Program.update(gammaDef)
+    #elapsed = timeit.default_timer() - start_time
+    #print("updating  time",elapsed)
 
     # undraw the screen
     screen.blit(screen, (0, 0))

@@ -68,7 +68,7 @@ def isPoint(I):
     # extact the tuple from the LED point
     if isinstance(I,tuple):
         tup,point = I
-        if isinstance(point,list) and len(point)==2:
+        if isinstance(point,tuple) and len(point)==2:
             # convert Fraction to int if point[0] or point[1] is a Fraction
             x=int(point[0])
             y=int(point[1])
@@ -78,14 +78,14 @@ def isPoint(I):
 def isColor(I):
     if isinstance(I,tuple):
         tup,color = I
-        if isinstance(color,list) and len(color)==3:
+        if isinstance(color,tuple) and len(color)==3:
             return all(c in range(0,256) for c in color)
     return False
 
 def isSegment(I):
     if isinstance(I,tuple):
         tup,segment = I
-        if isinstance(segment,list) and len(segment)==4:
+        if isinstance(segment,tuple) and len(segment)==4:
             t,p,q,c=segment
             return t=="`seg" and isPoint(p) and isPoint(q) and isColor(c)
     return False
@@ -93,7 +93,7 @@ def isSegment(I):
 def isTriangle(I):
     if isinstance(I,tuple):
         tup,triangle = I
-        if isinstance(triangle,list) and len(triangle)==5:
+        if isinstance(triangle,tuple) and len(triangle)==5:
             t,p,q,r,c=triangle
             return t=="`fTri" and isNonCollinear(p,q,r) and isColor(c)
     return False
@@ -115,7 +115,7 @@ def slope(p,q):
 def isCircle(I):
     if isinstance(I,tuple):
         tup,circle = I
-        if isinstance(circle,list) and len(circle)==4:
+        if isinstance(circle,tuple) and len(circle)==4:
             t,p,r,c=circle
             return t=="`circ" and isPoint(p) and isinstance(r,int) and r>0 and isColor(c)
     return False
@@ -123,7 +123,7 @@ def isCircle(I):
 def isDisc(I):
     if isinstance(I,tuple):
         tup,circle = I
-        if isinstance(circle,list) and len(circle)==4:
+        if isinstance(circle,tuple) and len(circle)==4:
             t,p,r,c=circle
             return t=="`disc" and isPoint(p) and isinstance(r,int) and r>0 and isColor(c)
     return False
@@ -131,7 +131,7 @@ def isDisc(I):
 def isText(I):
     if isinstance(I,tuple):
         tup,text = I
-        if isinstance(text,list) and len(text)==5:
+        if isinstance(text,tuple) and len(text)==5:
             t,s,p,n,c=text
             return t=="`txt" and isinstance(s,tuple) and s[0]=='string' and isPoint(p) and isColor(c) and isinstance(n,int) and n in range(4,101)
     return False
