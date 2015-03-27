@@ -32,7 +32,7 @@ class ParserTest(unittest.TestCase):
             if eFlag:
                 tree, tFlag = parseExpression(expression)
                 if tFlag:
-                    values.append(val(tree.expression()))
+                    values.append(prettyString(val(tree.expression())))
         return values      
 
     '''
@@ -86,7 +86,7 @@ class ParserTest(unittest.TestCase):
         ParamsL = [ [2,3],[0,0],[0,1],[0,-1],[-1,0]] # f(2,3), f(0,0), f(0,1) ......
         actural = self.functionValues(F,Fname,ParamsL)
         # expected value of function calls
-        expected = [6,0,2,-2,-1]    
+        expected = ['6','0','2','-2','-1']    
         self.assertEqual(expected,actural)
         
         # test for g2
@@ -94,7 +94,7 @@ class ParserTest(unittest.TestCase):
         ParamsL = [ [-1],[0],[1],[2]] # f(2,3), f(0,0), f(0,1) ......
         actural = self.functionValues(F,Fname,ParamsL)
         # expected value of function calls
-        expected = [5,4,5,8]    
+        expected = ['5','4','5','8']    
         self.assertEqual(expected,actural)      
         
         # test for g3
@@ -103,6 +103,7 @@ class ParserTest(unittest.TestCase):
         actural = self.functionValues(F,Fname,ParamsL)
         # expected value of function calls
         expected = [5,8,13,20]    
+        expected = [str(i) for i in expected]
         self.assertEqual(expected,actural)      
         
         # test for 
@@ -110,6 +111,7 @@ class ParserTest(unittest.TestCase):
         ParamsL = [[2,4],[2,0],[3,2]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [True,True,False]
+        expected = [str(i) for i in expected]        
         self.assertEqual(expected,actural)  
         
         # test for 
@@ -117,61 +119,71 @@ class ParserTest(unittest.TestCase):
         ParamsL = [[2],[3]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [True,False]
+        expected = [str(i) for i in expected]                
         self.assertEqual(expected,actural)  
         
         Fname = 'negative'
         ParamsL = [[-1],[1],[0]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [True,False,False]
+        expected = [str(i) for i in expected] 
         self.assertEqual(expected,actural)
         
         Fname = 'prime'
         ParamsL = [[1],[2],[3],[4],[5]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [False,True,True,False,True]
+        expected = [str(i) for i in expected] 
         self.assertEqual(expected,actural)
 
         Fname = 'perfect'
         ParamsL = [[1],[28]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [False,True]
+        expected = [str(i) for i in expected] 
         self.assertEqual(expected,actural)
 
         Fname = 'sumDivisors'
         ParamsL = [[8,0,5]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [7]
+        expected = [str(i) for i in expected] 
         self.assertEqual(expected,actural)  
         
         Fname = 'g'
         ParamsL = [[],[],[]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [12,12,12]
+        expected = [str(i) for i in expected] 
         self.assertEqual(expected,actural) 
         
         Fname = 'Z'
         ParamsL = [[],[],[]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [0,0,0]
+        expected = [str(i) for i in expected] 
         self.assertEqual(expected,actural)      
         
         Fname = 'e'
         ParamsL = [[],[],[]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [2,2,2]
+        expected = [str(i) for i in expected] 
         self.assertEqual(expected,actural)      
         
         Fname = 'positiveTen'
         ParamsL = [[0],[3],[10],[11]]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [False,True,True,False]
+        expected = [str(i) for i in expected] 
         self.assertEqual(expected,actural)      
         
         Fname = 'gridDisplay'
         ParamsL = [[]]
         actural = self.functionValues(F,Fname,ParamsL)
-        expected = [('set', [('tuple', [('tuple', [200, 100]), ('tuple', [200, 400])]), ('tuple', [('tuple', [300, 100]), ('tuple', [300, 400])]), ('tuple', [('tuple', [100, 200]), ('tuple', [400, 200])]), ('tuple', [('tuple', [100, 300]), ('tuple', [400, 300])])])]
-        self.assertEqual(expected,actural)      
+        expected = ['{((200,100),(200,400)),((300,100),(300,400)),((100,200),(400,200)),((100,300),(400,300))}']
+        #expected = [('set', [('tuple', [('tuple', [200, 100]), ('tuple', [200, 400])]), ('tuple', [('tuple', [300, 100]), ('tuple', [300, 400])]), ('tuple', [('tuple', [100, 200]), ('tuple', [400, 200])]), ('tuple', [('tuple', [100, 300]), ('tuple', [400, 300])])])]
+        self.assertEqual(expected,actural)
 
 
         Fname = 'currentPlayer'
@@ -186,6 +198,7 @@ class ParserTest(unittest.TestCase):
                 ['(B,(10,10))','(1,0)','({(W,(10,11)),(W,(11,10)),(W,(12,10)),(B,(13,10))},B,0,0)']]
         actural = self.functionValues(F,Fname,ParamsL)
         expected = [True,True]
+        expected = [str(i) for i in expected] 
         self.assertEqual(expected,actural) 
 
 
@@ -236,8 +249,8 @@ class ParserTest(unittest.TestCase):
 
         # test for operator of list  
         expressions = ['<1,2>[1]','<2,3>+<4,5>']
-        actural = self.expressionValues(expressions)
-        expected = [1,('seq',[2,3,4,5])]
+        actural = self.expressionPrettyValues(expressions)
+        expected = ['1','<2,3,4,5>']
         self.assertEqual(expected,actural)
         
         # test for quantifier some and all
@@ -267,51 +280,54 @@ class ParserTest(unittest.TestCase):
 
         # test for set comprehension 
         expressions = ['{x|x in {1..9} & 1<x<3}',  '{x | x in {-2..2} & nonnegative(x)}' , '{x | x in {-2..2} & nonnegative(x) & even(x)}']
-        actural = self.expressionValues(expressions)
-        expected = [('set',[2]), ('set',[0,1,2]),('set',[0,2])]
+        actural = self.expressionPrettyValues(expressions)
+        expected = ['{2}','{0,1,2}','{0,2}']
+        #expected = [('set',[2]), ('set',[0,1,2]),('set',[0,2])]
         self.assertEqual(expected,actural) 
         
         # test for Sum
-        expressions = ['Sum[i in {1..10} & even(i) ] i^2', 'Sum[x=1]^[9]x', 'Sum[x=1]^[9](x+1)']
+        expressions = ['Sum[i in {1..10} & even(i) ] i^2', 'Sum[x=1]^[9]x', 'Sum[x=1]^[9](x+1)','Sum[i in {5..1}]i']
         actural = self.expressionValues(expressions)
-        expected = [220,45,54]
+        expected = [220,45,54,0]
         self.assertEqual(expected,actural) 
         
         # test for Nrsec
         # g2 = x^2+4
         expressions = ['Nrsec[x in {1..3}]{y|y in {1..x} & y<4}', 'Union[k in {1,2,3} & k<=2] {k+1}']
         
-        actural = self.expressionValues(expressions)
-        expected = [('set',[1]),('set',[2,3])]
+        actural = self.expressionPrettyValues(expressions)
+        expected = ['{1}','{2,3}']
         self.assertEqual(expected,actural) 
         
         # test for Union
         expressions = ['Union[x in {1..3}]{y|y in {1..x} & y<4}']
-        actural = self.expressionValues(expressions)
-        expected = [('set',[1, 1, 2, 1, 2, 3])]
+        actural = self.expressionPrettyValues(expressions)
+        expected = ['{1,1,2,1,2,3}']
         self.assertEqual(expected,actural) 
 
         # test for set union and tuple elements
         expressions = ['{1,2,3} U {4}','( {1,2,3} U {4}, {6} )','( ({1,2,3} U {4}), {6} )']
-        actural = self.expressionValues(expressions)
-        expected = [('set',[1,2,3,4]),('tuple',[('set',[1,2,3,4]),('set',[6])]),('tuple',[('set',[1,2,3,4]),('set',[6])])]
+        actural = self.expressionPrettyValues(expressions)
+        expected = ['{1,2,3,4}','({1,2,3,4},{6})','({1,2,3,4},{6})']
         self.assertEqual(expected,actural) 
 
-        expressions = ['<1,2,3> + <4>','( {<1,2,3> + <4>,2,3} U {4}, {6} )','{(1,2),{1..9},|<1,2>+<3,4>|}',\
-                '({1,2}U{3,4}U{5},((1,2),(3,4),<2,4>))','(2,g2(1),g2(1)+g2(2),3,g2(g2(1)))']
-        actural = self.expressionPrettyValues(expressions)
-        expected = ['<1,2,3,4>','({<1,2,3,4>,2,3,4},{6})','{(1,2),{1,2,3,4,5,6,7,8,9},4}','({1,2,3,4,5},((1,2),(3,4),<2,4>))','(2,5,13,3,29)']
-        self.assertEqual(expected,actural) 
+        #expressions = ['<1,2,3> + <4>','( {<1,2,3> + <4>,2,3} U {4}, {6} )','{(1,2),{1..9},|<1,2>+<3,4>|}',\
+                #'({1,2}U{3,4}U{5},((1,2),(3,4),<2,4>))','(2,g2(1),g2(1)+g2(2),3,g2(g2(1)))']
+        #actural = self.expressionPrettyValues(expressions)
+        #expected = ['<1,2,3,4>','({2,3,4,<1,2,3,4>},{6})','{(1,2),{1,2,3,4,5,6,7,8,9},4}','({1,2,3,4,5},((1,2),(3,4),<2,4>))','(2,5,13,3,29)']
+        #self.assertEqual(expected,actural) 
 
         # test for mutiple commas, performance test
         expressions = ['{(0,1), (1,1), (1,0), (1,1), (0,1), (1,1), (1, 0), (1,1)}']
-        actural = self.expressionValues(expressions)
-        expected = [('set', [('tuple', [0, 1]), ('tuple', [1, 1]), ('tuple', [1, 0]), ('tuple', [1, 1]), ('tuple', [0, 1]), ('tuple', [1, 1]), ('tuple', [1, 0]), ('tuple', [1, 1])])]
+        actural = self.expressionPrettyValues(expressions)
+        #expected = [('set', [('tuple', [0, 1]), ('tuple', [1, 1]), ('tuple', [1, 0]), ('tuple', [1, 1]), ('tuple', [0, 1]), ('tuple', [1, 1]), ('tuple', [1, 0]), ('tuple', [1, 1])])]
+        expected = ['{(0,1),(1,1),(1,0),(1,1),(0,1),(1,1),(1,0),(1,1)}']
         self.assertEqual(expected,actural) 
 
         expressions = ['((1,(10,10)),(1,0),({(2,(11,10)),(2,(12,10)),(1,(13,10))},1,0,0))']
-        actural = self.expressionValues(expressions)
-        expected = [('tuple', [('tuple', [1, ('tuple', [10, 10])]), ('tuple', [1, 0]), ('tuple', [('set', [('tuple', [2, ('tuple', [11, 10])]), ('tuple', [2, ('tuple', [12, 10])]), ('tuple', [1, ('tuple', [13, 10])])]), 1, 0, 0])])]
+        actural = self.expressionPrettyValues(expressions)
+        expected = ['((1,(10,10)),(1,0),({(2,(11,10)),(2,(12,10)),(1,(13,10))},1,0,0))']
+        #expected = [('tuple', [('tuple', [1, ('tuple', [10, 10])]), ('tuple', [1, 0]), ('tuple', [('set', [('tuple', [2, ('tuple', [11, 10])]), ('tuple', [2, ('tuple', [12, 10])]), ('tuple', [1, ('tuple', [13, 10])])]), 1, 0, 0])])]
         self.assertEqual(expected,actural) 
 
         # test for string
