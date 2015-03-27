@@ -63,5 +63,21 @@ class TypeCheck:
     def off(self):
         self.flag = False
 
+class ValDict:
+    def __init__(self):
+        self.dic = dict()
+    def update(self,E,V):
+        self.dic[E]=V
+    def clear(self):
+        self.dic=dict()
+    def valueOf(self,E):
+        return self.dic[E]
+    def hasKey(self,E):
+        return E in self.dic
+    def length(self):
+        return len(self.dic)
+
 Program=LEDProgram()
 TypeChecking = TypeCheck()
+
+

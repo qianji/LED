@@ -10,8 +10,9 @@ An *Expression* is one of the following
 '''
 import numbers, math
 from fractions import Fraction
-BuiltInTypes = ['Bool','Nat','Int','Rat','fSet','Seq','Lambda']
 import timeit
+BuiltInTypes = frozenset(['Bool','Nat','Int','Rat','fSet','Seq','Lambda'])
+#BuiltInTypes = ['Bool','Nat','Int','Rat','fSet','Seq','Lambda']
 class AST:
     # An AST or Abstract Expression is either a variable, a number, a quoted symbol, an atom 
     # or a non-empty list, whose first element is an operator and whose remaining elements are AST's.
@@ -64,8 +65,14 @@ class AST:
             return self.tree
         else:
             F,args = self.op(),self.args()
+            e = tuple(args)
+            if dictionary.hasKey(e):
+                eArgs = dictionary.valueOf(e)
+            else:
             # convert each of the AST in args to an expression
-            eArgs = tuple([x.expression() for x in self.args()])
+                eArgs = tuple([x.expression() for x in self.args()])
+                dictionary.update(e,eArgs)
+            #eArgs = tuple([x.expression() for x in self.args()])
             if isinstance(F,str): return (F,eArgs)
             else: return (F.expression(),eArgs)
     
@@ -85,7 +92,8 @@ def isQuotedString(x): return isinstance(x,str) and len(x)>1 and x[0]=='"' and x
 
 def prettyString(E):
     if isNumber(E) or isAtom(E): return(str(E))
-    if isSet(E): return('{' + prettyStack(E[1]) + '}')
+    if isSet(E): 
+        return('{' + prettyStack(tuple(E[1])) + '}')
     if isVector(E): return( '<' + prettyStack(E[1]) + '>')
     if isTuple(E): return( '(' + prettyStack(E[1]) + ')')
     if isString(E): return('"'+prettyLEDString(E[1])+'"')
@@ -157,3 +165,18 @@ def numeralValue(F):
         numeral +=str(result[c])
     numeral += "..)"
     return numeral
+
+class ValDict:
+    def __init__(self):
+        self.dic = dict()
+    def update(self,E,V):
+        self.dic[E]=V
+    def clear(self):
+        self.dic=dict()
+    def valueOf(self,E):
+        return self.dic[E]
+    def hasKey(self,E):
+        return E in self.dic
+    def length(self):
+        return len(self.dic)
+dictionary = ValDict()

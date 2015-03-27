@@ -32,19 +32,33 @@ from LEDProgram import Program
 from LEDProgram import TypeChecking
 from _functools import reduce
 from fractions import Fraction
-dictionary = dict()
+#@profile
 def val(E):
-    if E in dictionary:
-        return dictionary[E]
+    #print(E)
+    #print(dictionary.length()
+    if dictionary.hasKey(E):
+        #print("retrieving E in dictionary",E)
+        return dictionary.valueOf(E)
     if E==None:
         return
     # if E is an expression
-    if isScalar(E) or isBuiltInType(E): return E
+    # for performance purpose, check if is tuple first to prevent further checking
+    if not isinstance(E,tuple):
+        if isScalar(E) or isBuiltInType(E):
+            # for some reason, if E==1, dictionary[E]=E would store True but not 1
+            # in python, True and 1 are interchangeble 
+            if E==1:
+                dictionary.update(E,1)
+                #dictionary[E]=1
+            else:
+                dictionary.update(E,E)
+                #dictionary[E]=E
+            return E
     if isinstance(E,str) and Program.defined(E,0) :  
         #return valDefined(E,[])
         value = valDefined(E,[])
         if not value==None:
-            dictionary[E]=value
+            #dictionary.update(E,value)
             return value
         print('Error in evaluating call',str(E)+'()')
         return
@@ -63,20 +77,22 @@ def val(E):
     if hasNone(Args): 
         #print('One of the arguments is not valid')
         return 
-#     if Op=='seq': return ('seq',Args)
-    # if Op=='set'   : return ('set',Args)
-    # if Op=='tuple' : return ('tuple',Args)
-    # if Op=='star': return ('star',Args)
-    # if Op=='comStar': return ('comStar',Args)
-    # if Op=='lambda': return('lambda',Args)
-    #if Op=='string': return prettyString((Op,Args))
-    if Op in ['seq','set','tuple','star','comStar','lambda','fSet','Seq','string']: return (Op,tuple(Args))
+
+    if Op in ['seq','set','tuple','star','comStar','lambda','fSet','Seq','string']: 
+        # use frozenset instead of list to store set 
+        Args = tuple(Args)
+        dictionary.update((Op,Args),(Op,Args))
+        #dictionary[(Op,Args)]=(Op,Arg
+        return (Op,Args)
     if Op in builtIns : 
         # check if Op is one of the Big Operations
         #if Op in ['setComp','Union','Sum','Prod','Nrsec']:
         try:
-            value = valBuiltIn(Op,Args)
-            dictionary[(Op,Args)]=value
+            if dictionary.hasKey((Op,Args)):
+                value = dictionary.valueOf((Op,Args))
+            else:
+                value = valBuiltIn(Op,Args)
+                dictionary.update((Op,Args),value)
             return value
         except:
             print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
@@ -85,7 +101,9 @@ def val(E):
     #return  valDefined(Op,Args)
         value = valDefined(Op,Args)
         if not value == None:
-            dictionary[(Op,Args)]=value
+            #dictionary[Op,X]=value
+            dictionary.update((Op,Args),value)
+            #dictionary[Op,Args]=value
             return value
         print('Error in evaluating call',str(Op)+'('+prettyStack(Args)+')')       
         return
@@ -108,7 +126,7 @@ def valBuiltIn(Op,Args):
         return (Op,Args)
     F = builtIns[Op]
     return F(Args)
-
+#@profile
 def valDefined(Op,Args): 
     # Op is the name of user defined function
     (params,funBody,guardCon,signature) = Program.body(Op,len(Args))
@@ -123,7 +141,14 @@ def valDefined(Op,Args):
     else:
         expr=subExpression(funBodyExpression,binding[0])
     # check to see if the expr belows to input of the function signature
-    groundBody = subAll(Args,params,expr)
+    e =(tuple(Args),tuple(params),expr)
+    #if e in dictionary:
+    if dictionary.hasKey(e):
+        groundBody = dictionary.valueOf(e)
+    else:
+        groundBody = subAll(Args,params,expr)
+        dictionary.update(e,groundBody)
+        #dictionary[e]=groundBody
     if isinstance(Args,tuple):
         if len(Args)>1:
             Args = ('tuple',tuple(Args))
@@ -139,7 +164,12 @@ def valDefined(Op,Args):
         value=DefVal(groundBody)
         if not valMember([value,val(signature[1].expression())]):
             print('The output of the function:', value,'does not comply with the type',signature[1],' in the function signature')
-            return
+            #return
+    if dictionary.hasKey(groundBody):
+        value = dictionary.valueOf(groundBody)
+    else:
+        value=DefVal(groundBody)
+        dictionary.update(groundBody,value)
     value=DefVal(groundBody)
     return value
 
@@ -167,17 +197,32 @@ def DefVal(fbody):
 def subAll(Vals,Vars,E):
     a = E
     for i in range(len(Vals)):
-        a = sub(Vals[i],Vars[i],a)
+        exp = (Vals[i],Vars[i],a)
+        if dictionary.hasKey(exp):
+            a= dictionary.valueOf(exp)
+        else:
+            a = sub(Vals[i],Vars[i],a)
+            dictionary.update(exp,a)
+            #dictionary[exp]=a
+        #a = sub(Vals[i],Vars[i],a)
     return a
 
 def sub(c,x,T):
     if T==None:
         return
-    if isScalar(T): return T
-    elif T==x     :  return c
+    e=(c,x,T)
+    if dictionary.hasKey(e):
+        return dictionary.valueOf(e)
+    if isScalar(T): 
+        return T
+    elif T==x:  
+        return c
     elif isinstance(T, str): return T
     (Op,Args) = T
-    return ((sub(c,x,Op),tuple([sub(c,x,A) for A in Args])))
+    val = ((sub(c,x,Op),tuple([sub(c,x,A) for A in Args])))
+    dictionary.update(e,val)
+    #dictionary[e]=val
+    return val
 
 # Each built-in operator is evaluated by a separate function.
 # These functions assume argument X has been evaluated, except
@@ -233,25 +278,45 @@ def valSub(X):
 
 # set operations
 def valIn(X): 
-    if isSet(X[1]): return any({valEq([X[0],Y]) for Y in X[1][1]})
+    if isSet(X[1]):
+        fs = frozenset(X[1][1])
+        return X[0] in fs
+        #return any({valEq([X[0],Y]) for Y in X[1][1]})
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valSetEq(X): 
-    if isSet(X[0]) and isSet(X[1]): return valSubeq([X[0],X[1]]) and valSubeq([X[1],X[0]])
+    if isSet(X[0]) and isSet(X[1]): 
+        fs = frozenset(X[0][1])
+        fs1 = frozenset(X[1][1])
+
+        return fs==fs1
+        #return valSubeq([X[0],X[1]]) and valSubeq([X[1],X[0]])
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valSubeq(X):
-    if isSet(X[0]) and isSet(X[1]) : return  all(  {valIn([e,X[1]]) for e in X[0][1]}  )
+    if isSet(X[0]) and isSet(X[1]) :
+        fs = frozenset(X[0][1])
+        fs1 = frozenset(X[1][1])        
+        return fs.issubset(fs1)
+        #return  all(  {valIn([e,X[1]]) for e in X[0][1]}  )
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valUnion(X): 
-    if isSet(X[0]) and isSet(X[1]) :return ('set', tuple(X[0][1]) + tuple([e for e in X[1][1] if not valIn([e,X[0]])]))
+    if isSet(X[0]) and isSet(X[1]) :
+        fs = frozenset(X[0][1])
+        fs1 = frozenset(X[1][1])
+        return ('set',fs.union(fs1))
+        #return ('set', tuple(X[0][1]) + tuple([e for e in X[1][1] if not valIn([e,X[0]])]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valNrsec(X):
-    if isSet(X[0]) and isSet(X[1]): return ('set',tuple([e for e in X[0][1] if valIn([e,X[1]])]))
+    if isSet(X[0]) and isSet(X[1]): return ('set',frozenset([e for e in X[0][1] if valIn([e,X[1]])]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valSetSubtr(X):
-    if isSet(X[0]) and isSet(X[1]): return ('set',tuple([e for e in X[0][1] if not valIn([e,X[1]])]))
+    if isSet(X[0]) and isSet(X[1]): 
+        fs = frozenset(X[0][1])
+        fs1 = frozenset(X[1][1])
+        return ('set',fs.difference(fs1))
+        #return ('set',frozenset([e for e in X[0][1] if not valIn([e,X[1]])]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valCrossProd(X):
-    if isSet(X[0]) and isSet(X[1]): return ('set',tuple([('tuple',[a,b]) for a in X[0][1] for b in X[1][1]]))
+    if isSet(X[0]) and isSet(X[1]): return ('set',frozenset([('tuple',[a,b]) for a in X[0][1] for b in X[1][1]]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 
 def valCardinal(X):
@@ -279,14 +344,15 @@ def valChoose(X):
     if isSet(X[0]): return random.choice(X[0][1])
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valIntRange(X):
-    s = []
+    #s = []
     l,u = X
     if not (isIntegerValue(l) and isIntegerValue(u))  :
         print('Operation .. not valid on arguments:',prettyArgs(Args))            
         return
-    for i in range(int(l),int(u+1)):
-        s.append(i)
-    return ('set',tuple(s))
+    #for i in range(int(l),int(u+1)):
+        #s.append(i)
+    s={i for i in range(int(l),int(u+1))}
+    return ('set',frozenset(s))
 
 def isIntegerValue(n):
     """
@@ -315,7 +381,9 @@ def valPlus(X):
 def valPipes(X):
     if isNumber(X[0]): return valAbs(X)
     if isVector(X[0]) or isString(X[0]): return valLen(X)
-    if isSet(X[0])   : return valCardinal(X)
+    if isSet(X[0]): 
+        return len(X[0][1])
+        #return valCardinal(X)
     print('Operation || not valid on arguments:',prettyString(X[0]))    
 def valEq(X):
     [a,b] = X
@@ -364,7 +432,7 @@ def valLambda(Args):
 def valSetComp(Args):
     t= Args[0]
     p= Args[1]
-    return ('set',tuple([val(dot(t,b)) for b in solutionSet(p)]))
+    return ('set',frozenset([val(dot(t,b)) for b in solutionSet(p)]))
 
 # The value of Union[p] T is ('set', [x for b in S(p) for x in val(dot(T,b))[1]]
 def valBigUnion(Args):
@@ -397,10 +465,11 @@ def valBigNrsec(Args):
     p= Args[0]
     slonSet = solutionSet(p)
     d = [[x for x in val(dot(t,b))[1]] for b in solutionSet(p)]
-    return ('set',tuple(list(set(d[0]).intersection(*d))))
+    return ('set',tuple(set(d[0]).intersection(*d)))
 
 
 def valMember(Args):
+    #print(Args)
     if Args[1]=='Nat':
         return isinstance(Args[0],int) and Args[0]>=0
     if Args[1]=='Bool':
@@ -410,7 +479,7 @@ def valMember(Args):
     if Args[1]=='Rat':
         return isRationalNum(Args)
     if Args[1]=='Seq':
-        return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='seq'
+        return isinstance(Args[0],tuple) and isinstance(Args[0][1],tuple) and Args[0][0]=='seq'
     if Args[1]=='fSet':
         return isTypeSet(Args)
     if Args[1]=='Lambda':
@@ -441,8 +510,10 @@ def isTypeMember(Var,Type):
     if isinstance(Var,tuple) and isinstance(Type,tuple) and Var[0]=='tuple':
         return all([valMember([Var[1][i],Type[1][i]]) for i in range(0,len(Var[1]))])
     # add param 
-    if isinstance(Var,list) and isinstance(Type,tuple):
-        return all([valMember([Var[1][i],Type[1][i]]) for i in range(0,len(Var[1]))])
+
+    if isinstance(Var,tuple) and Var[0]=='tuple' and not isinstance(Type,tuple) :
+        #return all([valMember([Var[1][i],Type[1][i]]) for i in range(0,len(Var[1]))])
+        return all([valMember([v,t]) for (v,t) in zip(Var[1],Type[1])])
     # 1:{1,2}
     #return valMember([Var,Type])
     return False
@@ -450,10 +521,10 @@ def isObject(Args):
     return isTypeSet(Args) or isTypeTuple(Args) or isRationalNum(Args) or isTypeLambda(Args)
 
 def isTypeSet(Args):
-    return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='set'
+    return isinstance(Args[0],tuple) and isinstance(Args[0][1],frozenset) and Args[0][0]=='set'
 
 def isTypeTuple(Args):
-    return isinstance(Args[0],tuple) and isinstance(Args[0][1],list) and Args[0][0]=='tuple'
+    return isinstance(Args[0],tuple) and isinstance(Args[0][1],tuple) and Args[0][0]=='tuple'
 
 def isRationalNum(Args):
     return isinstance(Args[0],int) or isinstance(Args[0],Fraction)
@@ -494,7 +565,7 @@ The solution set of a sentence p, written S(p), is defined as follows, provided 
 4.If p is of the form (x1,...,xn) = (c1,...,cn) where n>1, the xi's are distinct variables and the ci's are ground terms, then S(p) = {{(x1,c1),...,(xn,cn)}}.
 5.If p is of the form x in c, where x is a variable and c is a ground term with value {c1,...,cn}, then S(p) = {{(x,c1)},...,{(x,cn}}. 
     Note that, by this definition, if c is the empty set the value of S(p) is { }. 
-6.If p is of the form p1 or p2,  then S(p) = S(p1) U S(p2).
+6.If p is of the form p1 p2,  then S(p) = S(p1) U S(p2).
 7.If p is of the form p1 & p2, then S(p) = { b1 U b2 | b1 belongs to S(p1), b2 belongs to S(p2.b1), b1 consistent with b2 }.
 
 The intuitive interpretation of the binding {(x1,c1),...,(xn,cn)} is x1=c1 &...&xn=cn. 
@@ -558,11 +629,12 @@ def solutionSet(E):
         if Op =='in' and isinstance(Args[0],str) and isGround(Args[1]) and val(Args[1])[0] =='set' :
             x = Args[0]
             C = val(Args[1])[1]
-            for i in range(len(C)):
+            for i in C:
                 solution = []
-                solution.append((x,C[i]))
+                solution.append((x,i))
                 slonSet.append(solution)
             return slonSet
+            
         #case 6
         if Op =='or':
             p1 = Args[0]

@@ -1,4 +1,5 @@
 /-----
-dirSet:={d | d in {2..10} }
-captureHelp(dSet) := {d | d in dSet}
+f(x) := x+2
+g(x) := f(x) + f(x)
+C :=3
 ------/

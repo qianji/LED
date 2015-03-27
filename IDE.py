@@ -81,7 +81,7 @@ def run(F=''):
                             print("pretty printing time",elapsed)
                             elapsed = timeit.default_timer() - s
                             print("total time",elapsed)
-
+                        #print(dictionary.dic)
                         print()
                     except:
                         print('Failed to evaluate the expression. It is not a valid expression')
@@ -158,6 +158,12 @@ def play(F):
         #    return
         # Go ahead and update the screen with what we've drawn.
         # This MUST happen after all the other drawing commands.
+        
+        # reset the dictionary if it reaches some limit to prevent memory leak
+        if dictionary.length()>1000000:
+            dictionary.clear()
+        if dictionary.length()==0:
+            print("limite")
         pygame.display.flip()
  
 # Be IDLE friendly
