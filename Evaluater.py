@@ -281,8 +281,8 @@ def valSub(X):
 
 # set operations
 def valIn(X):
-    if isSet(X[1]):
-        return X[0] in X[1][1]
+    #if isSet(X[1]):
+    return X[0] in X[1][1]
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valSetEq(X): 
     if isSet(X[0]) and isSet(X[1]):
