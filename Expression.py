@@ -79,7 +79,7 @@ class AST:
 def isNumber(E): return isinstance(E,numbers.Number) or isinstance(E,Fraction)
 def isScalar(E): return isNumber(E) or isSymbol(E) or isBool(E) or isQuotedString(E)
 def isVector(x): return isinstance(x,tuple) and x[0] == 'seq'
-def isSet(x): return isinstance(x,tuple) and x[0] == 'set'
+def isSet(x): return isinstance(x,tuple) and x[0] == 'set' #and isinstance(x[1],frozenset)
 def isTuple(x): return isinstance(x,tuple) and x[0]=='tuple'
 def isSymbol(x): return False if x==None else isinstance(x,str) and len(x)>1 and x[0]=='`'  
 def isString(x): return False if x==None else isinstance(x,tuple) and x[0]=='string'

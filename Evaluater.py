@@ -80,7 +80,10 @@ def val(E):
 
     if Op in ['seq','set','tuple','star','comStar','lambda','fSet','Seq','string']: 
         # use frozenset instead of list to store set 
-        Args = tuple(Args)
+        if Op=='set':
+            Args = frozenset(Args)
+        else:
+            Args = tuple(Args)
         dictionary.update((Op,Args),(Op,Args))
         #dictionary[(Op,Args)]=(Op,Arg
         return (Op,Args)
@@ -277,58 +280,48 @@ def valSub(X):
     return L[index-1]
 
 # set operations
-def valIn(X): 
+def valIn(X):
     if isSet(X[1]):
-        fs = frozenset(X[1][1])
-        return X[0] in fs
-        #return any({valEq([X[0],Y]) for Y in X[1][1]})
+        return X[0] in X[1][1]
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valSetEq(X): 
-    if isSet(X[0]) and isSet(X[1]): 
-        fs = frozenset(X[0][1])
-        fs1 = frozenset(X[1][1])
-
-        return fs==fs1
-        #return valSubeq([X[0],X[1]]) and valSubeq([X[1],X[0]])
+    if isSet(X[0]) and isSet(X[1]):
+        return X[0][1]==X[1][1]
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valSubeq(X):
     if isSet(X[0]) and isSet(X[1]) :
-        fs = frozenset(X[0][1])
-        fs1 = frozenset(X[1][1])        
-        return fs.issubset(fs1)
-        #return  all(  {valIn([e,X[1]]) for e in X[0][1]}  )
+        return X[0][1].issubset(X[1][1])
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valUnion(X): 
     if isSet(X[0]) and isSet(X[1]) :
         fs = frozenset(X[0][1])
         fs1 = frozenset(X[1][1])
         return ('set',fs.union(fs1))
-        #return ('set', tuple(X[0][1]) + tuple([e for e in X[1][1] if not valIn([e,X[0]])]))
+        #return ('set',X[0][1].union(X[1][1]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))    
 def valNrsec(X):
     if isSet(X[0]) and isSet(X[1]): return ('set',frozenset([e for e in X[0][1] if valIn([e,X[1]])]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valSetSubtr(X):
     if isSet(X[0]) and isSet(X[1]): 
-        fs = frozenset(X[0][1])
-        fs1 = frozenset(X[1][1])
-        return ('set',fs.difference(fs1))
-        #return ('set',frozenset([e for e in X[0][1] if not valIn([e,X[1]])]))
+        return ('set',X[0][1].difference(X[1][1]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 def valCrossProd(X):
-    if isSet(X[0]) and isSet(X[1]): return ('set',frozenset([('tuple',[a,b]) for a in X[0][1] for b in X[1][1]]))
+    if isSet(X[0]) and isSet(X[1]): return ('set',frozenset([('tuple',(a,b)) for a in X[0][1] for b in X[1][1]]))
     print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
 
-def valCardinal(X):
-    Arg = X[0]
-    elts = Arg[1]
-    return len([i for i in range(len(elts)) if not valIn([ elts[i], ('set',elts[i+1:]) ])])
+#def valCardinal(X):
+    #Arg = X[0]
+    #elts = Arg[1]
+    #return len([i for i in range(len(elts)) if not valIn([ elts[i], ('set',elts[i+1:]) ])])
 def valPow(X):
     if not isSet(X[0]):
         print('Operation',Op,'not valid on arguments:',prettyArgs(Args))
         return
     [Arg] = X
     elts = Arg[1]
+    # convert frozentset to list{
+    elts = list(elts)
     if elts ==[] : return ('set',[('set',[])])
     head = elts[0]
     tail = elts[1:]

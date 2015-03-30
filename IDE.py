@@ -132,7 +132,6 @@ def play(F):
         # This limits the while loop to a max of 10 times per second.
         # Leave this out and we will use all CPU we can.
         # 60 frame per second
-        #clock.tick(1000)
         clickAST = AST('`nil')
         keyboardAST = AST('set',[])
         keys=[]
@@ -163,7 +162,7 @@ def play(F):
         if dictionary.length()>1000000:
             dictionary.clear()
         if dictionary.length()==0:
-            print("limite")
+            print("Clear the dictionary.")
         pygame.display.flip()
  
 # Be IDLE friendly
