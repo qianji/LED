@@ -144,13 +144,16 @@ def play(F):
                     done=True
                     sys.exit()
                 else:
-                    keys.append(event.key);
+                    #keys.append(event.key);
+                    keys=[]
             elif event.type == MOUSEBUTTONDOWN:
                 click = pygame.mouse.get_pos()
                 # update click in Program
                 clickAST = AST('tuple',[click[0],size[1]-click[1]])
+        keys=[i for i in range(0,len(pygame.key.get_pressed())) if pygame.key.get_pressed()[i]]
+        #print(keys)
         if len(keys)>0:
-            keyboardAST = AST('set',[AST('string',keys)])
+            keyboardAST = AST('tuple',[AST('string',keys)])
         inputAST = AST('tuple',[clickAST,keyboardAST])
         drawSreeen(screen,inputAST)
         #if ~drawSreeen(screen,inputAST):
