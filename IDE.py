@@ -22,7 +22,7 @@ definitions in F.
 '''
 def run(F=''):
     if not F=='':
-        compile(F+'.led')
+        compile(F)
     #print(Compiler.Program)
     DefinedFuns = Program.definedSymbols()
     if len(DefinedFuns)>0:
@@ -41,7 +41,7 @@ def run(F=''):
             start_time = timeit.default_timer()
             expression,eFlag = tokens(e)
             elapsed = timeit.default_timer() - start_time
-            print("Tokenizing time",elapsed)
+            #print("Tokenizing time",elapsed)
             if eFlag:
                 # building in commands
                 if len(expression)==3:
@@ -65,22 +65,22 @@ def run(F=''):
                 start_time = timeit.default_timer()
                 tree, tFlag = parseExpression(expression)
                 elapsed = timeit.default_timer() - start_time
-                print("Parsing time",elapsed)
+                #print("Parsing time",elapsed)
                 if tFlag:
                     try:
                         start_time = timeit.default_timer()
                         value = val(tree.expression())
                         elapsed = timeit.default_timer() - start_time
-                        print("Evaluating time",elapsed)
+                        #print("Evaluating time",elapsed)
                         if not value ==None:
                             start_time = timeit.default_timer()                            
                             if isinstance(value,Fraction):
                                 value = numeralValue(value)
                             print(prettyString(value))
                             elapsed = timeit.default_timer() - start_time
-                            print("pretty printing time",elapsed)
+                            #print("pretty printing time",elapsed)
                             elapsed = timeit.default_timer() - s
-                            print("total time",elapsed)
+                            #print("total time",elapsed)
                         #print(dictionary.dic)
                         print()
                     except:
