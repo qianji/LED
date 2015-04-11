@@ -7,6 +7,9 @@ from Expression import *
 from LEDProgram import *
 from Parser import *
 from Tokenizer import *
+
+import os
+from HTMLParser import *
 '''    
 string -> 
 If F is the name of the file containing the function definitions of LED with .led as its extension, then compile(F) compile the functions in the file 
@@ -19,15 +22,23 @@ For example, the following program f(x) := x^2  g(x,y) := y+2*x would be represe
 def compile(F):
     global Program
     try:
-        file = open(F)
-        programText = open(F).read()
+        fname = F+".led"
+        if not os.path.isfile(fname):
+            fname = F+".html"
+        file = open(fname)
+        programText = open(fname).read()
         file.close()
     except FileNotFoundError as e:
-        print(e)
+        print("The LED program file",F+".led or "+F+".html"+" does not exist." )
+        print()
         return
+    fileExtension = os.path.splitext(fname)[1]
     print('parsing the program ...........')
     # read the file as a string
-    t = removeComments(programText)
+    if fileExtension==".led":
+        t = removeComments(programText)
+    if fileExtension ==".html":
+        t = get_program_text_from_html(F+".html")
     #tokenize the file
     text,tokenF = tokens(t)
     #print(text)
