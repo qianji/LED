@@ -1,7 +1,7 @@
 LED Development
 ========
 #LED 
-The Language of Effective Definitions (LED) is a formal language for writing computable functions, designed by [Dr. Nelson Rushton](http://www.depts.ttu.edu/cs/faculty/faculty.php?name=J.%20Nelson%20Rushton) at Texas Tech University. 
+The Language of Effective Definitions (LED) is a formal language for writing computable functions, designed by [Dr. Nelson Rushton](http://www.depts.ttu.edu/cs/faculty/faculty.php?name=J.%20Nelson%20Rushton) at Texas Tech University and implemented by [Dr. Qianji Zheng](http://www.qianjizheng.com) 
 LED can be used as a functional programming language, as a tool for teaching mathematics and functional programming, or as a medium for precise human-to-human communication of mathematical definitions. It is used as a teaching tool in Dr. Rushton's [CS 1382 Discrete Math](http://nelsonrushton.net/) class. The design goals of LED are rigor, imitation, and simplicity, defined as follows:
 1. *rigor*: The syntax and semantics of the language are explicitly and precisely specified.
 2. *imitation*: LED expressions denote traditional mathematical objects (numbers, symbols, sets, tuples, and functions) using notations customary in technical and educational literature, as closely as possible while writing plain text.
